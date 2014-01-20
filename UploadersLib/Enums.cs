@@ -129,6 +129,8 @@ namespace UploadersLib
         TINYURL,
         [Description("turl.ca")]
         TURL,
+        [Description("yourls.org")]
+        YOURLS,
         [Description("Custom URL shortener")]
         CustomURLShortener
     }
@@ -155,7 +157,9 @@ namespace UploadersLib
         [Description("Response text")]
         Text,
         [Description("Redirection URL")]
-        RedirectionURL
+        RedirectionURL,
+        [Description("Response headers")]
+        Headers
     }
 
     public enum ProxyMethod
