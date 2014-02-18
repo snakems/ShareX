@@ -587,7 +587,7 @@ namespace ShareX
 
         protected override void SetVisibleCore(bool value)
         {
-            if (value && !IsHandleCreated && Program.IsSilentRun && Program.Settings.ShowTray)
+            if (value && !IsHandleCreated && (Program.IsSilentRun || Program.Settings.SilentRun) && Program.Settings.ShowTray)
             {
                 CreateHandle();
                 value = false;
@@ -748,7 +748,7 @@ namespace ShareX
                 Program.UploaderSettingsResetEvent.WaitOne();
             }
 
-            using (UploadersConfigForm uploadersConfigForm = new UploadersConfigForm(Program.UploadersConfig, new UploadersAPIKeys()))
+            using (UploadersConfigForm uploadersConfigForm = new UploadersConfigForm(Program.UploadersConfig))
             {
                 uploadersConfigForm.ShowDialog();
             }
@@ -919,6 +919,11 @@ namespace ShareX
             {
                 Helpers.LoadBrowserAsync(url);
             }
+        }
+
+        private void tsmiTrayShow_Click(object sender, EventArgs e)
+        {
+            this.ShowActivate();
         }
 
         private void tsmiTrayExit_Click(object sender, EventArgs e)
