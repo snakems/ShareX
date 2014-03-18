@@ -151,7 +151,9 @@ namespace ShareX
                 if (UseDefaultDestinations)
                 {
                     ImageDestination = defaultTaskSettings.ImageDestination;
+                    ImageFileDestination = defaultTaskSettings.ImageFileDestination;
                     TextDestination = defaultTaskSettings.TextDestination;
+                    TextFileDestination = defaultTaskSettings.TextFileDestination;
                     FileDestination = defaultTaskSettings.FileDestination;
                     URLShortenerDestination = defaultTaskSettings.URLShortenerDestination;
                     SocialNetworkingServiceDestination = defaultTaskSettings.SocialNetworkingServiceDestination;
@@ -207,15 +209,16 @@ namespace ShareX
 
     public class TaskSettingsImage
     {
-        #region Image / Quality
+        #region Image / General
 
         public EImageFormat ImageFormat = EImageFormat.PNG;
         public int ImageJPEGQuality = 90;
         public GIFQuality ImageGIFQuality = GIFQuality.Default;
         public int ImageSizeLimit = 1024;
         public EImageFormat ImageFormat2 = EImageFormat.JPEG;
+        public FileExistAction FileExistAction = FileExistAction.Ask;
 
-        #endregion Image / Quality
+        #endregion Image / General
 
         #region Image / Effects
 

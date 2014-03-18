@@ -353,6 +353,33 @@ namespace ShareX
 
             return updateChecker;
         }
+
+        public static string CheckFilePath(string folder, string filename, TaskSettings taskSettings)
+        {
+            string filepath = Path.Combine(folder, filename);
+
+            if (File.Exists(filepath))
+            {
+                switch (taskSettings.ImageSettings.FileExistAction)
+                {
+                    case FileExistAction.Ask:
+                        using (FileExistForm form = new FileExistForm(filepath))
+                        {
+                            form.ShowDialog();
+                            filepath = form.Filepath;
+                        }
+                        break;
+                    case FileExistAction.UniqueName:
+                        filepath = Helpers.GetUniqueFilePath(filepath);
+                        break;
+                    case FileExistAction.Cancel:
+                        filepath = string.Empty;
+                        break;
+                }
+            }
+
+            return filepath;
+        }
     }
 
     public class PointInfo

@@ -404,9 +404,14 @@ namespace ShareX
 
                     if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.SaveImageToFile))
                     {
-                        Info.FilePath = Path.Combine(Program.ScreenshotsPath, Info.FileName);
-                        imageData.Write(Info.FilePath);
-                        DebugHelper.WriteLine("SaveImageToFile: " + Info.FilePath);
+                        string filePath = TaskHelpers.CheckFilePath(Program.ScreenshotsPath, Info.FileName, Info.TaskSettings);
+
+                        if (!string.IsNullOrEmpty(filePath))
+                        {
+                            Info.FilePath = filePath;
+                            imageData.Write(Info.FilePath);
+                            DebugHelper.WriteLine("SaveImageToFile: " + Info.FilePath);
+                        }
                     }
 
                     if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.SaveImageToFileWithDialog))
@@ -722,7 +727,10 @@ namespace ShareX
                     };
                     break;
                 case FileDestination.GoogleDrive:
-                    fileUploader = new GoogleDrive(Program.UploadersConfig.GoogleDriveOAuth2Info);
+                    fileUploader = new GoogleDrive(Program.UploadersConfig.GoogleDriveOAuth2Info)
+                    {
+                        IsPublic = Program.UploadersConfig.GoogleDriveIsPublic
+                    };
                     break;
                 case FileDestination.RapidShare:
                     fileUploader = new RapidShare(Program.UploadersConfig.RapidShareUsername, Program.UploadersConfig.RapidSharePassword,
