@@ -30,7 +30,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.ImageUploaders
 {
@@ -73,7 +72,7 @@ namespace UploadersLib.ImageUploaders
             args.Add("auth_token", token);
             args.Add("api_sig", GetAPISig(args));
 
-            string response = SendPostRequest(API_URL, args);
+            string response = SendRequest(HttpMethod.POST, API_URL, args);
 
             Auth = new FlickrAuthInfo(ParseResponse(response, "auth"));
 
@@ -91,7 +90,7 @@ namespace UploadersLib.ImageUploaders
             args.Add("api_key", API_Key);
             args.Add("api_sig", GetAPISig(args));
 
-            string response = SendPostRequest(API_URL, args);
+            string response = SendRequest(HttpMethod.POST, API_URL, args);
 
             XElement eFrob = ParseResponse(response, "frob");
 
@@ -123,7 +122,7 @@ namespace UploadersLib.ImageUploaders
             args.Add("mini_token", frob);
             args.Add("api_sig", GetAPISig(args));
 
-            string response = SendPostRequest(API_URL, args);
+            string response = SendRequest(HttpMethod.POST, API_URL, args);
 
             Auth = new FlickrAuthInfo(ParseResponse(response, "auth"));
 
@@ -143,7 +142,7 @@ namespace UploadersLib.ImageUploaders
             args.Add("frob", frob);
             args.Add("api_sig", GetAPISig(args));
 
-            string response = SendPostRequest(API_URL, args);
+            string response = SendRequest(HttpMethod.POST, API_URL, args);
 
             Auth = new FlickrAuthInfo(ParseResponse(response, "auth"));
 

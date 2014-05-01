@@ -29,7 +29,9 @@ using ImageEffectsLib;
 using ScreenCaptureLib;
 using ShareX.Properties;
 using System;
+using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -239,57 +241,58 @@ namespace ShareX
                     {
                         tsmiShowErrors.Visible = true;
                     }
-                    else
+
+                    // Open
+                    tsmiOpen.Visible = true;
+
+                    tsmiOpenURL.Enabled = uim.SelectedItem.IsURLExist;
+                    tsmiOpenShortenedURL.Enabled = uim.SelectedItem.IsShortenedURLExist;
+                    tsmiOpenThumbnailURL.Enabled = uim.SelectedItem.IsThumbnailURLExist;
+                    tsmiOpenDeletionURL.Enabled = uim.SelectedItem.IsDeletionURLExist;
+
+                    tsmiOpenFile.Enabled = uim.SelectedItem.IsFileExist;
+                    tsmiOpenFolder.Enabled = uim.SelectedItem.IsFileExist;
+                    tsmiOpenThumbnailFile.Enabled = uim.SelectedItem.IsThumbnailFileExist;
+
+                    // Copy
+                    tsmiCopy.Visible = true;
+
+                    tsmiCopyURL.Enabled = uim.SelectedItems.Any(x => x.IsURLExist);
+                    tsmiCopyShortenedURL.Enabled = uim.SelectedItems.Any(x => x.IsShortenedURLExist);
+                    tsmiCopyThumbnailURL.Enabled = uim.SelectedItems.Any(x => x.IsThumbnailURLExist);
+                    tsmiCopyDeletionURL.Enabled = uim.SelectedItems.Any(x => x.IsDeletionURLExist);
+
+                    tsmiCopyFile.Enabled = uim.SelectedItem.IsFileExist;
+                    tsmiCopyImage.Enabled = uim.SelectedItem.IsImageFile;
+                    tsmiCopyText.Enabled = uim.SelectedItem.IsTextFile;
+                    tsmiCopyThumbnailFile.Enabled = uim.SelectedItem.IsThumbnailFileExist;
+                    tsmiCopyThumbnailImage.Enabled = uim.SelectedItem.IsThumbnailFileExist;
+
+                    tsmiCopyHTMLLink.Enabled = uim.SelectedItems.Any(x => x.IsURLExist);
+                    tsmiCopyHTMLImage.Enabled = uim.SelectedItems.Any(x => x.IsImageURL);
+                    tsmiCopyHTMLLinkedImage.Enabled = uim.SelectedItems.Any(x => x.IsImageURL && x.IsThumbnailURLExist);
+
+                    tsmiCopyForumLink.Enabled = uim.SelectedItems.Any(x => x.IsURLExist);
+                    tsmiCopyForumImage.Enabled = uim.SelectedItems.Any(x => x.IsImageURL && x.IsURLExist);
+                    tsmiCopyForumLinkedImage.Enabled = uim.SelectedItems.Any(x => x.IsImageURL && x.IsThumbnailURLExist);
+
+                    tsmiCopyFilePath.Enabled = uim.SelectedItems.Any(x => x.IsFilePathValid);
+                    tsmiCopyFileName.Enabled = uim.SelectedItems.Any(x => x.IsFilePathValid);
+                    tsmiCopyFileNameWithExtension.Enabled = uim.SelectedItems.Any(x => x.IsFilePathValid);
+                    tsmiCopyFolder.Enabled = uim.SelectedItems.Any(x => x.IsFilePathValid);
+
+                    CleanCustomClipboardFormats();
+
+                    if (Program.Settings.ClipboardContentFormats != null && Program.Settings.ClipboardContentFormats.Count > 0)
                     {
-                        // Open
-                        tsmiOpen.Visible = true;
+                        tssCopy5.Visible = true;
 
-                        tsmiOpenURL.Enabled = uim.SelectedItem.IsURLExist;
-                        tsmiOpenShortenedURL.Enabled = uim.SelectedItem.IsShortenedURLExist;
-                        tsmiOpenThumbnailURL.Enabled = uim.SelectedItem.IsThumbnailURLExist;
-                        tsmiOpenDeletionURL.Enabled = uim.SelectedItem.IsDeletionURLExist;
-
-                        tsmiOpenFile.Enabled = uim.SelectedItem.IsFileExist;
-                        tsmiOpenFolder.Enabled = uim.SelectedItem.IsFileExist;
-
-                        // Copy
-                        tsmiCopy.Visible = true;
-
-                        tsmiCopyURL.Enabled = uim.SelectedItems.Any(x => x.IsURLExist);
-                        tsmiCopyShortenedURL.Enabled = uim.SelectedItems.Any(x => x.IsShortenedURLExist);
-                        tsmiCopyThumbnailURL.Enabled = uim.SelectedItems.Any(x => x.IsThumbnailURLExist);
-                        tsmiCopyDeletionURL.Enabled = uim.SelectedItems.Any(x => x.IsDeletionURLExist);
-
-                        tsmiCopyFile.Enabled = uim.SelectedItem.IsFileExist;
-                        tsmiCopyImage.Enabled = uim.SelectedItem.IsImageFile;
-                        tsmiCopyText.Enabled = uim.SelectedItem.IsTextFile;
-
-                        tsmiCopyHTMLLink.Enabled = uim.SelectedItems.Any(x => x.IsURLExist);
-                        tsmiCopyHTMLImage.Enabled = uim.SelectedItems.Any(x => x.IsImageURL);
-                        tsmiCopyHTMLLinkedImage.Enabled = uim.SelectedItems.Any(x => x.IsImageURL && x.IsThumbnailURLExist);
-
-                        tsmiCopyForumLink.Enabled = uim.SelectedItems.Any(x => x.IsURLExist);
-                        tsmiCopyForumImage.Enabled = uim.SelectedItems.Any(x => x.IsImageURL && x.IsURLExist);
-                        tsmiCopyForumLinkedImage.Enabled = uim.SelectedItems.Any(x => x.IsImageURL && x.IsThumbnailURLExist);
-
-                        tsmiCopyFilePath.Enabled = uim.SelectedItems.Any(x => x.IsFilePathValid);
-                        tsmiCopyFileName.Enabled = uim.SelectedItems.Any(x => x.IsFilePathValid);
-                        tsmiCopyFileNameWithExtension.Enabled = uim.SelectedItems.Any(x => x.IsFilePathValid);
-                        tsmiCopyFolder.Enabled = uim.SelectedItems.Any(x => x.IsFilePathValid);
-
-                        CleanCustomClipboardFormats();
-
-                        if (Program.Settings.ClipboardContentFormats != null && Program.Settings.ClipboardContentFormats.Count > 0)
+                        foreach (ClipboardFormat cf in Program.Settings.ClipboardContentFormats)
                         {
-                            tssCopy5.Visible = true;
-
-                            foreach (ClipboardFormat cf in Program.Settings.ClipboardContentFormats)
-                            {
-                                ToolStripMenuItem tsmiClipboardFormat = new ToolStripMenuItem(cf.Description);
-                                tsmiClipboardFormat.Tag = cf;
-                                tsmiClipboardFormat.Click += tsmiClipboardFormat_Click;
-                                tsmiCopy.DropDownItems.Add(tsmiClipboardFormat);
-                            }
+                            ToolStripMenuItem tsmiClipboardFormat = new ToolStripMenuItem(cf.Description);
+                            tsmiClipboardFormat.Tag = cf;
+                            tsmiClipboardFormat.Click += tsmiClipboardFormat_Click;
+                            tsmiCopy.DropDownItems.Add(tsmiClipboardFormat);
                         }
                     }
 
@@ -464,6 +467,10 @@ namespace ShareX
                     {
                         UploadManager.ClipboardUpload();
                     }
+                    else if (args[i].Equals("-autocapture", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        StartAutoCapture();
+                    }
                     else if (args[i][0] != '-')
                     {
                         UploadManager.UploadFile(args[i]);
@@ -535,6 +542,12 @@ namespace ShareX
             Refresh();
         }
 
+        private void OpenDropWindow()
+        {
+            DropForm.GetInstance(Program.Settings.DropSize, Program.Settings.DropOffset, Program.Settings.DropAlignment, Program.Settings.DropOpacity,
+                Program.Settings.DropHoverOpacity).ShowActivate();
+        }
+
         private void DoScreenRecorder(TaskSettings taskSettings = null)
         {
             if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
@@ -553,7 +566,17 @@ namespace ShareX
 
         private void OpenAutoCapture()
         {
-            new AutoCaptureForm().Show();
+            AutoCaptureForm.Instance.ShowActivate();
+        }
+
+        private void StartAutoCapture()
+        {
+            if (!AutoCaptureForm.IsRunning)
+            {
+                AutoCaptureForm form = AutoCaptureForm.Instance;
+                form.Show();
+                form.Execute();
+            }
         }
 
         private void OpenScreenColorPicker(TaskSettings taskSettings = null)
@@ -591,6 +614,30 @@ namespace ShareX
             using (MonitorTestForm monitorTestForm = new MonitorTestForm())
             {
                 monitorTestForm.ShowDialog();
+            }
+        }
+
+        private void OpenDNSChanger()
+        {
+            try
+            {
+                ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(Application.StartupPath, "DNSChanger.exe"));
+                psi.UseShellExecute = true;
+                psi.Verb = "runas";
+                Process.Start(psi);
+            }
+            catch { }
+        }
+
+        public static void OpenRuler()
+        {
+            using (Image fullscreen = Screenshot.CaptureFullscreen())
+            using (RectangleRegion surface = new RectangleRegion(fullscreen))
+            {
+                surface.RulerMode = true;
+                surface.Config.QuickCrop = false;
+                surface.Prepare();
+                surface.ShowDialog();
             }
         }
 
@@ -663,6 +710,11 @@ namespace ShareX
             UploadManager.UploadFile();
         }
 
+        private void tsbDragDropUpload_Click(object sender, EventArgs e)
+        {
+            OpenDropWindow();
+        }
+
         private void tsddbDestinations_DropDownOpened(object sender, EventArgs e)
         {
             UpdateDestinationStates();
@@ -675,17 +727,17 @@ namespace ShareX
 
         private void tsmiTestImageUpload_Click(object sender, EventArgs e)
         {
-            UploadManager.RunImageTask(ShareXResources.Logo);
+            UploadManager.RunImageTask(Resources.Test);
         }
 
         private void tsmiTestTextUpload_Click(object sender, EventArgs e)
         {
-            UploadManager.UploadText(Program.ApplicationName + " text upload test");
+            UploadManager.UploadText("Text upload test");
         }
 
         private void tsmiTestFileUpload_Click(object sender, EventArgs e)
         {
-            UploadManager.UploadImage(ShareXResources.Logo, ImageDestination.FileUploader);
+            UploadManager.UploadImage(Resources.Test, ImageDestination.FileUploader);
         }
 
         private void tsmiTestURLShortener_Click(object sender, EventArgs e)
@@ -725,6 +777,8 @@ namespace ShareX
 
             AfterSettingsJobs();
             Program.Settings.SaveAsync(Program.ApplicationConfigFilePath);
+
+            Program.ConfigureUploadersConfigWatcher();
         }
 
         private void tsbTaskSettings_Click(object sender, EventArgs e)
@@ -764,7 +818,7 @@ namespace ShareX
                 uploadersConfigForm.ShowDialog();
             }
 
-            Program.UploadersConfig.SaveAsync(Program.UploadersConfigFilePath);
+            Program.UploadersConfigSaveAsync();
         }
 
         private void tsmiCursorHelper_Click(object sender, EventArgs e)
@@ -790,6 +844,16 @@ namespace ShareX
         private void tsmiMonitorTest_Click(object sender, EventArgs e)
         {
             OpenMonitorTest();
+        }
+
+        private void tsmiDNSChanger_Click(object sender, EventArgs e)
+        {
+            OpenDNSChanger();
+        }
+
+        private void tsmiRuler_Click(object sender, EventArgs e)
+        {
+            OpenRuler();
         }
 
         private void tsbScreenshotsFolder_Click(object sender, EventArgs e)
@@ -982,6 +1046,11 @@ namespace ShareX
             uim.OpenFile();
         }
 
+        private void tsmiOpenThumbnailFile_Click(object sender, EventArgs e)
+        {
+            uim.OpenThumbnailFile();
+        }
+
         private void tsmiOpenFolder_Click(object sender, EventArgs e)
         {
             uim.OpenFolder();
@@ -1020,6 +1089,16 @@ namespace ShareX
         private void tsmiCopyText_Click(object sender, EventArgs e)
         {
             uim.CopyText();
+        }
+
+        private void tsmiCopyThumbnailFile_Click(object sender, EventArgs e)
+        {
+            uim.CopyThumbnailFile();
+        }
+
+        private void tsmiCopyThumbnailImage_Click(object sender, EventArgs e)
+        {
+            uim.CopyThumbnailImage();
         }
 
         private void tsmiCopyHTMLLink_Click(object sender, EventArgs e)

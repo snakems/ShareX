@@ -69,14 +69,16 @@ namespace ShareX
         SaveImageToFile = 1 << 5,
         [Description("Save image to file as...")]
         SaveImageToFileWithDialog = 1 << 6,
+        [Description("Save thumbnail image to file")]
+        SaveThumbnailImageToFile = 1 << 7,
         [Description("Copy file to clipboard")]
-        CopyFileToClipboard = 1 << 7,
+        CopyFileToClipboard = 1 << 8,
         [Description("Copy file path to clipboard")]
-        CopyFilePathToClipboard = 1 << 8,
+        CopyFilePathToClipboard = 1 << 9,
         [Description("Perform actions")]
-        PerformActions = 1 << 9,
+        PerformActions = 1 << 10,
         [Description("Upload image to host")]
-        UploadImageToHost = 1 << 10
+        UploadImageToHost = 1 << 11
     }
 
     [Flags]
@@ -130,6 +132,8 @@ namespace ShareX
         ClipboardUploadWithContentViewer,
         [Description("File upload")]
         FileUpload,
+        [Description("Drag & drop upload")]
+        DragDropUpload,
         [Description("Capture entire screen")]
         PrintScreen,
         [Description("Capture active window")]
@@ -165,7 +169,9 @@ namespace ShareX
         [Description("Index folder")]
         IndexFolder,
         [Description("Image effects")]
-        ImageEffects
+        ImageEffects,
+        [Description("Ruler")]
+        Ruler
     }
 
     public enum HotkeyStatus
@@ -183,5 +189,34 @@ namespace ShareX
         BalloonTip,
         [Description("Show toast notification with preview")]
         ToastNotification
+    }
+
+    [DefaultValue(ToastClickAction.OpenUrl)]
+    public enum ToastClickAction
+    {
+        [Description("Annotate image")]
+        AnnotateImage,
+        [Description("Copy image to clipboard")]
+        CopyImageToClipboard,
+        [Description("Open file")]
+        OpenFile,
+        [Description("Open folder")]
+        OpenFolder,
+        [Description("Open URL")]
+        OpenUrl,
+        [Description("Upload")]
+        Upload,
+    }
+
+    public enum FileExistAction
+    {
+        [Description("Ask what to do")]
+        Ask,
+        [Description("Overwrite file")]
+        Overwrite,
+        [Description("Append number to the filename")]
+        UniqueName,
+        [Description("Do not save")]
+        Cancel
     }
 }

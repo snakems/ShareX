@@ -25,7 +25,6 @@
 
 using System;
 using System.Collections.Generic;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.URLShorteners
 {
@@ -64,7 +63,7 @@ namespace UploadersLib.URLShorteners
                 //arguments.Add("title", "");
                 arguments.Add("format", "simple");
 
-                result.Response = SendGetRequest(APIURL, arguments);
+                result.Response = SendRequest(HttpMethod.POST, APIURL, arguments);
                 result.ShortenedURL = result.Response;
             }
 

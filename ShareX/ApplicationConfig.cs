@@ -27,6 +27,7 @@ using HelpersLib;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Design;
 using UploadersLib;
 
 namespace ShareX
@@ -39,6 +40,11 @@ namespace ShareX
         public bool ShowUploadWarning = true; // First time upload warning
         public bool ShowMultiUploadWarning = true; // More than 10 files upload warning
         public int NameParserAutoIncrementNumber = 0;
+
+        public ApplicationConfig()
+        {
+            this.ApplyDefaultPropertyValues();
+        }
 
         #region Main Form
 
@@ -78,10 +84,15 @@ namespace ShareX
 
         #region Upload
 
-        public bool IfUploadFailRetryOnce = false;
         public int UploadLimit = 5;
         public int BufferSizePower = 5;
         public List<ClipboardFormat> ClipboardContentFormats = new List<ClipboardFormat>();
+
+        public int MaxUploadFailRetry = 0;
+        public bool UseSecondaryUploaders = false;
+        public List<ImageDestination> SecondaryImageUploaders = new List<ImageDestination>();
+        public List<TextDestination> SecondaryTextUploaders = new List<TextDestination>();
+        public List<FileDestination> SecondaryFileUploaders = new List<FileDestination>();
 
         #endregion Upload
 
@@ -91,6 +102,12 @@ namespace ShareX
         public PrintSettings PrintSettings = new PrintSettings();
 
         #endregion Print
+
+        #region Profiles
+
+        public List<VideoEncoder> VideoEncoders = new List<VideoEncoder>();
+
+        #endregion Profiles
 
         #region Advanced
 
@@ -103,8 +120,34 @@ namespace ShareX
         [Category("Application"), DefaultValue(false), Description("By default copying \"Bitmap\" to clipboard. Alternative method copying \"PNG and DIB\" to clipboard.")]
         public bool UseAlternativeClipboardCopyImage { get; set; }
 
-        [Category("Upload / Clipboard upload"), DefaultValue(true), Description("Show clipboard content viewer when using clipboard upload in main window.")]
+        [Category("Application / Config"), DefaultValue(false), Description("Automatically detect external changes to UploaderConfig file and load settigns to memory.")]
+        public bool DetectUploaderConfigFileChanges { get; set; }
+
+        [Category("Clipboard upload"), DefaultValue(true), Description("Show clipboard content viewer when using clipboard upload in main window.")]
         public bool ShowClipboardContentViewer { get; set; }
+
+        [Category("Paths"), Description("Custom uploaders configuration path. If you have already configured this setting in another device and you are attempting to use the same location, then backup the file before configuring this setting and restore after exiting ShareX.")]
+        [Editor(typeof(DirectoryNameEditor), typeof(UITypeEditor))]
+        public string CustomUploadersConfigPath { get; set; }
+
+        [Category("Paths"), Description("Custom hotkeys configuration path. If you have already configured this setting in another device and you are attempting to use the same location, then backup the file before configuring this setting and restore after exiting ShareX.")]
+        [Editor(typeof(DirectoryNameEditor), typeof(UITypeEditor))]
+        public string CustomHotkeysConfigPath { get; set; }
+
+        [Category("Drag and drop window"), DefaultValue(150), Description("Size of drop window.")]
+        public int DropSize { get; set; }
+
+        [Category("Drag and drop window"), DefaultValue(5), Description("Position offset of drop window.")]
+        public int DropOffset { get; set; }
+
+        [Category("Drag and drop window"), DefaultValue(ContentAlignment.BottomRight), Description("Where drop window will open.")]
+        public ContentAlignment DropAlignment { get; set; }
+
+        [Category("Drag and drop window"), DefaultValue(100), Description("Opacity of drop window.")]
+        public int DropOpacity { get; set; }
+
+        [Category("Drag and drop window"), DefaultValue(255), Description("When you drag file to drop window then opacity will change to this.")]
+        public int DropHoverOpacity { get; set; }
 
         #endregion Advanced
 
@@ -122,6 +165,7 @@ namespace ShareX
 
         #region AutoCapture Form
 
+        public Rectangle AutoCaptureRegion = Rectangle.Empty;
         public decimal AutoCaptureRepeatTime = 60;
         public bool AutoCaptureMinimizeToTray = true;
         public bool AutoCaptureWaitUpload = true;

@@ -82,6 +82,20 @@ namespace ShareX
 
         public async void StartRecording(TaskSettings TaskSettings)
         {
+            if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVICommandLine)
+            {
+                if (!Program.Settings.VideoEncoders.IsValidIndex(TaskSettings.CaptureSettings.VideoEncoderSelected))
+                {
+                    MessageBox.Show("There is no valid CLI video encoder selected.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                else if (!Program.Settings.VideoEncoders[TaskSettings.CaptureSettings.VideoEncoderSelected].IsValid())
+                {
+                    MessageBox.Show("There is a problem with the CLI video encoder file path.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
             SelectRegion();
             Screenshot.CaptureCursor = TaskSettings.CaptureSettings.ShowCursor;
 
@@ -107,7 +121,7 @@ namespace ShareX
                     {
                         if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVI)
                         {
-                            path = Path.Combine(Program.ScreenshotsPath, TaskHelpers.GetFilename(TaskSettings, "avi"));
+                            path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, "avi"));
                         }
                         else
                         {
@@ -143,14 +157,13 @@ namespace ShareX
                         switch (TaskSettings.CaptureSettings.ScreenRecordOutput)
                         {
                             case ScreenRecordOutput.GIF:
-                                path = Path.Combine(Program.ScreenshotsPath, TaskHelpers.GetFilename(TaskSettings, "gif"));
+                                path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, "gif"));
                                 screenRecorder.SaveAsGIF(path, TaskSettings.ImageSettings.ImageGIFQuality);
                                 break;
                             case ScreenRecordOutput.AVICommandLine:
-                                path = Path.Combine(Program.ScreenshotsPath, TaskHelpers.GetFilename(TaskSettings,
-                                    TaskSettings.CaptureSettings.ScreenRecordCommandLineOutputExtension));
-                                screenRecorder.EncodeUsingCommandLine(path, TaskSettings.CaptureSettings.ScreenRecordCommandLinePath,
-                                    TaskSettings.CaptureSettings.ScreenRecordCommandLineArgs);
+                                VideoEncoder encoder = Program.Settings.VideoEncoders[TaskSettings.CaptureSettings.VideoEncoderSelected];
+                                path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, encoder.OutputExtension));
+                                screenRecorder.EncodeUsingCommandLine(encoder, path);
                                 break;
                         }
                     });

@@ -24,9 +24,7 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using ImageEffectsLib;
 using IndexerLib;
-using ShareX.Properties;
 using System;
 using System.Drawing;
 using System.IO;
@@ -74,6 +72,8 @@ namespace ShareX
         private string tempText;
         private ThreadWorker threadWorker;
         private Uploader uploader;
+
+        private static string lastSaveAsFolder;
 
         #region Constructors
 
@@ -259,11 +259,14 @@ namespace ShareX
 
                     bool isError = DoUpload();
 
-                    if (isError && Program.Settings.IfUploadFailRetryOnce)
+                    if (isError && Program.Settings.MaxUploadFailRetry > 0)
                     {
                         DebugHelper.WriteLine("Upload failed. Retrying upload.");
-                        Thread.Sleep(1000);
-                        isError = DoUpload();
+
+                        for (int retry = 1; isError && retry <= Program.Settings.MaxUploadFailRetry; retry++)
+                        {
+                            isError = DoUpload(retry);
+                        }
                     }
                 }
             }
@@ -276,7 +279,7 @@ namespace ShareX
             {
                 if (string.IsNullOrEmpty(Info.Result.URL))
                 {
-                    Info.Result.Errors.Add("URL is empty.");
+                    Info.Result.Errors.Add("URL is empty.\r\n\r\n" + Info.Result.ErrorsToString());
                 }
                 else
                 {
@@ -287,9 +290,25 @@ namespace ShareX
             Info.UploadTime = DateTime.UtcNow;
         }
 
-        private bool DoUpload()
+        private bool DoUpload(int retry = 0)
         {
             bool isError = false;
+
+            if (retry > 0)
+            {
+                if (Program.Settings.UseSecondaryUploaders)
+                {
+                    Info.TaskSettings.ImageDestination = Program.Settings.SecondaryImageUploaders[retry - 1];
+                    Info.TaskSettings.ImageFileDestination = Program.Settings.SecondaryFileUploaders[retry - 1];
+                    Info.TaskSettings.TextDestination = Program.Settings.SecondaryTextUploaders[retry - 1];
+                    Info.TaskSettings.TextFileDestination = Program.Settings.SecondaryFileUploaders[retry - 1];
+                    Info.TaskSettings.FileDestination = Program.Settings.SecondaryFileUploaders[retry - 1];
+                }
+                else
+                {
+                    Thread.Sleep(1000);
+                }
+            }
 
             try
             {
@@ -334,13 +353,6 @@ namespace ShareX
             }
             else if (Info.Job == TaskJob.TextUpload && !string.IsNullOrEmpty(tempText))
             {
-                if (tempText.Length <= 260 && Directory.Exists(tempText)) // TODO: Should be optional setting?
-                {
-                    Info.FileName = Path.ChangeExtension(Info.FileName, Info.TaskSettings.IndexerSettings.Output.ToString().ToLower());
-                    Info.TaskSettings.IndexerSettings.BinaryUnits = Program.Settings.BinaryUnits;
-                    tempText = Indexer.Index(tempText, Info.TaskSettings.IndexerSettings);
-                }
-
                 byte[] byteArray = Encoding.UTF8.GetBytes(tempText);
                 Data = new MemoryStream(byteArray);
             }
@@ -404,16 +416,26 @@ namespace ShareX
 
                     if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.SaveImageToFile))
                     {
-                        Info.FilePath = Path.Combine(Program.ScreenshotsPath, Info.FileName);
-                        imageData.Write(Info.FilePath);
-                        DebugHelper.WriteLine("SaveImageToFile: " + Info.FilePath);
+                        string filePath = TaskHelpers.CheckFilePath(Info.TaskSettings.CaptureFolder, Info.FileName, Info.TaskSettings);
+
+                        if (!string.IsNullOrEmpty(filePath))
+                        {
+                            Info.FilePath = filePath;
+                            imageData.Write(Info.FilePath);
+                            DebugHelper.WriteLine("SaveImageToFile: " + Info.FilePath);
+                        }
                     }
 
                     if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.SaveImageToFileWithDialog))
                     {
                         using (SaveFileDialog sfd = new SaveFileDialog())
                         {
-                            sfd.InitialDirectory = Program.ScreenshotsPath;
+                            if (string.IsNullOrEmpty(lastSaveAsFolder) || !Directory.Exists(lastSaveAsFolder))
+                            {
+                                lastSaveAsFolder = Info.TaskSettings.CaptureFolder;
+                            }
+
+                            sfd.InitialDirectory = lastSaveAsFolder;
                             sfd.FileName = Info.FileName;
                             sfd.DefaultExt = Path.GetExtension(Info.FileName).Substring(1);
                             sfd.Filter = string.Format("*{0}|*{0}|All files (*.*)|*.*", Path.GetExtension(Info.FileName));
@@ -422,9 +444,33 @@ namespace ShareX
                             if (sfd.ShowDialog() == DialogResult.OK && !string.IsNullOrEmpty(sfd.FileName))
                             {
                                 Info.FilePath = sfd.FileName;
+                                lastSaveAsFolder = Path.GetDirectoryName(Info.FilePath);
                                 imageData.Write(Info.FilePath);
                                 DebugHelper.WriteLine("SaveImageToFileWithDialog: " + Info.FilePath);
                             }
+                        }
+                    }
+
+                    if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.SaveThumbnailImageToFile))
+                    {
+                        string thumbnailFilename, thumbnailFolder;
+
+                        if (!string.IsNullOrEmpty(Info.FilePath))
+                        {
+                            thumbnailFilename = Path.GetFileName(Info.FilePath);
+                            thumbnailFolder = Path.GetDirectoryName(Info.FilePath);
+                        }
+                        else
+                        {
+                            thumbnailFilename = Info.FileName;
+                            thumbnailFolder = Info.TaskSettings.CaptureFolder;
+                        }
+
+                        Info.ThumbnailFilePath = TaskHelpers.CreateThumbnail(tempImage, thumbnailFolder, thumbnailFilename, Info.TaskSettings);
+
+                        if (!string.IsNullOrEmpty(Info.ThumbnailFilePath))
+                        {
+                            DebugHelper.WriteLine("SaveThumbnailImageToFile: " + Info.ThumbnailFilePath);
                         }
                     }
 
@@ -718,11 +764,14 @@ namespace ShareX
                     {
                         UploadPath = uploadPath,
                         AutoCreateShareableLink = Program.UploadersConfig.DropboxAutoCreateShareableLink,
-                        ShortURL = Program.UploadersConfig.DropboxShortURL
+                        ShareURLType = Program.UploadersConfig.DropboxURLType
                     };
                     break;
                 case FileDestination.GoogleDrive:
-                    fileUploader = new GoogleDrive(Program.UploadersConfig.GoogleDriveOAuth2Info);
+                    fileUploader = new GoogleDrive(Program.UploadersConfig.GoogleDriveOAuth2Info)
+                    {
+                        IsPublic = Program.UploadersConfig.GoogleDriveIsPublic
+                    };
                     break;
                 case FileDestination.RapidShare:
                     fileUploader = new RapidShare(Program.UploadersConfig.RapidShareUsername, Program.UploadersConfig.RapidSharePassword,
@@ -741,13 +790,12 @@ namespace ShareX
                     }
                     break;
                 case FileDestination.Minus:
-                    fileUploader = new Minus(Program.UploadersConfig.MinusConfig, new OAuthInfo(APIKeys.MinusConsumerKey, APIKeys.MinusConsumerSecret));
+                    fileUploader = new Minus(Program.UploadersConfig.MinusConfig, Program.UploadersConfig.MinusOAuth2Info);
                     break;
                 case FileDestination.Box:
-                    fileUploader = new Box(APIKeys.BoxKey)
+                    fileUploader = new Box(Program.UploadersConfig.BoxOAuth2Info)
                     {
-                        AuthToken = Program.UploadersConfig.BoxAuthToken,
-                        FolderID = Program.UploadersConfig.BoxFolderID,
+                        FolderID = Program.UploadersConfig.BoxSelectedFolder.id,
                         Share = Program.UploadersConfig.BoxShare
                     };
                     break;
@@ -830,7 +878,13 @@ namespace ShareX
                     fileUploader = new Jira(Program.UploadersConfig.JiraHost, Program.UploadersConfig.JiraOAuthInfo, Program.UploadersConfig.JiraIssuePrefix);
                     break;
                 case FileDestination.Mega:
-                    fileUploader = Program.UploadersConfig.MegaAnonymousLogin ? new Mega() : new Mega(Program.UploadersConfig.MegaAuthInfos, Program.UploadersConfig.MegaParentNodeId);
+                    fileUploader = new Mega(Program.UploadersConfig.MegaAuthInfos, Program.UploadersConfig.MegaParentNodeId);
+                    break;
+                case FileDestination.AmazonS3:
+                    fileUploader = new AmazonS3(Program.UploadersConfig.AmazonS3Settings);
+                    break;
+                case FileDestination.Pushbullet:
+                    fileUploader = new Pushbullet(Program.UploadersConfig.PushbulletSettings);
                     break;
             }
 

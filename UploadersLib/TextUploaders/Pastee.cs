@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using System.Collections.Generic;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.TextUploaders
 {
@@ -57,7 +56,7 @@ namespace UploadersLib.TextUploaders
                     arguments.Add("key", Key);
                 }
 
-                ur.URL = SendPostRequest("https://pastee.org/submit", arguments, ResponseType.RedirectionURL);
+                ur.URL = SendRequest(HttpMethod.POST, "https://pastee.org/submit", arguments, ResponseType.RedirectionURL);
             }
 
             return ur;

@@ -32,8 +32,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
-using System.Net;
-using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -52,7 +50,7 @@ namespace HelpersLib
         public const string Alphanumeric = Numbers + AlphabetCapital + Alphabet;
         public const string URLCharacters = Alphanumeric + "-._~"; // 45 46 95 126
         public const string URLPathCharacters = URLCharacters + "/"; // 47
-        public const string ValidURLCharacters = URLPathCharacters + ":?#[]@!$&'()*+,;=";
+        public const string ValidURLCharacters = URLPathCharacters + ":?#[]@!$&'()*+,;= ";
 
         private static readonly object randomLock = new object();
         private static readonly Random random = new Random();
@@ -203,7 +201,7 @@ namespace HelpersLib
             return GetValidFolderPath(folderPath) + Path.DirectorySeparatorChar + GetValidFileName(fileName);
         }
 
-        public static string GetValidURL(string url, bool replaceSpace = true)
+        public static string GetValidURL(string url, bool replaceSpace = false)
         {
             if (replaceSpace) url = url.Replace(' ', '_');
             return new string(url.Where(c => ValidURLCharacters.Contains(c)).ToArray());
@@ -257,13 +255,32 @@ namespace HelpersLib
             if (!string.IsNullOrEmpty(fileName))
             {
                 string ext = Path.GetExtension(fileName).ToLower();
-                RegistryKey regKey = Registry.ClassesRoot.OpenSubKey(ext);
-                if (regKey != null && regKey.GetValue("Content Type") != null)
+
+                if (!string.IsNullOrEmpty(ext))
                 {
-                    return regKey.GetValue("Content Type").ToString();
+                    string mimeType = MimeTypes.GetMimeType(ext);
+
+                    if (!string.IsNullOrEmpty(mimeType))
+                    {
+                        return mimeType;
+                    }
+
+                    using (RegistryKey regKey = Registry.ClassesRoot.OpenSubKey(ext))
+                    {
+                        if (regKey != null && regKey.GetValue("Content Type") != null)
+                        {
+                            mimeType = regKey.GetValue("Content Type").ToString();
+
+                            if (!string.IsNullOrEmpty(mimeType))
+                            {
+                                return mimeType;
+                            }
+                        }
+                    }
                 }
             }
-            return "application/octet-stream";
+
+            return MimeTypes.DefaultMimeType;
         }
 
         public static string[] GetEnumDescriptions<T>()
@@ -444,6 +461,12 @@ namespace HelpersLib
             return (OSVersion.Major == 6 && OSVersion.Minor >= 2) || OSVersion.Major > 6;
         }
 
+        public static bool IsDefaultInstallDir()
+        {
+            string path = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+            return Application.ExecutablePath.StartsWith(path);
+        }
+
         public static void LoadBrowserAsync(string url)
         {
             if (!string.IsNullOrEmpty(url))
@@ -475,8 +498,9 @@ namespace HelpersLib
 
         public static bool IsValidURLRegex(string url)
         {
-            // https://gist.github.com/729294
+            if (string.IsNullOrEmpty(url)) return false;
 
+            // https://gist.github.com/729294
             string pattern =
                 "^" +
                 // protocol identifier
@@ -516,33 +540,36 @@ namespace HelpersLib
             return Regex.IsMatch(url.Trim(), pattern, RegexOptions.IgnoreCase);
         }
 
-        public static string GetUniqueFilePath(string folder, string filename)
+        public static bool IsValidIPAddress(string ip)
         {
-            string filepath = Path.Combine(folder, filename);
+            if (string.IsNullOrEmpty(ip)) return false;
 
+            string pattern = @"(?<First>2[0-4]\d|25[0-5]|[01]?\d\d?)\.(?<Second>2[0-4]\d|25[0-5]|[01]?\d\d?)\.(?<Third>2[0-4]\d|25[0-5]|[01]?\d\d?)\.(?<Fourth>2[0-4]\d|25[0-5]|[01]?\d\d?)";
+
+            return Regex.IsMatch(ip.Trim(), pattern);
+        }
+
+        public static string GetUniqueFilePath(string filepath)
+        {
             if (File.Exists(filepath))
             {
-                string filenameWithoutExt, ext;
-                int num;
+                string folder = Path.GetDirectoryName(filepath);
+                string filename = Path.GetFileNameWithoutExtension(filepath);
+                string extension = Path.GetExtension(filepath);
+                int number = 1;
 
-                GroupCollection groups = Regex.Match(filepath, @"(.+ \()(\d+)(\)\.\w+)").Groups;
+                Match regex = Regex.Match(filepath, @"(.+) \((\d+)\)\.\w+");
 
-                if (string.IsNullOrEmpty(groups[2].Value))
+                if (regex.Success)
                 {
-                    filenameWithoutExt = Path.GetFileNameWithoutExtension(filename) + " (";
-                    num = 1;
-                    ext = ")" + Path.GetExtension(filename);
-                }
-                else
-                {
-                    filenameWithoutExt = groups[1].Value;
-                    num = int.Parse(groups[2].Value);
-                    ext = groups[3].Value;
+                    filename = regex.Groups[1].Value;
+                    number = int.Parse(regex.Groups[2].Value);
                 }
 
                 do
                 {
-                    filepath = filenameWithoutExt + ++num + ext;
+                    number++;
+                    filepath = Path.Combine(folder, string.Format("{0} ({1}){2}", filename, number, extension));
                 }
                 while (File.Exists(filepath));
             }

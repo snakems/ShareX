@@ -86,46 +86,115 @@ namespace UploadersLib
             }
         }
 
-        protected string SendRequest(HttpMethod httpMethod, string url, Dictionary<string, string> arguments = null, ResponseType responseType = ResponseType.Text)
+        #region Request methods
+
+        protected string SendRequest(HttpMethod method, string url, Dictionary<string, string> arguments = null, ResponseType responseType = ResponseType.Text,
+            NameValueCollection headers = null, CookieCollection cookies = null)
         {
-            switch (httpMethod)
+            HttpWebResponse response = null;
+
+            try
             {
-                case HttpMethod.Get:
-                    return SendGetRequest(url, arguments, responseType);
-                case HttpMethod.Post:
-                    return SendPostRequest(url, arguments, responseType);
+                if (method == HttpMethod.POST) // Multipart form data
+                {
+                    response = PostResponseMultiPart(url, arguments, headers, cookies);
+                }
+                else
+                {
+                    response = GetResponse(method, url, arguments, headers, cookies);
+                }
+
+                return ResponseToString(response, responseType);
+            }
+            finally
+            {
+                if (response != null)
+                {
+                    response.Close();
+                }
+            }
+        }
+
+        protected string SendRequest(HttpMethod method, string url, string content, Dictionary<string, string> arguments = null, ResponseType responseType = ResponseType.Text,
+            NameValueCollection headers = null, CookieCollection cookies = null)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(content);
+
+            using (MemoryStream ms = new MemoryStream())
+            {
+                ms.Write(data, 0, data.Length);
+                return SendRequest(method, url, ms, arguments, responseType, headers, cookies);
+            }
+        }
+
+        protected string SendRequest(HttpMethod method, string url, Stream content, Dictionary<string, string> arguments = null, ResponseType responseType = ResponseType.Text,
+            NameValueCollection headers = null, CookieCollection cookies = null)
+        {
+            using (HttpWebResponse response = GetResponse(method, url, arguments, headers, cookies, content))
+            {
+                return ResponseToString(response, responseType);
+            }
+        }
+
+        protected bool SendRequest(HttpMethod method, Stream downloadStream, string url, Dictionary<string, string> arguments = null,
+            NameValueCollection headers = null, CookieCollection cookies = null)
+        {
+            using (HttpWebResponse response = GetResponse(method, url, arguments, headers, cookies))
+            {
+                if (response != null)
+                {
+                    response.GetResponseStream().CopyStreamTo(downloadStream, BufferSize);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private HttpWebResponse GetResponse(HttpMethod method, string url, Dictionary<string, string> arguments = null,
+            NameValueCollection headers = null, CookieCollection cookies = null, Stream dataStream = null)
+        {
+            IsUploading = true;
+            stopUpload = false;
+
+            url = CreateQuery(url, arguments);
+
+            try
+            {
+                HttpWebRequest request = PrepareWebRequest(method, url, headers, cookies);
+
+                if (dataStream != null)
+                {
+                    using (Stream requestStream = request.GetRequestStream())
+                    {
+                        if (!TransferData(dataStream, requestStream))
+                        {
+                            return null;
+                        }
+                    }
+                }
+
+                return (HttpWebResponse)request.GetResponse();
+            }
+            catch (Exception e)
+            {
+                if (!stopUpload) AddWebError(e);
+            }
+            finally
+            {
+                IsUploading = false;
             }
 
             return null;
         }
 
+        #endregion Request methods
+
         #region Post methods
 
-        protected string SendPostRequest(string url, Dictionary<string, string> arguments = null, ResponseType responseType = ResponseType.Text,
-            CookieCollection cookies = null, NameValueCollection headers = null)
+        protected string SendPostRequestJSON(string url, string json, ResponseType responseType = ResponseType.Text, CookieCollection cookies = null, NameValueCollection headers = null)
         {
-            using (HttpWebResponse response = PostResponseMultiPart(url, arguments, cookies, headers))
-            {
-                return ResponseToString(response, responseType);
-            }
-        }
-
-        protected string SendPostRequestURLEncoded(string url, string arguments = null, ResponseType responseType = ResponseType.Text)
-        {
-            using (HttpWebResponse response = PostResponseURLEncoded(url, arguments))
-            {
-                return ResponseToString(response, responseType);
-            }
-        }
-
-        protected string SendPostRequestURLEncoded(string url, Dictionary<string, string> arguments = null, ResponseType responseType = ResponseType.Text)
-        {
-            return SendPostRequestURLEncoded(url, CreateQuery(arguments), responseType);
-        }
-
-        protected string SendPostRequestJSON(string url, string json, ResponseType responseType = ResponseType.Text)
-        {
-            using (HttpWebResponse response = PostResponseJSON(url, json))
+            using (HttpWebResponse response = PostResponseJSON(url, json, cookies, headers))
             {
                 return ResponseToString(response, responseType);
             }
@@ -139,7 +208,7 @@ namespace UploadersLib
             }
         }
 
-        private HttpWebResponse PostResponseMultiPart(string url, Dictionary<string, string> arguments, CookieCollection cookies = null, NameValueCollection headers = null)
+        private HttpWebResponse PostResponseMultiPart(string url, Dictionary<string, string> arguments, NameValueCollection headers = null, CookieCollection cookies = null)
         {
             string boundary = CreateBoundary();
             byte[] data = MakeInputContent(boundary, arguments);
@@ -151,30 +220,14 @@ namespace UploadersLib
             }
         }
 
-        private HttpWebResponse PostResponseURLEncoded(string url, string arguments)
-        {
-            byte[] data = Encoding.UTF8.GetBytes(arguments);
-
-            using (MemoryStream stream = new MemoryStream())
-            {
-                stream.Write(data, 0, data.Length);
-                return GetResponseUsingPost(url, stream, null, "application/x-www-form-urlencoded");
-            }
-        }
-
-        private HttpWebResponse PostResponseURLEncoded(string url, Dictionary<string, string> arguments)
-        {
-            return PostResponseURLEncoded(url, CreateQuery(arguments));
-        }
-
-        private HttpWebResponse PostResponseJSON(string url, string json)
+        private HttpWebResponse PostResponseJSON(string url, string json, CookieCollection cookies = null, NameValueCollection headers = null)
         {
             byte[] data = Encoding.UTF8.GetBytes(json);
 
             using (MemoryStream stream = new MemoryStream())
             {
                 stream.Write(data, 0, data.Length);
-                return GetResponseUsingPost(url, stream, null, "application/json");
+                return GetResponseUsingPost(url, stream, null, "application/json", cookies, headers);
             }
         }
 
@@ -259,90 +312,6 @@ namespace UploadersLib
 
         #endregion Post methods
 
-        #region Get methods
-
-        protected string SendGetRequest(string url, Dictionary<string, string> arguments = null, ResponseType responseType = ResponseType.Text,
-            CookieCollection cookies = null, NameValueCollection headers = null)
-        {
-            using (HttpWebResponse response = GetResponseUsingGet(url, arguments, cookies, headers))
-            {
-                return ResponseToString(response, responseType);
-            }
-        }
-
-        protected bool SendGetRequest(Stream responseStream, string url, Dictionary<string, string> arguments = null)
-        {
-            using (HttpWebResponse response = GetResponseUsingGet(url, arguments))
-            {
-                if (response != null)
-                {
-                    response.GetResponseStream().CopyStreamTo(responseStream, BufferSize);
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        private HttpWebResponse GetResponseUsingGet(string url, Dictionary<string, string> arguments = null,
-            CookieCollection cookies = null, NameValueCollection headers = null)
-        {
-            IsUploading = true;
-
-            url = CreateQuery(url, arguments);
-
-            try
-            {
-                return (HttpWebResponse)PrepareGetWebRequest(url, cookies, headers).GetResponse();
-            }
-            catch (Exception e)
-            {
-                AddWebError(e);
-            }
-            finally
-            {
-                IsUploading = false;
-            }
-
-            return null;
-        }
-
-        #endregion Get methods
-
-        #region Delete methods
-
-        protected string SendDeleteRequest(string url, Dictionary<string, string> arguments = null, ResponseType responseType = ResponseType.Text)
-        {
-            using (HttpWebResponse response = GetResponseUsingDelete(url, arguments))
-            {
-                return ResponseToString(response, responseType);
-            }
-        }
-
-        private HttpWebResponse GetResponseUsingDelete(string url, Dictionary<string, string> arguments = null)
-        {
-            IsUploading = true;
-
-            url = CreateQuery(url, arguments);
-
-            try
-            {
-                return (HttpWebResponse)PrepareDeleteWebRequest(url).GetResponse();
-            }
-            catch (Exception e)
-            {
-                AddWebError(e);
-            }
-            finally
-            {
-                IsUploading = false;
-            }
-
-            return null;
-        }
-
-        #endregion Delete methods
-
         #region Helper methods
 
         private HttpWebRequest PreparePostWebRequest(string url, string boundary, long length, string contentType, CookieCollection cookies = null,
@@ -364,7 +333,7 @@ namespace UploadersLib
             if (cookies != null) request.CookieContainer.Add(cookies);
             if (headers != null) request.Headers.Add(headers);
             request.KeepAlive = false;
-            request.Method = HttpMethod.Post.GetDescription();
+            request.Method = HttpMethod.POST.ToString();
             request.Pipelined = false;
             request.ProtocolVersion = HttpVersion.Version11;
             request.Proxy = ProxyInfo.Current.GetWebProxy();
@@ -374,26 +343,14 @@ namespace UploadersLib
             return request;
         }
 
-        private HttpWebRequest PrepareGetWebRequest(string url, CookieCollection cookies = null, NameValueCollection headers = null)
+        private HttpWebRequest PrepareWebRequest(HttpMethod method, string url, NameValueCollection headers = null, CookieCollection cookies = null)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+            request.Method = method.ToString();
+            if (headers != null) request.Headers.Add(headers);
             request.CookieContainer = new CookieContainer();
             if (cookies != null) request.CookieContainer.Add(cookies);
-            if (headers != null) request.Headers.Add(headers);
             request.KeepAlive = false;
-            request.Method = HttpMethod.Get.GetDescription();
-            IWebProxy proxy = ProxyInfo.Current.GetWebProxy();
-            if (proxy != null) request.Proxy = proxy;
-            request.UserAgent = UserAgent;
-
-            return request;
-        }
-
-        private HttpWebRequest PrepareDeleteWebRequest(string url)
-        {
-            HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
-            request.KeepAlive = false;
-            request.Method = HttpMethod.Delete.GetDescription();
             IWebProxy proxy = ProxyInfo.Current.GetWebProxy();
             if (proxy != null) request.Proxy = proxy;
             request.UserAgent = UserAgent;
@@ -621,7 +578,7 @@ namespace UploadersLib
         #region OAuth methods
 
         protected string GetAuthorizationURL(string requestTokenURL, string authorizeURL, OAuthInfo authInfo,
-            Dictionary<string, string> customParameters = null, HttpMethod httpMethod = HttpMethod.Get)
+            Dictionary<string, string> customParameters = null, HttpMethod httpMethod = HttpMethod.GET)
         {
             string url = OAuthManager.GenerateQuery(requestTokenURL, customParameters, httpMethod, authInfo);
 
@@ -635,12 +592,12 @@ namespace UploadersLib
             return null;
         }
 
-        protected bool GetAccessToken(string accessTokenURL, OAuthInfo authInfo, HttpMethod httpMethod = HttpMethod.Get)
+        protected bool GetAccessToken(string accessTokenURL, OAuthInfo authInfo, HttpMethod httpMethod = HttpMethod.GET)
         {
             return GetAccessTokenEx(accessTokenURL, authInfo, httpMethod) != null;
         }
 
-        protected NameValueCollection GetAccessTokenEx(string accessTokenURL, OAuthInfo authInfo, HttpMethod httpMethod = HttpMethod.Get)
+        protected NameValueCollection GetAccessTokenEx(string accessTokenURL, OAuthInfo authInfo, HttpMethod httpMethod = HttpMethod.GET)
         {
             if (string.IsNullOrEmpty(authInfo.AuthToken) || string.IsNullOrEmpty(authInfo.AuthSecret))
             {

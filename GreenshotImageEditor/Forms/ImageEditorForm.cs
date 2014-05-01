@@ -31,7 +31,6 @@ using GreenshotPlugin.Controls;
 using GreenshotPlugin.Core;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -217,7 +216,7 @@ namespace Greenshot
         private void SurfaceMessageReceived(object sender, SurfaceMessageEventArgs eventArgs)
         {
             string dateTime = DateTime.Now.ToLongTimeString();
-            // TODO: Fix that we only open files, like in the tooltip
+
             switch (eventArgs.MessageType)
             {
                 case SurfaceMessageTyp.FileSaved:
@@ -1216,7 +1215,6 @@ namespace Greenshot
         private void AddDropshadowToolStripMenuItemClick(object sender, EventArgs e)
         {
             DropShadowEffect dropShadowEffect = new DropShadowEffect();
-            // TODO: Use the dropshadow settings form to make it possible to change the default values
             //DialogResult result = new DropShadowSettingsForm(dropShadowEffect).ShowDialog(this);
             //if (result == DialogResult.OK) {
             surface.ApplyBitmapEffect(dropShadowEffect);
@@ -1232,7 +1230,6 @@ namespace Greenshot
         private void ResizeToolStripMenuItemClick(object sender, EventArgs e)
         {
             ResizeEffect resizeEffect = new ResizeEffect(surface.Image.Width, surface.Image.Height, true);
-            // TODO: Use the Resize SettingsForm to make it possible to change the default values
             // DialogResult result = new ResizeSettingsForm(resizeEffect).ShowDialog(this);
             // if (result == DialogResult.OK) {
             surface.ApplyBitmapEffect(resizeEffect);
@@ -1248,7 +1245,6 @@ namespace Greenshot
         private void TornEdgesToolStripMenuItemClick(object sender, EventArgs e)
         {
             TornEdgeEffect tornEdgeEffect = new TornEdgeEffect();
-            // TODO: Use the dropshadow settings form to make it possible to change the default values
             //DialogResult result = new TornEdgeSettingsForm(tornEdgeEffect).ShowDialog(this);
             //if (result == DialogResult.OK) {
             surface.ApplyBitmapEffect(tornEdgeEffect);
@@ -1331,6 +1327,7 @@ namespace Greenshot
 
         private void btnClose_Click(object sender, EventArgs e)
         {
+            DialogResult = DialogResult.Cancel;
             forceClose = true;
             Close();
         }

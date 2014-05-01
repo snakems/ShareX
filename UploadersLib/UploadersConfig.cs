@@ -106,6 +106,10 @@ namespace UploadersLib
         public string UpasteUserKey = string.Empty;
         public bool UpasteIsPublic = false;
 
+        // Pushbullet
+
+        public PushbulletSettings PushbulletSettings = new PushbulletSettings();
+
         #endregion Text uploaders
 
         #region File uploaders
@@ -114,13 +118,14 @@ namespace UploadersLib
 
         public OAuthInfo DropboxOAuthInfo = null;
         public DropboxAccountInfo DropboxAccountInfo = null;
-        public string DropboxUploadPath = "Public/" + Application.ProductName + "/%y-%mo";
+        public string DropboxUploadPath = "Public/ShareX/%y/%mo";
         public bool DropboxAutoCreateShareableLink = false;
-        public bool DropboxShortURL = true;
+        public DropboxURLType DropboxURLType = DropboxURLType.Default;
 
         // Google Drive
 
         public OAuth2Info GoogleDriveOAuth2Info = null;
+        public bool GoogleDriveIsPublic = false;
 
         // RapidShare
 
@@ -136,13 +141,13 @@ namespace UploadersLib
 
         // Minus
 
+        public OAuth2Info MinusOAuth2Info = null;
         public MinusOptions MinusConfig = new MinusOptions();
 
         // Box
 
-        public string BoxTicket = string.Empty;
-        public string BoxAuthToken = string.Empty;
-        public string BoxFolderID = "0";
+        public OAuth2Info BoxOAuth2Info = null;
+        public BoxFileEntry BoxSelectedFolder = Box.RootFolder;
         public bool BoxShare = true;
 
         // Ge.tt
@@ -189,9 +194,16 @@ namespace UploadersLib
 
         // Mega
 
-        public bool MegaAnonymousLogin = true;
         public MegaApiClient.AuthInfos MegaAuthInfos = null;
         public string MegaParentNodeId = null;
+
+        // Amazon S3
+
+        public AmazonS3Settings AmazonS3Settings = new AmazonS3Settings()
+        {
+            ObjectPrefix = "ShareX/%y/%mo",
+            UseReducedRedundancyStorage = true
+        };
 
         #endregion File uploaders
 
@@ -323,7 +335,7 @@ namespace UploadersLib
                 case FileDestination.Minus:
                     return MinusConfig != null && MinusConfig.MinusUser != null;
                 case FileDestination.Box:
-                    return !string.IsNullOrEmpty(BoxAuthToken);
+                    return OAuth2Info.CheckOAuth(BoxOAuth2Info);
                 case FileDestination.Ge_tt:
                     return Ge_ttLogin != null && !string.IsNullOrEmpty(Ge_ttLogin.AccessToken);
                 case FileDestination.Localhostr:
@@ -339,7 +351,10 @@ namespace UploadersLib
                 case FileDestination.Jira:
                     return OAuthInfo.CheckOAuth(JiraOAuthInfo);
                 case FileDestination.Mega:
-                    return MegaAnonymousLogin || (MegaAuthInfos != null && MegaAuthInfos.Email != null && MegaAuthInfos.Hash != null && MegaAuthInfos.PasswordAesKey != null);
+                    return MegaAuthInfos != null && MegaAuthInfos.Email != null && MegaAuthInfos.Hash != null && MegaAuthInfos.PasswordAesKey != null;
+                case FileDestination.Pushbullet:
+                    return PushbulletSettings != null && !string.IsNullOrEmpty(PushbulletSettings.UserAPIKey) && PushbulletSettings.DeviceList != null &&
+                        PushbulletSettings.DeviceList.IsValidIndex(PushbulletSettings.SelectedDevice);
                 default:
                     return true;
             }

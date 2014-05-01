@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using ShareX.Properties;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -120,6 +119,11 @@ namespace ShareX
             if (IsItemSelected && SelectedItem.IsFileExist) Helpers.LoadBrowserAsync(SelectedItem.Info.FilePath);
         }
 
+        public void OpenThumbnailFile()
+        {
+            if (IsItemSelected && SelectedItem.IsThumbnailFileExist) Helpers.LoadBrowserAsync(SelectedItem.Info.ThumbnailFilePath);
+        }
+
         public void OpenFolder()
         {
             if (IsItemSelected && SelectedItem.IsFileExist) Helpers.OpenFolderWithFile(SelectedItem.Info.FilePath);
@@ -181,6 +185,16 @@ namespace ShareX
         public void CopyText()
         {
             if (IsItemSelected && SelectedItem.IsTextFile) ClipboardHelpers.CopyTextFromFile(SelectedItem.Info.FilePath);
+        }
+
+        public void CopyThumbnailFile()
+        {
+            if (IsItemSelected && SelectedItem.IsThumbnailFileExist) ClipboardHelpers.CopyFile(SelectedItem.Info.ThumbnailFilePath);
+        }
+
+        public void CopyThumbnailImage()
+        {
+            if (IsItemSelected && SelectedItem.IsThumbnailFileExist) ClipboardHelpers.CopyImageFromFile(SelectedItem.Info.ThumbnailFilePath);
         }
 
         public void CopyHTMLLink()
@@ -263,7 +277,7 @@ namespace ShareX
                 if (!string.IsNullOrEmpty(errors))
                 {
                     using (ErrorForm form = new ErrorForm(Application.ProductName, "Upload errors", errors, DebugHelper.Logger,
-                        Program.LogFilePath, Links.URL_ISSUES))
+                        Program.LogsFilePath, Links.URL_ISSUES))
                     {
                         form.ShowDialog();
                     }

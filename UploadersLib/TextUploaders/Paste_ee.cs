@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using System.Collections.Generic;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.TextUploaders
 {
@@ -60,7 +59,7 @@ namespace UploadersLib.TextUploaders
                 arguments.Add("format", "simple");
                 arguments.Add("return", "link");
 
-                ur.Response = SendPostRequest("http://paste.ee/api", arguments);
+                ur.Response = SendRequest(HttpMethod.POST, "http://paste.ee/api", arguments);
 
                 if (!string.IsNullOrEmpty(ur.Response) && ur.Response.StartsWith("error"))
                 {

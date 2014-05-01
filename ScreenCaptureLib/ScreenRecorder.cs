@@ -136,10 +136,12 @@ namespace ScreenCaptureLib
                 IsRecording = true;
                 stopRequest = false;
 
-                for (int i = 0; (frameCount == 0 && !stopRequest) || i < frameCount; i++)
+                for (int i = 0; !stopRequest && (frameCount == 0 || i < frameCount); i++)
                 {
                     Stopwatch timer = Stopwatch.StartNew();
+
                     Image img = Screenshot.CaptureRectangle(CaptureRectangle);
+                    //DebugHelper.WriteLine("Screen capture: " + (int)timer.ElapsedMilliseconds);
 
                     if (OutputType == ScreenRecordOutput.AVI || OutputType == ScreenRecordOutput.AVICommandLine)
                     {
@@ -150,7 +152,7 @@ namespace ScreenCaptureLib
                         hdCache.AddImageAsync(img);
                     }
 
-                    if ((frameCount == 0 && !stopRequest) || (i + 1 < frameCount))
+                    if (!stopRequest && (frameCount == 0 || i + 1 < frameCount))
                     {
                         int sleepTime = delay - (int)timer.ElapsedMilliseconds;
 
@@ -158,9 +160,9 @@ namespace ScreenCaptureLib
                         {
                             Thread.Sleep(sleepTime);
                         }
-                        else
+                        else if (sleepTime < 0)
                         {
-                            //Debug.WriteLine("FPS drop: " + sleepTime);
+                            //DebugHelper.WriteLine("FPS drop: " + -sleepTime);
                         }
                     }
                 }
@@ -209,24 +211,12 @@ namespace ScreenCaptureLib
             }
         }
 
-        public void EncodeUsingCommandLine(string output, string encoderPath, string encoderArguments)
+        public void EncodeUsingCommandLine(VideoEncoder encoder, string targetFilePath)
         {
-            if (!string.IsNullOrEmpty(CachePath) && File.Exists(CachePath) && !string.IsNullOrEmpty(encoderPath) && File.Exists(encoderPath))
+            if (!string.IsNullOrEmpty(CachePath) && File.Exists(CachePath))
             {
                 OnEncodingProgressChanged(-1);
-                Helpers.CreateDirectoryIfNotExist(output);
-
-                using (Process process = new Process())
-                {
-                    ProcessStartInfo psi = new ProcessStartInfo(encoderPath);
-                    encoderArguments = encoderArguments.Replace("%input", "\"" + CachePath + "\"").Replace("%output", "\"" + output + "\"");
-                    psi.Arguments = encoderArguments;
-                    psi.WindowStyle = ProcessWindowStyle.Hidden;
-                    process.StartInfo = psi;
-                    process.Start();
-                    process.WaitForExit();
-                }
-
+                encoder.Encode(CachePath, targetFilePath);
                 OnEncodingProgressChanged(100);
             }
         }
