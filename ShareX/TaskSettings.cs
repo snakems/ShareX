@@ -32,6 +32,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Design;
 using UploadersLib;
 
 namespace ShareX
@@ -151,7 +152,9 @@ namespace ShareX
                 if (UseDefaultDestinations)
                 {
                     ImageDestination = defaultTaskSettings.ImageDestination;
+                    ImageFileDestination = defaultTaskSettings.ImageFileDestination;
                     TextDestination = defaultTaskSettings.TextDestination;
+                    TextFileDestination = defaultTaskSettings.TextFileDestination;
                     FileDestination = defaultTaskSettings.FileDestination;
                     URLShortenerDestination = defaultTaskSettings.URLShortenerDestination;
                     SocialNetworkingServiceDestination = defaultTaskSettings.SocialNetworkingServiceDestination;
@@ -193,6 +196,17 @@ namespace ShareX
                 }
             }
         }
+
+        public string CaptureFolder
+        {
+            get
+            {
+                if (!string.IsNullOrEmpty(AdvancedSettings.CapturePath))
+                    return AdvancedSettings.CapturePath;
+
+                return Program.ScreenshotsPath;
+            }
+        }
     }
 
     public class TaskSettingsGeneral
@@ -207,15 +221,16 @@ namespace ShareX
 
     public class TaskSettingsImage
     {
-        #region Image / Quality
+        #region Image / General
 
         public EImageFormat ImageFormat = EImageFormat.PNG;
         public int ImageJPEGQuality = 90;
         public GIFQuality ImageGIFQuality = GIFQuality.Default;
         public int ImageSizeLimit = 1024;
         public EImageFormat ImageFormat2 = EImageFormat.JPEG;
+        public FileExistAction FileExistAction = FileExistAction.Ask;
 
-        #endregion Image / Quality
+        #endregion Image / General
 
         #region Image / Effects
 
@@ -228,6 +243,15 @@ namespace ShareX
         public WatermarkConfig WatermarkConfig = new WatermarkConfig();
 
         #endregion Image / Effects
+
+        #region Image / Thumbnail
+
+        public int ThumbnailWidth = 200;
+        public int ThumbnailHeight = 0;
+        public string ThumbnailName = "-thumbnail";
+        public bool ThumbnailCheckSize = false;
+
+        #endregion Image / Thumbnail
     }
 
     public class TaskSettingsCapture
@@ -259,9 +283,7 @@ namespace ShareX
         public float ScreenRecordDuration = 3f;
         public float ScreenRecordStartDelay = 0.1f;
 
-        public string ScreenRecordCommandLinePath = "x264.exe";
-        public string ScreenRecordCommandLineArgs = "--output %output %input";
-        public string ScreenRecordCommandLineOutputExtension = "mp4";
+        public int VideoEncoderSelected = 0;
 
         #endregion Capture / Screen recorder
     }
@@ -278,7 +300,8 @@ namespace ShareX
 
         #region Upload / Clipboard upload
 
-        public bool ClipboardUploadAutoDetectURL = true;
+        public bool ClipboardUploadAutoDetectURL = false;
+        public bool ClipboardUploadAutoIndexFolder = false;
 
         #endregion Upload / Clipboard upload
     }
@@ -288,7 +311,7 @@ namespace ShareX
         [Category("General"), DefaultValue(false), Description("Allow after capture tasks for image files by treating them as images when files are handled during file upload, clipboard upload, drag & drop, watch folder and other tasks.")]
         public bool ProcessImagesDuringFileUpload { get; set; }
 
-        [Category("General"), DefaultValue(false), Description("Use after capture tasks for clipboard image upload.")]
+        [Category("General"), DefaultValue(true), Description("Use after capture tasks for clipboard image upload.")]
         public bool ProcessImagesDuringClipboardUpload { get; set; }
 
         [Category("Image"), DefaultValue(256), Description("Preferred thumbnail width. 0 means aspect ratio will be used to adjust width according to height")]
@@ -296,6 +319,10 @@ namespace ShareX
 
         [Category("Image"), DefaultValue(0), Description("Preferred thumbnail height. 0 means aspect ratio will be used to adjust height according to width.")]
         public int ThumbnailPreferredHeight { get; set; }
+
+        [Category("Paths"), Description("Custom capture path takes precedence over path configured in Application configuration.")]
+        [Editor(typeof(DirectoryNameEditor), typeof(UITypeEditor))]
+        public string CapturePath { get; set; }
 
         [Category("After upload"), DefaultValue(""),
         Description("Clipboard content format after uploading. Supported variables: $result, $url, $shorturl, $thumbnailurl, $deletionurl, $filepath, $filename, $filenamenoext, $folderpath, $foldername, $uploadtime and other variables such as %y-%mo-%d etc.")]
@@ -324,6 +351,9 @@ namespace ShareX
 
         [Category("After upload / Notifications"), DefaultValue(ContentAlignment.BottomRight), Description("Specify where should toast notification window appear on the screen.")]
         public ContentAlignment ToastWindowPlacement { get; set; }
+
+        [Category("After upload / Notifications"), DefaultValue(ToastClickAction.OpenUrl), Description("Specify action after toast notification window is left clicked.")]
+        public ToastClickAction ToastWindowClickAction { get; set; }
 
         private Size toastWindowSize;
 

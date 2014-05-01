@@ -23,12 +23,9 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
-using System.Web;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.ImageUploaders
 {
@@ -56,7 +53,7 @@ namespace UploadersLib.ImageUploaders
                 args.Add("user", Config.Username);
                 args.Add("password", Config.Password);
 
-                string response = SendPostRequest(URLAccessToken, args);
+                string response = SendRequest(HttpMethod.POST, URLAccessToken, args);
 
                 if (!string.IsNullOrEmpty(response))
                 {

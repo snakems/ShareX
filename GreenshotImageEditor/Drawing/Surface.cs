@@ -202,7 +202,6 @@ namespace Greenshot.Drawing
         /// This saves a lot of "create new bitmap" commands
         /// Should not be serialized, as it's generated.
         /// The actual bitmap is in the paintbox...
-        /// TODO: Check if this buffer is still needed!
         /// </summary>
         [NonSerialized]
         private Bitmap buffer = null;
@@ -349,7 +348,10 @@ namespace Greenshot.Drawing
         /// </summary>
         public DrawingModes DrawingMode
         {
-            get { return drawingMode; }
+            get
+            {
+                return drawingMode;
+            }
             set
             {
                 drawingMode = value;

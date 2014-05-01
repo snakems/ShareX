@@ -29,6 +29,7 @@ using ShareX.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.Threading;
 using System.Threading.Tasks;
@@ -83,6 +84,9 @@ namespace ShareX
                 case HotkeyType.FileUpload:
                     UploadManager.UploadFile(taskSettings);
                     break;
+                case HotkeyType.DragDropUpload:
+                    OpenDropWindow();
+                    break;
                 case HotkeyType.PrintScreen:
                     CaptureScreenshot(CaptureType.Screen, taskSettings, false);
                     break;
@@ -136,6 +140,9 @@ namespace ShareX
                     break;
                 case HotkeyType.ImageEffects:
                     OpenImageEffects();
+                    break;
+                case HotkeyType.Ruler:
+                    OpenRuler();
                     break;
             }
         }
@@ -275,6 +282,15 @@ namespace ShareX
             {
                 Image img;
                 string activeWindowTitle = NativeMethods.GetForegroundWindowText();
+                string activeProcessName = null;
+
+                using (Process process = NativeMethods.GetForegroundWindowProcess())
+                {
+                    if (process != null)
+                    {
+                        activeProcessName = process.ProcessName;
+                    }
+                }
 
                 if (taskSettings.CaptureSettings.CaptureTransparent && !taskSettings.CaptureSettings.CaptureClientArea)
                 {
@@ -285,7 +301,11 @@ namespace ShareX
                     img = Screenshot.CaptureActiveWindow();
                 }
 
-                img.Tag = new ImageTag { ActiveWindowTitle = activeWindowTitle };
+                img.Tag = new ImageTag
+                {
+                    ActiveWindowTitle = activeWindowTitle,
+                    ActiveProcessName = activeProcessName
+                };
 
                 return img;
             }, CaptureType.ActiveWindow, taskSettings, autoHideForm);
@@ -408,13 +428,23 @@ namespace ShareX
 
         private void CaptureLastRegion(TaskSettings taskSettings, bool autoHideForm = true)
         {
-            if (Surface.LastRegionFillPath != null)
+            if (!taskSettings.AdvancedSettings.UseLightRectangleCrop && Surface.LastRegionFillPath != null)
             {
                 DoCapture(() =>
                 {
                     using (Image screenshot = Screenshot.CaptureFullscreen())
                     {
                         return ShapeCaptureHelpers.GetRegionImage(screenshot, Surface.LastRegionFillPath, Surface.LastRegionDrawPath, taskSettings.CaptureSettings.SurfaceOptions);
+                    }
+                }, CaptureType.LastRegion, taskSettings, autoHideForm);
+            }
+            else if (taskSettings.AdvancedSettings.UseLightRectangleCrop && !RectangleLight.LastSelectionRectangle0Based.IsEmpty)
+            {
+                DoCapture(() =>
+                {
+                    using (Image screenshot = Screenshot.CaptureFullscreen())
+                    {
+                        return ImageHelpers.CropImage(screenshot, RectangleLight.LastSelectionRectangle0Based);
                     }
                 }, CaptureType.LastRegion, taskSettings, autoHideForm);
             }

@@ -52,8 +52,6 @@ namespace ShareX
                 img = ImageHelpers.FillBackground(img, Color.White);
             }
 
-            ImageHelpers.AddMetadata(img, PropertyTagSoftwareUsed, Program.ApplicationName);
-
             imageData.ImageStream = SaveImage(img, taskSettings.ImageSettings.ImageFormat, taskSettings);
 
             int sizeLimit = taskSettings.ImageSettings.ImageSizeLimit * 1000;
@@ -70,6 +68,43 @@ namespace ShareX
             }
 
             return imageData;
+        }
+
+        public static string CreateThumbnail(Image img, string folder, string filename, TaskSettings taskSettings)
+        {
+            if ((taskSettings.ImageSettings.ThumbnailWidth > 0 || taskSettings.ImageSettings.ThumbnailHeight > 0) && (!taskSettings.ImageSettings.ThumbnailCheckSize ||
+                (img.Width > taskSettings.ImageSettings.ThumbnailWidth && img.Height > taskSettings.ImageSettings.ThumbnailHeight)))
+            {
+                string thumbnailFileName = Path.GetFileNameWithoutExtension(filename) + taskSettings.ImageSettings.ThumbnailName + ".jpg";
+                string thumbnailFilePath = TaskHelpers.CheckFilePath(folder, thumbnailFileName, taskSettings);
+
+                if (!string.IsNullOrEmpty(thumbnailFilePath))
+                {
+                    Image thumbImage = null;
+
+                    try
+                    {
+                        thumbImage = (Image)img.Clone();
+                        thumbImage = new Resize
+                        {
+                            Width = taskSettings.ImageSettings.ThumbnailWidth,
+                            Height = taskSettings.ImageSettings.ThumbnailHeight
+                        }.Apply(thumbImage);
+                        thumbImage = ImageHelpers.FillBackground(thumbImage, Color.White);
+                        thumbImage.SaveJPG(thumbnailFilePath, 90);
+                        return thumbnailFilePath;
+                    }
+                    finally
+                    {
+                        if (thumbImage != null)
+                        {
+                            thumbImage.Dispose();
+                        }
+                    }
+                }
+            }
+
+            return null;
         }
 
         public static MemoryStream SaveImage(Image img, EImageFormat imageFormat, TaskSettings taskSettings)
@@ -136,6 +171,7 @@ namespace ShareX
             if (imageTag != null)
             {
                 nameParser.WindowText = imageTag.ActiveWindowTitle;
+                nameParser.ProcessName = imageTag.ActiveProcessName;
             }
 
             if (string.IsNullOrEmpty(nameParser.WindowText))
@@ -168,8 +204,15 @@ namespace ShareX
                             }
                             break;
                         case PopUpNotificationType.ToastNotification:
+                            NotificationFormConfig toastConfig = new NotificationFormConfig()
+                            {
+                                Action = taskSettings.AdvancedSettings.ToastWindowClickAction,
+                                FilePath = filePath,
+                                Text = "ShareX - Task completed\r\n" + notificationText,
+                                URL = notificationText
+                            };
                             NotificationForm.Show((int)(taskSettings.AdvancedSettings.ToastWindowDuration * 1000), taskSettings.AdvancedSettings.ToastWindowPlacement,
-                   taskSettings.AdvancedSettings.ToastWindowSize, filePath, "ShareX - Task completed\r\n" + notificationText, notificationText);
+                   taskSettings.AdvancedSettings.ToastWindowSize, toastConfig);
                             break;
                     }
                 }
@@ -352,6 +395,33 @@ namespace ShareX
             }
 
             return updateChecker;
+        }
+
+        public static string CheckFilePath(string folder, string filename, TaskSettings taskSettings)
+        {
+            string filepath = Path.Combine(folder, filename);
+
+            if (File.Exists(filepath))
+            {
+                switch (taskSettings.ImageSettings.FileExistAction)
+                {
+                    case FileExistAction.Ask:
+                        using (FileExistForm form = new FileExistForm(filepath))
+                        {
+                            form.ShowDialog();
+                            filepath = form.Filepath;
+                        }
+                        break;
+                    case FileExistAction.UniqueName:
+                        filepath = Helpers.GetUniqueFilePath(filepath);
+                        break;
+                    case FileExistAction.Cancel:
+                        filepath = string.Empty;
+                        break;
+                }
+            }
+
+            return filepath;
         }
     }
 

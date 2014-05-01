@@ -26,11 +26,28 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.ComponentModel;
 using System.IO;
 using UploadersLib.HelperClasses;
 
 namespace UploadersLib.ImageUploaders
 {
+    public enum ImgurThumbnailType
+    {
+        [Description("Small Square")]
+        Small_Square,
+        [Description("Big Square")]
+        Big_Square,
+        [Description("Small Thumbnail")]
+        Small_Thumbnail,
+        [Description("Medium Thumbnail")]
+        Medium_Thumbnail,
+        [Description("Large Thumbnail")]
+        Large_Thumbnail,
+        [Description("Huge Thumbnail")]
+        Huge_Thumbnail
+    }
+
     public sealed class Imgur_v3 : ImageUploader, IOAuth2
     {
         public AccountType UploadMethod { get; set; }
@@ -60,7 +77,7 @@ namespace UploadersLib.ImageUploaders
             args.Add("grant_type", "pin");
             args.Add("pin", pin);
 
-            string response = SendPostRequest("https://api.imgur.com/oauth2/token", args);
+            string response = SendRequest(HttpMethod.POST, "https://api.imgur.com/oauth2/token", args);
 
             if (!string.IsNullOrEmpty(response))
             {
@@ -87,7 +104,7 @@ namespace UploadersLib.ImageUploaders
                 args.Add("client_secret", AuthInfo.Client_Secret);
                 args.Add("grant_type", "refresh_token");
 
-                string response = SendPostRequest("https://api.imgur.com/oauth2/token", args);
+                string response = SendRequest(HttpMethod.POST, "https://api.imgur.com/oauth2/token", args);
 
                 if (!string.IsNullOrEmpty(response))
                 {
@@ -117,7 +134,7 @@ namespace UploadersLib.ImageUploaders
             }
             else
             {
-                Errors.Add("Login is required.");
+                Errors.Add("Imgur login is required.");
                 return false;
             }
 
@@ -130,7 +147,7 @@ namespace UploadersLib.ImageUploaders
             {
                 NameValueCollection headers = new NameValueCollection();
                 headers.Add("Authorization", "Bearer " + AuthInfo.Token.access_token);
-                string response = SendGetRequest("https://api.imgur.com/3/account/me/albums", null, ResponseType.Text, null, headers);
+                string response = SendRequest(HttpMethod.GET, "https://api.imgur.com/3/account/me/albums", null, ResponseType.Text, headers, null);
 
                 if (!string.IsNullOrEmpty(response))
                 {
@@ -190,15 +207,28 @@ namespace UploadersLib.ImageUploaders
                             result.URL = upload.data.link;
 
                             int index = result.URL.LastIndexOf('.');
-                            string thumbnail;
+                            string thumbnail = string.Empty;
 
-                            if (ThumbnailType == ImgurThumbnailType.Large_Thumbnail)
+                            switch (ThumbnailType)
                             {
-                                thumbnail = "l";
-                            }
-                            else
-                            {
-                                thumbnail = "s";
+                                case ImgurThumbnailType.Small_Square:
+                                    thumbnail = "s";
+                                    break;
+                                case ImgurThumbnailType.Big_Square:
+                                    thumbnail = "b";
+                                    break;
+                                case ImgurThumbnailType.Small_Thumbnail:
+                                    thumbnail = "t";
+                                    break;
+                                case ImgurThumbnailType.Medium_Thumbnail:
+                                    thumbnail = "m";
+                                    break;
+                                case ImgurThumbnailType.Large_Thumbnail:
+                                    thumbnail = "l";
+                                    break;
+                                case ImgurThumbnailType.Huge_Thumbnail:
+                                    thumbnail = "h";
+                                    break;
                             }
 
                             result.ThumbnailURL = result.URL.Remove(index) + thumbnail + result.URL.Substring(index);

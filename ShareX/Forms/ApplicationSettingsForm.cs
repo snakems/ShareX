@@ -25,11 +25,10 @@
 
 using HelpersLib;
 using ScreenCaptureLib;
-using ShareX.Properties;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 using UploadersLib;
 
@@ -87,7 +86,6 @@ namespace ShareX
             UpdateProxyControls();
 
             // Upload
-            cbIfUploadFailRetryOnce.Checked = Program.Settings.IfUploadFailRetryOnce;
             nudUploadLimit.Value = Program.Settings.UploadLimit;
 
             for (int i = 0; i < MaxBufferSizePower; i++)
@@ -103,8 +101,33 @@ namespace ShareX
                 AddClipboardFormat(cf);
             }
 
+            nudRetryUpload.Value = Program.Settings.MaxUploadFailRetry;
+            chkUseSecondaryUploaders.Checked = Program.Settings.UseSecondaryUploaders;
+            tlpBackupDestinations.Enabled = Program.Settings.UseSecondaryUploaders;
+
+            Program.Settings.SecondaryImageUploaders.AddRange(((ImageDestination[])Enum.GetValues(typeof(ImageDestination))).Where(n => (Program.Settings.SecondaryImageUploaders.All(e => e != n))));
+            Program.Settings.SecondaryTextUploaders.AddRange(((TextDestination[])Enum.GetValues(typeof(TextDestination))).Where(n => (Program.Settings.SecondaryTextUploaders.All(e => e != n))));
+            Program.Settings.SecondaryFileUploaders.AddRange(((FileDestination[])Enum.GetValues(typeof(FileDestination))).Where(n => (Program.Settings.SecondaryFileUploaders.All(e => e != n))));
+
+            Program.Settings.SecondaryImageUploaders.Where(n => (((ImageDestination[])Enum.GetValues(typeof(ImageDestination))).All(e => e != n))).ForEach(x => Program.Settings.SecondaryImageUploaders.Remove(x));
+            Program.Settings.SecondaryTextUploaders.Where(n => (((TextDestination[])Enum.GetValues(typeof(TextDestination))).All(e => e != n))).ForEach(x => Program.Settings.SecondaryTextUploaders.Remove(x));
+            Program.Settings.SecondaryFileUploaders.Where(n => (((FileDestination[])Enum.GetValues(typeof(FileDestination))).All(e => e != n))).ForEach(x => Program.Settings.SecondaryFileUploaders.Remove(x));
+
+            Program.Settings.SecondaryImageUploaders.ForEach<ImageDestination>(x => lvSecondaryImageUploaders.Items.Add(new ListViewItem(x.GetDescription()) { Tag = x }));
+            Program.Settings.SecondaryTextUploaders.ForEach<TextDestination>(x => lvSecondaryTextUploaders.Items.Add(new ListViewItem(x.GetDescription()) { Tag = x }));
+            Program.Settings.SecondaryFileUploaders.ForEach<FileDestination>(x => lvSecondaryFileUploaders.Items.Add(new ListViewItem(x.GetDescription()) { Tag = x }));
+
             // Print
             cbDontShowPrintSettingDialog.Checked = Program.Settings.DontShowPrintSettingsDialog;
+            cbPrintDontShowWindowsDialog.Checked = !Program.Settings.PrintSettings.ShowPrintDialog;
+
+            // Profiles
+            if (Program.Settings.VideoEncoders.Count == 0)
+            {
+                Program.Settings.VideoEncoders.Add(new VideoEncoder() { Name = "x264 encoder to MP4", Path = "x264.exe", Args = "--output %output %input", OutputExtension = "mp4" });
+                Program.Settings.VideoEncoders.Add(new VideoEncoder() { Name = "ffmpeg encoder to WebM", Path = "ffmpeg.exe", Args = "-i %input -c:v libvpx -crf 12 -b:v 500K %output", OutputExtension = "webm" });
+            }
+            Program.Settings.VideoEncoders.ForEach(x => AddVideoEncoder(x));
 
             // Advanced
             pgSettings.SelectedObject = Program.Settings;
@@ -157,6 +180,12 @@ namespace ShareX
             }
 
             lblPreviewPersonalFolderPath.Text = personalPath;
+        }
+
+        public void SelectProfilesTab()
+        {
+            tcSettings.SelectedTab = tpProfiles;
+            tcProfiles.SelectedTab = tpEncodersCLI;
         }
 
         #region General
@@ -323,11 +352,6 @@ namespace ShareX
 
         #region Upload
 
-        private void cbIfUploadFailRetryOnce_CheckedChanged(object sender, EventArgs e)
-        {
-            Program.Settings.IfUploadFailRetryOnce = cbIfUploadFailRetryOnce.Checked;
-        }
-
         private void nudUploadLimit_ValueChanged(object sender, EventArgs e)
         {
             Program.Settings.UploadLimit = (int)nudUploadLimit.Value;
@@ -401,6 +425,24 @@ namespace ShareX
             }
         }
 
+        private void chkUseSecondaryUploaders_CheckedChanged(object sender, EventArgs e)
+        {
+            Program.Settings.UseSecondaryUploaders = chkUseSecondaryUploaders.Checked;
+            tlpBackupDestinations.Enabled = Program.Settings.UseSecondaryUploaders;
+        }
+
+        private void nudRetryUpload_ValueChanged(object sender, EventArgs e)
+        {
+            Program.Settings.MaxUploadFailRetry = (int)nudRetryUpload.Value;
+        }
+
+        private void lvSecondaryUploaders_MouseUp(object sender, MouseEventArgs e)
+        {
+            Program.Settings.SecondaryImageUploaders = lvSecondaryImageUploaders.Items.Cast<ListViewItem>().Select(x => (ImageDestination)x.Tag).ToList();
+            Program.Settings.SecondaryTextUploaders = lvSecondaryTextUploaders.Items.Cast<ListViewItem>().Select(x => (TextDestination)x.Tag).ToList();
+            Program.Settings.SecondaryFileUploaders = lvSecondaryFileUploaders.Items.Cast<ListViewItem>().Select(x => (FileDestination)x.Tag).ToList();
+        }
+
         #endregion Upload
 
         #region Print
@@ -419,6 +461,82 @@ namespace ShareX
             }
         }
 
+        private void cbPrintDontShowWindowsDialog_CheckedChanged(object sender, EventArgs e)
+        {
+            Program.Settings.PrintSettings.ShowPrintDialog = !cbPrintDontShowWindowsDialog.Checked;
+        }
+
         #endregion Print
+
+        #region Profiles
+
+        private void btnEncodersAdd_Click(object sender, EventArgs e)
+        {
+            using (EncoderProgramForm form = new EncoderProgramForm())
+            {
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    VideoEncoder encoder = form.encoder;
+                    Program.Settings.VideoEncoders.Add(encoder);
+                    AddVideoEncoder(encoder);
+                }
+            }
+        }
+
+        private void AddVideoEncoder(VideoEncoder encoder)
+        {
+            ListViewItem lvi = new ListViewItem(encoder.Name ?? "");
+            lvi.Tag = encoder;
+            lvi.SubItems.Add(encoder.Path ?? "");
+            lvi.SubItems.Add(encoder.Args ?? "");
+            lvi.SubItems.Add(encoder.OutputExtension ?? "");
+            lvEncoders.Items.Add(lvi);
+        }
+
+        private void lvEncoders_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            btnEncodersEdit_Click(sender, e);
+        }
+
+        private void btnEncodersEdit_Click(object sender, EventArgs e)
+        {
+            if (lvEncoders.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvEncoders.SelectedItems[0];
+                VideoEncoder encoder = lvi.Tag as VideoEncoder;
+
+                using (EncoderProgramForm form = new EncoderProgramForm(encoder))
+                {
+                    if (form.ShowDialog() == DialogResult.OK)
+                    {
+                        lvi.Text = encoder.Name ?? "";
+                        lvi.SubItems[1].Text = encoder.Path ?? "";
+                        lvi.SubItems[2].Text = encoder.Args ?? "";
+                        lvi.SubItems[3].Text = encoder.OutputExtension ?? "";
+                    }
+                }
+            }
+        }
+
+        private void btnEncoderDuplicate_Click(object sender, EventArgs e)
+        {
+            var encoders = lvEncoders.SelectedItems.Cast<ListViewItem>().Select(x => ((VideoEncoder)x.Tag).Copy()).ToList();
+            encoders.ForEach(x => AddVideoEncoder(x));
+            encoders.ForEach(x => Program.Settings.VideoEncoders.Add(x));
+        }
+
+        private void btnEncodersRemove_Click(object sender, EventArgs e)
+        {
+            if (lvEncoders.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvEncoders.SelectedItems[0];
+                VideoEncoder encoder = lvi.Tag as VideoEncoder;
+
+                Program.Settings.VideoEncoders.Remove(encoder);
+                lvEncoders.Items.Remove(lvi);
+            }
+        }
+
+        #endregion Profiles
     }
 }

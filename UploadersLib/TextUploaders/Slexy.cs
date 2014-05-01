@@ -25,7 +25,6 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.TextUploaders
 {
@@ -64,7 +63,7 @@ namespace UploadersLib.TextUploaders
                 arguments.Add("tabbing", "true");
                 arguments.Add("tabtype", "real");
 
-                ur.URL = SendPostRequest(APIURL, arguments, ResponseType.RedirectionURL);
+                ur.URL = SendRequest(HttpMethod.POST, APIURL, arguments, ResponseType.RedirectionURL);
             }
 
             return ur;

@@ -19,8 +19,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using System.Runtime.InteropServices;
-using System.Text;
 using Greenshot.IniFile;
 using Greenshot.Plugin;
 using GreenshotPlugin.Controls;
@@ -29,6 +27,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Encoder = System.Drawing.Imaging.Encoder;
@@ -510,7 +510,7 @@ namespace GreenshotPlugin.Core
                             QualityDialog qualityDialog = new QualityDialog(outputSettings);
                             qualityDialog.ShowDialog();
                         }
-                        // TODO: For now we always overwrite, should be changed
+
                         Save(surface, fileNameWithExtension, true, outputSettings, conf.OutputFileCopyPathToClipboard);
                         returnValue = fileNameWithExtension;
                         IniConfig.Save();

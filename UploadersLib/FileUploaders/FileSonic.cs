@@ -27,7 +27,6 @@ using HelpersLib;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml.Linq;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.FileUploaders
 {
@@ -76,7 +75,7 @@ namespace UploadersLib.FileUploaders
             args.Add("u", Username);
             args.Add("p", Password);
 
-            string response = SendGetRequest(APIURL, args);
+            string response = SendRequest(HttpMethod.GET, APIURL, args);
 
             XDocument xd = XDocument.Parse(response);
             return xd.GetValue("FSApi_Upload/getUploadUrl/response/url");

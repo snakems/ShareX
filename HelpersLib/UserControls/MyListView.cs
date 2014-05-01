@@ -23,8 +23,10 @@
 
 #endregion License Information (GPL v3)
 
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace HelpersLib
@@ -39,6 +41,10 @@ namespace HelpersLib
 
         [DefaultValue(-1)]
         public int AutoFillColumnIndex { get; set; }
+
+        private int lineIndex = -1;
+        private int lastLineIndex = -1;
+        private ListViewItem dragOverItem = null;
 
         public MyListView()
         {
@@ -105,6 +111,89 @@ namespace HelpersLib
             }
 
             base.OnKeyDown(e);
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+
+            if (m.Msg == WM_PAINT && lineIndex >= 0)
+            {
+                Rectangle rc = Items[lineIndex < Items.Count ? lineIndex : lineIndex - 1].GetBounds(ItemBoundsPortion.Entire);
+                DrawInsertionLine(rc.Left, rc.Right, lineIndex < Items.Count ? rc.Top : rc.Bottom);
+            }
+        }
+
+        protected override void OnItemDrag(ItemDragEventArgs e)
+        {
+            base.OnItemDrag(e);
+
+            if (AllowDrop && e.Button == MouseButtons.Left)
+            {
+                DoDragDrop(e.Item, DragDropEffects.Move);
+            }
+        }
+
+        protected override void OnDragOver(DragEventArgs drgevent)
+        {
+            base.OnDragOver(drgevent);
+
+            ListViewItem lvi = drgevent.Data.GetData(typeof(ListViewItem)) as ListViewItem;
+
+            if (lvi != null && lvi.ListView == this)
+            {
+                drgevent.Effect = DragDropEffects.Move;
+
+                Point cp = PointToClient(new Point(drgevent.X, drgevent.Y));
+                dragOverItem = GetItemAt(cp.X, cp.Y);
+                lineIndex = dragOverItem != null ? dragOverItem.Index : Items.Count;
+
+                if (lineIndex != lastLineIndex)
+                {
+                    Invalidate();
+                }
+
+                lastLineIndex = lineIndex;
+            }
+        }
+
+        protected override void OnDragDrop(DragEventArgs drgevent)
+        {
+            base.OnDragDrop(drgevent);
+
+            ListViewItem lvi = drgevent.Data.GetData(typeof(ListViewItem)) as ListViewItem;
+
+            if (lvi != null && lvi.ListView == this)
+            {
+                ListViewItem insertItem = (ListViewItem)lvi.Clone();
+                Items.Insert(dragOverItem != null ? dragOverItem.Index : Items.Count, insertItem);
+                Items.Remove(lvi);
+            }
+
+            lineIndex = lastLineIndex = -1;
+            Invalidate();
+        }
+
+        protected override void OnDragLeave(EventArgs e)
+        {
+            base.OnDragLeave(e);
+
+            lineIndex = lastLineIndex = -1;
+            Invalidate();
+        }
+
+        private void DrawInsertionLine(int x1, int x2, int y)
+        {
+            using (Graphics g = CreateGraphics())
+            {
+                g.DrawLine(Pens.LightBlue, x1, y, x2 - 1, y);
+
+                Point[] leftTriangle = new Point[3] { new Point(x1, y - 4), new Point(x1 + 7, y), new Point(x1, y + 4) };
+                g.FillPolygon(Brushes.LightBlue, leftTriangle);
+
+                Point[] rightTriangle = new Point[3] { new Point(x2, y - 4), new Point(x2 - 8, y), new Point(x2, y + 4) };
+                g.FillPolygon(Brushes.LightBlue, rightTriangle);
+            }
         }
     }
 }

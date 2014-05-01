@@ -26,7 +26,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.URLShorteners
 {
@@ -55,11 +54,11 @@ namespace UploadersLib.URLShorteners
 
             if (customUploader.RequestType == CustomUploaderRequestType.POST)
             {
-                result.Response = SendPostRequest(customUploader.RequestURL, args, customUploader.ResponseType);
+                result.Response = SendRequest(HttpMethod.POST, customUploader.RequestURL, args, customUploader.ResponseType);
             }
             else if (customUploader.RequestType == CustomUploaderRequestType.GET)
             {
-                result.Response = SendGetRequest(customUploader.RequestURL, args, customUploader.ResponseType);
+                result.Response = SendRequest(HttpMethod.GET, customUploader.RequestURL, args, customUploader.ResponseType);
             }
 
             customUploader.ParseResponse(result, true);

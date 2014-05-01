@@ -26,7 +26,6 @@
 using HelpersLib;
 using ImageEffectsLib;
 using ScreenCaptureLib;
-using ShareX.Properties;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -43,6 +42,8 @@ namespace ShareX
         private ContextMenuStrip cmsNameFormatPattern, cmsNameFormatPatternActiveWindow;
         private ToolStripDropDownItem tsmiImageFileUploaders, tsmiTextFileUploaders;
         private bool loaded;
+
+        private readonly string ConfigureEncoder = "Configure video encoders --->";
 
         public TaskSettingsForm(TaskSettings hotkeySetting, bool isDefault = false)
         {
@@ -121,16 +122,26 @@ namespace ShareX
             cboPopUpNotification.SelectedIndex = (int)TaskSettings.GeneralSettings.PopUpNotification;
             cbHistorySave.Checked = TaskSettings.GeneralSettings.SaveHistory;
 
-            // Image - Quality
+            // Image - General
             cbImageFormat.SelectedIndex = (int)TaskSettings.ImageSettings.ImageFormat;
             nudImageJPEGQuality.Value = TaskSettings.ImageSettings.ImageJPEGQuality;
             cbImageGIFQuality.SelectedIndex = (int)TaskSettings.ImageSettings.ImageGIFQuality;
             nudUseImageFormat2After.Value = TaskSettings.ImageSettings.ImageSizeLimit;
             cbImageFormat2.SelectedIndex = (int)TaskSettings.ImageSettings.ImageFormat2;
+            cbImageFileExist.Items.Clear();
+            cbImageFileExist.Items.AddRange(Helpers.GetEnumDescriptions<FileExistAction>());
+            cbImageFileExist.SelectedIndex = (int)TaskSettings.ImageSettings.FileExistAction;
 
             // Image - Effects
             chkShowImageEffectsWindowAfterCapture.Checked = TaskSettings.ImageSettings.ShowImageEffectsWindowAfterCapture;
             cbImageEffectOnlyRegionCapture.Checked = TaskSettings.ImageSettings.ImageEffectOnlyRegionCapture;
+
+            // Image - Thumbnail
+            nudThumbnailWidth.Value = TaskSettings.ImageSettings.ThumbnailWidth;
+            nudThumbnailHeight.Value = TaskSettings.ImageSettings.ThumbnailHeight;
+            txtThumbnailName.Text = TaskSettings.ImageSettings.ThumbnailName;
+            lblThumbnailNamePreview.Text = "ImageName" + TaskSettings.ImageSettings.ThumbnailName + ".jpg";
+            cbThumbnailIfSmaller.Checked = TaskSettings.ImageSettings.ThumbnailCheckSize;
 
             // Capture
             cbShowCursor.Checked = TaskSettings.CaptureSettings.ShowCursor;
@@ -149,24 +160,17 @@ namespace ShareX
             // Capture / Screen recorder
             cbScreenRecorderOutput.Items.AddRange(Helpers.GetEnumDescriptions<ScreenRecordOutput>());
             cbScreenRecorderOutput.SelectedIndex = (int)TaskSettings.CaptureSettings.ScreenRecordOutput;
+            UpdateVideoEncoders();
+
             nudScreenRecorderFPS.Value = TaskSettings.CaptureSettings.ScreenRecordFPS;
             cbScreenRecorderFixedDuration.Checked = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
             nudScreenRecorderDuration.Enabled = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
             nudScreenRecorderDuration.Value = (decimal)TaskSettings.CaptureSettings.ScreenRecordDuration;
             nudScreenRecorderStartDelay.Value = (decimal)TaskSettings.CaptureSettings.ScreenRecordStartDelay;
 
-            gbCommandLineEncoderSettings.Enabled = TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVICommandLine;
-            txtScreenRecorderCommandLinePath.Text = TaskSettings.CaptureSettings.ScreenRecordCommandLinePath;
-            txtScreenRecorderCommandLineArgs.Text = TaskSettings.CaptureSettings.ScreenRecordCommandLineArgs;
-            txtScreenRecorderCommandLineOutputExtension.Text = TaskSettings.CaptureSettings.ScreenRecordCommandLineOutputExtension;
-
             // Actions
             TaskHelpers.AddDefaultExternalPrograms(TaskSettings);
-
-            foreach (ExternalProgram fileAction in TaskSettings.ExternalPrograms)
-            {
-                AddFileAction(fileAction);
-            }
+            TaskSettings.ExternalPrograms.ForEach(x => AddFileAction(x));
 
             // Watch folders
             cbWatchFolderEnabled.Checked = TaskSettings.WatchFolderEnabled;
@@ -192,6 +196,7 @@ namespace ShareX
 
             // Upload / Clipboard upload
             cbClipboardUploadAutoDetectURL.Checked = TaskSettings.UploadSettings.ClipboardUploadAutoDetectURL;
+            cbClipboardUploadAutoIndexFolder.Checked = TaskSettings.UploadSettings.ClipboardUploadAutoIndexFolder;
 
             // Indexer
             pgIndexerConfig.SelectedObject = TaskSettings.IndexerSettings;
@@ -201,6 +206,20 @@ namespace ShareX
 
             UpdateDefaultSettingVisibility();
             loaded = true;
+        }
+
+        private void UpdateVideoEncoders()
+        {
+            cboEncoder.Items.Clear();
+            if (Program.Settings.VideoEncoders.Count > 0)
+            {
+                Program.Settings.VideoEncoders.ForEach(x => cboEncoder.Items.Add(x));
+                cboEncoder.SelectedIndex = TaskSettings.CaptureSettings.VideoEncoderSelected.BetweenOrDefault(0, Program.Settings.VideoEncoders.Count - 1);
+            }
+            else if (!cboEncoder.Items.Contains(ConfigureEncoder))
+            {
+                cboEncoder.Items.Add(ConfigureEncoder);
+            }
         }
 
         private void UpdateDefaultSettingVisibility()
@@ -512,6 +531,11 @@ namespace ShareX
             TaskSettings.ImageSettings.ImageSizeLimit = (int)nudUseImageFormat2After.Value;
         }
 
+        private void cbImageFileExist_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TaskSettings.ImageSettings.FileExistAction = (FileExistAction)cbImageFileExist.SelectedIndex;
+        }
+
         private void btnWatermarkSettings_Click(object sender, EventArgs e)
         {
             using (WatermarkForm watermarkForm = new WatermarkForm(TaskSettings.ImageSettings.WatermarkConfig) { Icon = Icon })
@@ -539,6 +563,27 @@ namespace ShareX
                     TaskSettings.ImageSettings.ImageEffects = imageEffectsForm.Effects;
                 }
             }
+        }
+
+        private void nudThumbnailWidth_ValueChanged(object sender, EventArgs e)
+        {
+            TaskSettings.ImageSettings.ThumbnailWidth = (int)nudThumbnailWidth.Value;
+        }
+
+        private void nudThumbnailHeight_ValueChanged(object sender, EventArgs e)
+        {
+            TaskSettings.ImageSettings.ThumbnailHeight = (int)nudThumbnailHeight.Value;
+        }
+
+        private void txtThumbnailName_TextChanged(object sender, EventArgs e)
+        {
+            TaskSettings.ImageSettings.ThumbnailName = txtThumbnailName.Text;
+            lblThumbnailNamePreview.Text = "ImageName" + TaskSettings.ImageSettings.ThumbnailName + ".jpg";
+        }
+
+        private void cbThumbnailIfSmaller_CheckedChanged(object sender, EventArgs e)
+        {
+            TaskSettings.ImageSettings.ThumbnailCheckSize = cbThumbnailIfSmaller.Checked;
         }
 
         #endregion Image
@@ -592,12 +637,19 @@ namespace ShareX
             cbCaptureShadow.Enabled = TaskSettings.CaptureSettings.CaptureTransparent;
         }
 
+        #endregion Capture
+
         #region Screen recorder
 
         private void cbScreenRecorderOutput_SelectedIndexChanged(object sender, EventArgs e)
         {
             TaskSettings.CaptureSettings.ScreenRecordOutput = (ScreenRecordOutput)cbScreenRecorderOutput.SelectedIndex;
-            gbCommandLineEncoderSettings.Enabled = TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVICommandLine;
+            btnEncoderConfig.Enabled = cboEncoder.Enabled = TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVICommandLine;
+        }
+
+        private void cboEncoder_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            TaskSettings.CaptureSettings.VideoEncoderSelected = cboEncoder.SelectedIndex;
         }
 
         private void nudScreenRecorderFPS_ValueChanged(object sender, EventArgs e)
@@ -621,29 +673,17 @@ namespace ShareX
             TaskSettings.CaptureSettings.ScreenRecordStartDelay = (float)nudScreenRecorderStartDelay.Value;
         }
 
-        private void txtScreenRecorderCommandLinePath_TextChanged(object sender, EventArgs e)
+        private void btnEncoderConfig_Click(object sender, EventArgs e)
         {
-            TaskSettings.CaptureSettings.ScreenRecordCommandLinePath = txtScreenRecorderCommandLinePath.Text;
-        }
-
-        private void btnScreenRecorderBrowseCommandLinePath_Click(object sender, EventArgs e)
-        {
-            Helpers.BrowseFile("ShareX - Choose encoder path", txtScreenRecorderCommandLinePath, Program.StartupPath);
-        }
-
-        private void txtScreenRecorderCommandLineArgs_TextChanged(object sender, EventArgs e)
-        {
-            TaskSettings.CaptureSettings.ScreenRecordCommandLineArgs = txtScreenRecorderCommandLineArgs.Text;
-        }
-
-        private void txtScreenRecorderCommandLineOutputExtension_TextChanged(object sender, EventArgs e)
-        {
-            TaskSettings.CaptureSettings.ScreenRecordCommandLineOutputExtension = txtScreenRecorderCommandLineOutputExtension.Text;
+            using (ApplicationSettingsForm form = new ApplicationSettingsForm())
+            {
+                form.SelectProfilesTab();
+                form.ShowDialog();
+                UpdateVideoEncoders();
+            }
         }
 
         #endregion Screen recorder
-
-        #endregion Capture
 
         #region Actions
 
@@ -742,6 +782,25 @@ namespace ShareX
             }
         }
 
+        private void lvWatchFolderList_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (lvWatchFolderList.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvWatchFolderList.SelectedItems[0];
+                WatchFolderSettings watchFolder = lvi.Tag as WatchFolderSettings;
+
+                using (WatchFolderForm form = new WatchFolderForm(watchFolder))
+                {
+                    if (form.ShowDialog() == DialogResult.OK)
+                    {
+                        lvi.Text = watchFolder.FolderPath ?? "";
+                        lvi.SubItems[1].Text = watchFolder.Filter ?? "";
+                        lvi.SubItems[2].Text = watchFolder.IncludeSubdirectories.ToString() ?? "";
+                    }
+                }
+            }
+        }
+
         private void AddWatchFolder(WatchFolderSettings watchFolderSetting)
         {
             if (watchFolderSetting != null)
@@ -789,6 +848,7 @@ namespace ShareX
             {
                 AutoIncrementNumber = Program.Settings.NameParserAutoIncrementNumber,
                 WindowText = Text,
+                ProcessName = "ShareX",
                 MaxNameLength = TaskSettings.AdvancedSettings.NamePatternMaxLength,
                 MaxTitleLength = TaskSettings.AdvancedSettings.NamePatternMaxTitleLength
             };
@@ -815,6 +875,11 @@ namespace ShareX
         private void cbClipboardUploadAutoDetectURL_CheckedChanged(object sender, EventArgs e)
         {
             TaskSettings.UploadSettings.ClipboardUploadAutoDetectURL = cbClipboardUploadAutoDetectURL.Checked;
+        }
+
+        private void cbClipboardUploadAutoIndexFolder_CheckedChanged(object sender, EventArgs e)
+        {
+            TaskSettings.UploadSettings.ClipboardUploadAutoIndexFolder = cbClipboardUploadAutoIndexFolder.Checked;
         }
 
         #endregion Upload

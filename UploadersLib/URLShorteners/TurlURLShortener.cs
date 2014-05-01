@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using System.Collections.Generic;
-using UploadersLib.HelperClasses;
 
 namespace UploadersLib.URLShorteners
 {
@@ -41,7 +40,7 @@ namespace UploadersLib.URLShorteners
                 Dictionary<string, string> arguments = new Dictionary<string, string>();
                 arguments.Add("url", url);
 
-                result.Response = SendGetRequest(APIURL, arguments);
+                result.Response = SendRequest(HttpMethod.GET, APIURL, arguments);
 
                 if (!string.IsNullOrEmpty(result.Response))
                 {

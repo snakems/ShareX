@@ -32,6 +32,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using UploadersLib;
 
@@ -83,6 +84,9 @@ namespace ShareX
 
         public static string CustomPersonalPath { get; private set; }
 
+        private static FileSystemWatcher uploaderConfigWatcher;
+        private static WatchFolderDuplicateEventTimer uploaderConfigWatcherTimer;
+
         public static string PersonalPath
         {
             get
@@ -109,16 +113,42 @@ namespace ShareX
             }
         }
 
+        private static string UploadersConfigFolder
+        {
+            get
+            {
+                if (Settings != null && !string.IsNullOrEmpty(Settings.CustomUploadersConfigPath))
+                {
+                    return Settings.CustomUploadersConfigPath;
+                }
+
+                return PersonalPath;
+            }
+        }
+
         public static string UploadersConfigFilePath
         {
             get
             {
                 if (!IsSandbox)
                 {
-                    return Path.Combine(PersonalPath, UploadersConfigFilename);
+                    return Path.Combine(UploadersConfigFolder, UploadersConfigFilename);
                 }
 
                 return null;
+            }
+        }
+
+        private static string HotkeysConfigFolder
+        {
+            get
+            {
+                if (Settings != null && !string.IsNullOrEmpty(Settings.CustomHotkeysConfigPath))
+                {
+                    return Settings.CustomHotkeysConfigPath;
+                }
+
+                return PersonalPath;
             }
         }
 
@@ -128,7 +158,7 @@ namespace ShareX
             {
                 if (!IsSandbox)
                 {
-                    return Path.Combine(PersonalPath, HotkeysConfigFilename);
+                    return Path.Combine(HotkeysConfigFolder, HotkeysConfigFilename);
                 }
 
                 return null;
@@ -148,7 +178,7 @@ namespace ShareX
             }
         }
 
-        private static string LogParentFolder
+        private static string LogsFolder
         {
             get
             {
@@ -156,16 +186,16 @@ namespace ShareX
             }
         }
 
-        public static string LogFilePath
+        public static string LogsFilePath
         {
             get
             {
                 string filename = string.Format(LogFileName, FastDateTime.Now);
-                return Path.Combine(LogParentFolder, filename);
+                return Path.Combine(LogsFolder, filename);
             }
         }
 
-        public static string ScreenshotsParentFolder
+        private static string ScreenshotsFolder
         {
             get
             {
@@ -183,7 +213,7 @@ namespace ShareX
             get
             {
                 string subFolderName = new NameParser(NameParserType.FolderPath).Parse(Settings.SaveImageSubFolderPattern);
-                return Path.Combine(ScreenshotsParentFolder, subFolderName);
+                return Path.Combine(ScreenshotsFolder, subFolderName);
             }
         }
 
@@ -297,7 +327,7 @@ namespace ShareX
                 BackupSettings();
 
                 DebugHelper.WriteLine("ShareX closing");
-                DebugHelper.Logger.SaveLog(LogFilePath);
+                DebugHelper.Logger.SaveLog(LogsFilePath);
             }
         }
 
@@ -309,6 +339,8 @@ namespace ShareX
             UploaderSettingsResetEvent.Set();
             LoadHotkeySettings();
             HotkeySettingsResetEvent.Set();
+
+            ConfigureUploadersConfigWatcher();
         }
 
         public static void LoadProgramSettings()
@@ -369,10 +401,33 @@ namespace ShareX
 
         public static void WritePersonalPathConfig(string path)
         {
-            // If path is empty and config file is not exist then don't create it
-            if (!string.IsNullOrEmpty(path) || File.Exists(PersonalPathConfig))
+            if (path == null)
             {
-                File.WriteAllText(PersonalPathConfig, path ?? string.Empty, Encoding.UTF8);
+                path = string.Empty;
+            }
+            else
+            {
+                path = path.Trim();
+            }
+
+            bool isDefaultPath = string.IsNullOrEmpty(path) && !File.Exists(PersonalPathConfig);
+
+            if (!isDefaultPath)
+            {
+                string currentPath = ReadPersonalPathConfig();
+
+                if (!path.Equals(currentPath, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    try
+                    {
+                        File.WriteAllText(PersonalPathConfig, path, Encoding.UTF8);
+                    }
+                    catch (UnauthorizedAccessException)
+                    {
+                        MessageBox.Show("Can't access to \"" + PersonalPathConfig + "\" file.\r\nPlease run ShareX as administrator to change personal folder path.", "ShareX",
+                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
             }
         }
 
@@ -388,7 +443,7 @@ namespace ShareX
 
         private static void OnError(Exception e)
         {
-            using (ErrorForm errorForm = new ErrorForm(Application.ProductName, e, DebugHelper.Logger, LogFilePath, Links.URL_ISSUES))
+            using (ErrorForm errorForm = new ErrorForm(Application.ProductName, e, DebugHelper.Logger, LogsFilePath, Links.URL_ISSUES))
             {
                 errorForm.ShowDialog();
             }
@@ -435,6 +490,45 @@ namespace ShareX
             }
 
             return false;
+        }
+
+        public static void ConfigureUploadersConfigWatcher()
+        {
+            if (Program.Settings.DetectUploaderConfigFileChanges && uploaderConfigWatcher == null)
+            {
+                uploaderConfigWatcher = new FileSystemWatcher(Path.GetDirectoryName(Program.UploadersConfigFilePath), Path.GetFileName(Program.UploadersConfigFilePath));
+                uploaderConfigWatcher.Changed += uploaderConfigWatcher_Changed;
+                uploaderConfigWatcherTimer = new WatchFolderDuplicateEventTimer(Program.UploadersConfigFilePath);
+                uploaderConfigWatcher.EnableRaisingEvents = true;
+            }
+            else if (uploaderConfigWatcher != null)
+            {
+                uploaderConfigWatcher.Dispose();
+                uploaderConfigWatcher = null;
+            }
+        }
+
+        private static void uploaderConfigWatcher_Changed(object sender, FileSystemEventArgs e)
+        {
+            if (!uploaderConfigWatcherTimer.IsDuplicateEvent(e.FullPath))
+            {
+                SynchronizationContext context = SynchronizationContext.Current ?? new SynchronizationContext();
+                Action onCompleted = () => context.Post(state => ReloadUploadersConfig(e.FullPath), null);
+                Helpers.WaitWhileAsync(() => Helpers.IsFileLocked(e.FullPath), 250, 5000, onCompleted, 1000);
+                uploaderConfigWatcherTimer = new WatchFolderDuplicateEventTimer(e.FullPath);
+            }
+        }
+
+        private static void ReloadUploadersConfig(string filePath)
+        {
+            UploadersConfig = UploadersLib.UploadersConfig.Load(filePath);
+        }
+
+        public async static void UploadersConfigSaveAsync()
+        {
+            if (uploaderConfigWatcher != null) uploaderConfigWatcher.EnableRaisingEvents = false;
+            await TaskEx.Run(() => UploadersConfig.Save(Program.UploadersConfigFilePath));
+            if (uploaderConfigWatcher != null) uploaderConfigWatcher.EnableRaisingEvents = true;
         }
     }
 }

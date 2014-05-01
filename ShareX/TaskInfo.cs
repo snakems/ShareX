@@ -65,6 +65,7 @@ namespace ShareX
         }
 
         public string FileName { get; set; }
+        public string ThumbnailFilePath { get; set; }
         public EDataType DataType { get; set; }
 
         public EDataType UploadDestination
@@ -92,7 +93,16 @@ namespace ShareX
                     case EDataType.Text:
                         return TaskSettings.TextDestination.GetDescription();
                     case EDataType.File:
-                        return TaskSettings.FileDestination.GetDescription();
+                        switch (DataType)
+                        {
+                            case EDataType.Image:
+                                return TaskSettings.ImageFileDestination.GetDescription();
+                            case EDataType.Text:
+                                return TaskSettings.TextFileDestination.GetDescription();
+                            default:
+                            case EDataType.File:
+                                return TaskSettings.FileDestination.GetDescription();
+                        }
                     case EDataType.URL:
                         return TaskSettings.URLShortenerDestination.GetDescription();
                 }

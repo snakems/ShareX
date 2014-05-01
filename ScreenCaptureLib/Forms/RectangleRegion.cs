@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -39,6 +38,9 @@ namespace ScreenCaptureLib
         // For screen color picker
         public bool OneClickMode { get; set; }
         public Point OneClickPosition { get; set; }
+
+        // For screen ruler
+        public bool RulerMode { get; set; }
 
         public RectangleRegion(Image backgroundImage = null)
             : base(backgroundImage)
@@ -71,6 +73,28 @@ namespace ScreenCaptureLib
                 case Keys.M:
                     Config.ShowMagnifier = !Config.ShowMagnifier;
                     break;
+                case Keys.Control | Keys.C:
+                    CopyAreaInfo();
+                    break;
+            }
+        }
+
+        private void CopyAreaInfo()
+        {
+            if (AreaManager.IsCurrentAreaValid)
+            {
+                string clipboardText;
+
+                if (RulerMode)
+                {
+                    clipboardText = GetRulerText(AreaManager.CurrentArea);
+                }
+                else
+                {
+                    clipboardText = GetAreaText(AreaManager.CurrentArea);
+                }
+
+                ClipboardHelpers.CopyText(clipboardText);
             }
         }
 
@@ -152,7 +176,7 @@ namespace ScreenCaptureLib
 
                         if (Config.ShowInfo)
                         {
-                            ImageHelpers.DrawTextWithOutline(g, string.Format("X:{0} Y:{1} W:{2} H:{3}", totalArea.X, totalArea.Y,
+                            ImageHelpers.DrawTextWithOutline(g, string.Format("X: {0} / Y: {1} / W: {2} / H: {3}", totalArea.X, totalArea.Y,
                                 totalArea.Width, totalArea.Height), new PointF(totalArea.X + 5, totalArea.Y - 25), textFont, Color.White, Color.Black);
                         }
                     }
@@ -174,6 +198,17 @@ namespace ScreenCaptureLib
                     g.DrawRectangleProper(borderDotPen, AreaManager.CurrentArea);
                     g.DrawRectangleProper(borderDotPen2, AreaManager.CurrentArea);
                     DrawObjects(g);
+
+                    if (RulerMode)
+                    {
+                        DrawRuler(g, AreaManager.CurrentArea, borderPen, 5, 10);
+                        DrawRuler(g, AreaManager.CurrentArea, borderPen, 15, 100);
+
+                        Point centerPos = new Point(AreaManager.CurrentArea.X + AreaManager.CurrentArea.Width / 2, AreaManager.CurrentArea.Y + AreaManager.CurrentArea.Height / 2);
+                        int markSize = 10;
+                        g.DrawLine(borderPen, centerPos.X, centerPos.Y - markSize, centerPos.X, centerPos.Y + markSize);
+                        g.DrawLine(borderPen, centerPos.X - markSize, centerPos.Y, centerPos.X + markSize, centerPos.Y);
+                    }
                 }
 
                 if (Config.ShowInfo)
@@ -182,8 +217,14 @@ namespace ScreenCaptureLib
                     {
                         if (area.IsValid())
                         {
-                            ImageHelpers.DrawTextWithOutline(g, string.Format("X:{0} Y:{1}\nW:{2} H:{3}", area.X, area.Y, area.Width, area.Height),
-                                new PointF(area.X + 5, area.Y + 5), textFont, Color.White, Color.Black);
+                            if (RulerMode)
+                            {
+                                ImageHelpers.DrawTextWithOutline(g, GetRulerText(area), new PointF(area.X + 15, area.Y + 15), textFont, Color.White, Color.Black);
+                            }
+                            else
+                            {
+                                ImageHelpers.DrawTextWithOutline(g, GetAreaText(area), new PointF(area.X + 5, area.Y + 5), textFont, Color.White, Color.Black);
+                            }
                         }
                     }
                 }
@@ -198,6 +239,18 @@ namespace ScreenCaptureLib
             {
                 DrawCrosshair(g);
             }
+        }
+
+        private string GetRulerText(Rectangle area)
+        {
+            Point endPos = new Point(area.X + area.Width - 1, area.Y + area.Height - 1);
+            return string.Format("X: {0} / Y: {1} / X2: {2} / Y2: {3}\nWidth: {4} px / Height: {5} px\nDistance: {6:0.00} px / Angle: {7:0.00}°", area.X, area.Y, endPos.X, endPos.Y,
+                area.Width, area.Height, MathHelpers.Distance(area.Location, endPos), MathHelpers.LookAtDegree(area.Location, endPos));
+        }
+
+        private string GetAreaText(Rectangle area)
+        {
+            return string.Format("X: {0} / Y: {1}\nW: {2} / H: {3}", area.X, area.Y, area.Width, area.Height);
         }
 
         private void DrawCrosshair(Graphics g)
@@ -311,6 +364,24 @@ namespace ScreenCaptureLib
             }
 
             return bmp;
+        }
+
+        private void DrawRuler(Graphics g, Rectangle rect, Pen pen, int rulerSize, int rulerWidth)
+        {
+            if (rect.Width >= rulerSize && rect.Height >= rulerSize)
+            {
+                for (int x = 1; x <= rect.Width / rulerWidth; x++)
+                {
+                    g.DrawLine(pen, new Point(rect.X + x * rulerWidth, rect.Y), new Point(rect.X + x * rulerWidth, rect.Y + rulerSize));
+                    g.DrawLine(pen, new Point(rect.X + x * rulerWidth, rect.Bottom), new Point(rect.X + x * rulerWidth, rect.Bottom - rulerSize));
+                }
+
+                for (int y = 1; y <= rect.Height / rulerWidth; y++)
+                {
+                    g.DrawLine(pen, new Point(rect.X, rect.Y + y * rulerWidth), new Point(rect.X + rulerSize, rect.Y + y * rulerWidth));
+                    g.DrawLine(pen, new Point(rect.Right, rect.Y + y * rulerWidth), new Point(rect.Right - rulerSize, rect.Y + y * rulerWidth));
+                }
+            }
         }
 
         public void UpdateRegionPath()

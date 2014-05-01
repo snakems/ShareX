@@ -23,6 +23,8 @@
 
 #endregion License Information (GPL v3)
 
+// Credits: https://github.com/SirCmpwn
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -71,7 +73,7 @@ namespace UploadersLib.ImageUploaders
 
             while (true)
             {
-                result.Response = SendGetRequest("https://mediacru.sh/api/" + hash + "/status");
+                result.Response = SendRequest(HttpMethod.GET, "https://mediacru.sh/api/" + hash + "/status");
                 JToken jsonResponse = JToken.Parse(result.Response);
                 string status = jsonResponse["status"].Value<string>();
 
@@ -130,7 +132,7 @@ namespace UploadersLib.ImageUploaders
         {
             try
             {
-                string response = SendGetRequest("https://mediacru.sh/api/" + hash);
+                string response = SendRequest(HttpMethod.GET, "https://mediacru.sh/api/" + hash);
 
                 if (!string.IsNullOrEmpty(response))
                 {

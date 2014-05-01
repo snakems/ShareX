@@ -23,7 +23,6 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib.Properties;
 using System;
 using System.Drawing;
 using System.Windows.Forms;
@@ -80,6 +79,10 @@ namespace HelpersLib
         {
             btnStartHashCheck.Text = "Start";
             txtResult.Text = result.ToUpperInvariant();
+            if (!string.IsNullOrEmpty(txtTarget.Text))
+            {
+                txtTarget.Text = txtTarget.Text.ToUpperInvariant();
+            }
         }
 
         private void txtResult_TextChanged(object sender, EventArgs e)

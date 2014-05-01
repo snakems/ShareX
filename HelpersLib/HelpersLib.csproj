@@ -57,7 +57,7 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.1\lib\net35\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net35\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -87,7 +87,13 @@
     <Compile Include="Colors\RGBA.cs" />
     <Compile Include="ConvolutionMatrix.cs" />
     <Compile Include="ConvolutionMatrixManager.cs" />
+    <Compile Include="EncoderProgram.cs" />
     <Compile Include="FontSafe.cs" />
+    <Compile Include="Helpers\MathHelpers.cs" />
+    <Compile Include="MimeTypes.cs" />
+    <Compile Include="Native\LayeredForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\MonitorTestForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,7 +101,11 @@
       <DependentUpon>MonitorTestForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\SSLBypassHelper.cs" />
+    <Compile Include="Native\NativeConstants.cs" />
+    <Compile Include="PingHelper.cs" />
+    <Compile Include="PingResult.cs" />
     <Compile Include="UITypeEditors\EnumDescriptionConverter.cs" />
+    <Compile Include="UITypeEditors\DirectoryNameEditor.cs" />
     <Compile Include="UITypeEditors\MyColorConverter.cs" />
     <Compile Include="UITypeEditors\MyColorEditor.cs" />
     <Compile Include="UITypeEditors\ImageFileNameEditor.cs" />
@@ -113,12 +123,6 @@
     </Compile>
     <Compile Include="DebugTimer.cs" />
     <Compile Include="Extensions\ObjectExtensions.cs" />
-    <Compile Include="Forms\ClipboardFormatForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\ClipboardFormatForm.Designer.cs">
-      <DependentUpon>ClipboardFormatForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\HashCheckForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -293,6 +297,7 @@
     <Compile Include="UpdateChecker\XMLUpdateChecker.cs" />
     <Compile Include="UpdateChecker\UpdateInfo.cs" />
     <Compile Include="Links.cs" />
+    <Compile Include="Vector2.cs" />
     <Compile Include="WindowState.cs" />
     <Compile Include="XmlColor.cs" />
     <Compile Include="XmlFont.cs" />
@@ -304,9 +309,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ClipboardContentViewer.resx">
       <DependentUpon>ClipboardContentViewer.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\ClipboardFormatForm.resx">
-      <DependentUpon>ClipboardFormatForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ErrorForm.resx">
       <DependentUpon>ErrorForm.cs</DependentUpon>
