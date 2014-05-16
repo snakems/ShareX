@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -497,6 +497,11 @@ namespace HelpersLib
         {
             DescriptionAttribute[] attributes = (DescriptionAttribute[])type.GetCustomAttributes(typeof(DescriptionAttribute), false);
             return (attributes.Length > 0) ? attributes[0].Description : type.Name;
+        }
+
+        public static IEnumerable<T> TakeLast<T>(this IEnumerable<T> source, int count)
+        {
+            return source.Reverse().Take(count).Reverse();
         }
     }
 }

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -74,7 +74,10 @@ namespace ShareX
 
             foreach (LinkFormatEnum type in Enum.GetValues(typeof(LinkFormatEnum)))
             {
-                if (!Helpers.IsImageFile(Info.Result.URL) && type != LinkFormatEnum.URL && type != LinkFormatEnum.LocalFilePath && type != LinkFormatEnum.LocalFilePathUri)
+                if (!Helpers.IsImageFile(Info.Result.URL) &&
+                    (type == LinkFormatEnum.HTMLImage || type == LinkFormatEnum.HTMLLinkedImage ||
+                     type == LinkFormatEnum.ForumImage || type == LinkFormatEnum.ForumLinkedImage ||
+                     type == LinkFormatEnum.WikiImage || type == LinkFormatEnum.WikiLinkedImage))
                     continue;
 
                 AddFormat(type.GetDescription(), GetUrlByType(type));
@@ -166,7 +169,7 @@ namespace ShareX
 
             if (!string.IsNullOrEmpty(url))
             {
-                Helpers.LoadBrowserAsync(url);
+                Helpers.OpenURL(url);
             }
         }
 
@@ -174,7 +177,7 @@ namespace ShareX
         {
             if (!string.IsNullOrEmpty(Info.FilePath) && File.Exists(Info.FilePath))
             {
-                Helpers.LoadBrowserAsync(Info.FilePath);
+                Helpers.OpenURL(Info.FilePath);
             }
         }
 

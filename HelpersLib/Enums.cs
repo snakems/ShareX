@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -223,12 +223,12 @@ namespace HelpersLib
 
     public enum ScreenRecordOutput
     {
-        [Description("Animated GIF")]
-        GIF,
-        [Description("AVI")]
+        [Description("FFmpeg")]
+        FFmpeg,
+        [Description("Video Compression Manager (VCM)")]
         AVI,
-        [Description("AVI CLI encoder")]
-        AVICommandLine
+        [Description("Animated GIF")]
+        GIF
     }
 
     public enum DownloaderFormStatus
@@ -243,7 +243,8 @@ namespace HelpersLib
     {
         Default,
         Silent,
-        VerySilent
+        VerySilent,
+        Event
     }
 
     public enum ReleaseChannelType
@@ -288,5 +289,24 @@ namespace HelpersLib
     public enum ColorFormat
     {
         RGB, RGBA, ARGB
+    }
+
+    public enum ProxyMethod
+    {
+        None,
+        Manual,
+        Automatic
+    }
+
+    public enum ProxyType
+    {
+        [Description("HTTP proxy")]
+        HTTP,
+        [Description("SOCKS v4 proxy")]
+        SOCKS4,
+        [Description("SOCKS v4a proxy")]
+        SOCKS4a,
+        [Description("SOCKS v5 proxy")]
+        SOCKS5
     }
 }

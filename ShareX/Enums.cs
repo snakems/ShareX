@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -158,20 +158,22 @@ namespace ShareX
         FreeHandRegion,
         [Description("Capture last region")]
         LastRegion,
-        [Description("Screen recorder")]
+        [Description("Screen recording")]
         ScreenRecorder,
         [Description("Auto capture")]
         AutoCapture,
         [Description("Screen color picker")]
         ScreenColorPicker,
+        [Description("Ruler")]
+        Ruler,
+        [Description("FTP client")]
+        FTPClient,
         [Description("Hash check")]
         HashCheck,
         [Description("Index folder")]
         IndexFolder,
         [Description("Image effects")]
-        ImageEffects,
-        [Description("Ruler")]
-        Ruler
+        ImageEffects
     }
 
     public enum HotkeyStatus

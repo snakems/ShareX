@@ -74,6 +74,9 @@ namespace Greenshot {
             this.rotateCwToolstripButton = new GreenshotPlugin.Controls.GreenshotToolStripButton();
             this.rotateCcwToolstripButton = new GreenshotPlugin.Controls.GreenshotToolStripButton();
             this.menuStrip1 = new Greenshot.Controls.MenuStripEx();
+            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveAsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editToolStripMenuItem = new GreenshotPlugin.Controls.GreenshotToolStripMenuItem();
             this.undoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.redoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -107,7 +110,9 @@ namespace Greenshot {
             this.btnSaveClose = new System.Windows.Forms.ToolStripButton();
             this.btnClose = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator6 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnSaveAs = new System.Windows.Forms.ToolStripButton();
             this.btnClipboardCopy = new System.Windows.Forms.ToolStripButton();
+            this.btnUploadImage = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnUndo = new System.Windows.Forms.ToolStripButton();
             this.btnRedo = new System.Windows.Forms.ToolStripButton();
@@ -166,7 +171,6 @@ namespace Greenshot {
             this.fileSavedStatusContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.copyPathMenuItem = new GreenshotPlugin.Controls.GreenshotToolStripMenuItem();
             this.openDirectoryMenuItem = new GreenshotPlugin.Controls.GreenshotToolStripMenuItem();
-            this.btnUploadImage = new System.Windows.Forms.ToolStripButton();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.LeftToolStripPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -474,12 +478,38 @@ namespace Greenshot {
             this.menuStrip1.ClickThrough = true;
             this.menuStrip1.Dock = System.Windows.Forms.DockStyle.None;
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.fileToolStripMenuItem,
             this.editToolStripMenuItem,
             this.objectToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(785, 24);
             this.menuStrip1.TabIndex = 1;
+            // 
+            // fileToolStripMenuItem
+            // 
+            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.saveToolStripMenuItem,
+            this.saveAsToolStripMenuItem});
+            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            this.fileToolStripMenuItem.Text = "&File";
+            // 
+            // saveToolStripMenuItem
+            // 
+            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
+            this.saveToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S)));
+            this.saveToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveToolStripMenuItem.Text = "&Save";
+            this.saveToolStripMenuItem.Click += new System.EventHandler(this.saveToolStripMenuItem_Click);
+            // 
+            // saveAsToolStripMenuItem
+            // 
+            this.saveAsToolStripMenuItem.Image = ((System.Drawing.Image)(resources.GetObject("saveAsToolStripMenuItem.Image")));
+            this.saveAsToolStripMenuItem.Name = "saveAsToolStripMenuItem";
+            this.saveAsToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
+            this.saveAsToolStripMenuItem.Text = "Save &As...";
+            this.saveAsToolStripMenuItem.Click += new System.EventHandler(this.saveAsToolStripMenuItem_Click);
             // 
             // editToolStripMenuItem
             // 
@@ -771,6 +801,7 @@ namespace Greenshot {
             this.btnSaveClose,
             this.btnClose,
             this.toolStripSeparator6,
+            this.btnSaveAs,
             this.btnClipboardCopy,
             this.btnUploadImage,
             this.toolStripSeparator2,
@@ -841,6 +872,16 @@ namespace Greenshot {
             this.toolStripSeparator6.Name = "toolStripSeparator6";
             this.toolStripSeparator6.Size = new System.Drawing.Size(6, 27);
             // 
+            // btnSaveAs
+            // 
+            this.btnSaveAs.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnSaveAs.Image = ((System.Drawing.Image)(resources.GetObject("btnSaveAs.Image")));
+            this.btnSaveAs.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnSaveAs.Name = "btnSaveAs";
+            this.btnSaveAs.Size = new System.Drawing.Size(23, 24);
+            this.btnSaveAs.Text = "Save image as...";
+            this.btnSaveAs.Click += new System.EventHandler(this.btnSaveAs_Click);
+            // 
             // btnClipboardCopy
             // 
             this.btnClipboardCopy.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -849,6 +890,16 @@ namespace Greenshot {
             this.btnClipboardCopy.Size = new System.Drawing.Size(23, 24);
             this.btnClipboardCopy.Text = "Copy to clipboard";
             this.btnClipboardCopy.Click += new System.EventHandler(this.btnClipboardCopy_Click);
+            // 
+            // btnUploadImage
+            // 
+            this.btnUploadImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.btnUploadImage.Image = ((System.Drawing.Image)(resources.GetObject("btnUploadImage.Image")));
+            this.btnUploadImage.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnUploadImage.Name = "btnUploadImage";
+            this.btnUploadImage.Size = new System.Drawing.Size(23, 24);
+            this.btnUploadImage.Text = "Upload image";
+            this.btnUploadImage.Click += new System.EventHandler(this.btnUploadImage_Click);
             // 
             // toolStripSeparator2
             // 
@@ -1089,7 +1140,7 @@ namespace Greenshot {
             this.fontFamilyComboBox.MaxDropDownItems = 20;
             this.fontFamilyComboBox.Name = "fontFamilyComboBox";
             this.fontFamilyComboBox.Size = new System.Drawing.Size(200, 23);
-            this.fontFamilyComboBox.Text = "ABeeZee";
+            this.fontFamilyComboBox.Text = "Agency FB";
             this.fontFamilyComboBox.GotFocus += new System.EventHandler(this.ToolBarFocusableElementGotFocus);
             this.fontFamilyComboBox.LostFocus += new System.EventHandler(this.ToolBarFocusableElementLostFocus);
             // 
@@ -1119,7 +1170,7 @@ namespace Greenshot {
             0,
             0});
             this.fontSizeUpDown.Name = "fontSizeUpDown";
-            this.fontSizeUpDown.Size = new System.Drawing.Size(41, 24);
+            this.fontSizeUpDown.Size = new System.Drawing.Size(41, 23);
             this.fontSizeUpDown.Text = "12";
             this.fontSizeUpDown.Value = new decimal(new int[] {
             12,
@@ -1549,16 +1600,6 @@ namespace Greenshot {
             this.openDirectoryMenuItem.Text = "Open directory in Windows Explorer";
             this.openDirectoryMenuItem.Click += new System.EventHandler(this.OpenDirectoryMenuItemClick);
             // 
-            // btnUploadImage
-            // 
-            this.btnUploadImage.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.btnUploadImage.Image = ((System.Drawing.Image)(resources.GetObject("btnUploadImage.Image")));
-            this.btnUploadImage.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnUploadImage.Name = "btnUploadImage";
-            this.btnUploadImage.Size = new System.Drawing.Size(23, 24);
-            this.btnUploadImage.Text = "Upload image";
-            this.btnUploadImage.Click += new System.EventHandler(this.btnUploadImage_Click);
-            // 
             // ImageEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1710,5 +1751,9 @@ namespace Greenshot {
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator6;
         private System.Windows.Forms.ToolStripButton btnClipboardCopy;
         private System.Windows.Forms.ToolStripButton btnUploadImage;
+        private System.Windows.Forms.ToolStripButton btnSaveAs;
+        private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem saveAsToolStripMenuItem;
 	}
 }

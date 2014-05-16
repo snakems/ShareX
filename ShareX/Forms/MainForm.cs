@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -438,15 +438,17 @@ namespace ShareX
             UpdateChecker updateChecker = TaskHelpers.CheckUpdate();
 
             if (updateChecker.UpdateInfo != null && updateChecker.UpdateInfo.Status == UpdateStatus.UpdateAvailable &&
-                MessageBox.Show("An update is available for ShareX.\r\nWould you like to download it?", "ShareX",
+                MessageBox.Show("A newer version of ShareX is available.\r\nWould you like to download and install it?", string.Format("{0} v{1} is available", Application.ProductName, updateChecker.UpdateInfo.LatestVersion.ToString()),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
-                UpdaterForm updaterForm = new UpdaterForm(updateChecker);
-                updaterForm.ShowDialog();
-
-                if (updaterForm.Status == DownloaderFormStatus.InstallStarted)
+                using (DownloaderForm updaterForm = new DownloaderForm(updateChecker))
                 {
-                    Application.Exit();
+                    updaterForm.ShowDialog();
+
+                    if (updaterForm.Status == DownloaderFormStatus.InstallStarted)
+                    {
+                        Application.Exit();
+                    }
                 }
             }
         }
@@ -469,7 +471,7 @@ namespace ShareX
                     }
                     else if (args[i].Equals("-autocapture", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        StartAutoCapture();
+                        TaskHelpers.StartAutoCapture();
                     }
                     else if (args[i][0] != '-')
                     {
@@ -540,105 +542,6 @@ namespace ShareX
 
             scMain.Panel2Collapsed = !Program.Settings.ShowPreview;
             Refresh();
-        }
-
-        private void OpenDropWindow()
-        {
-            DropForm.GetInstance(Program.Settings.DropSize, Program.Settings.DropOffset, Program.Settings.DropAlignment, Program.Settings.DropOpacity,
-                Program.Settings.DropHoverOpacity).ShowActivate();
-        }
-
-        private void DoScreenRecorder(TaskSettings taskSettings = null)
-        {
-            if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
-
-            ScreenRecordForm form = ScreenRecordForm.Instance;
-
-            if (form.IsRecording)
-            {
-                form.StopRecording();
-            }
-            else
-            {
-                form.StartRecording(taskSettings);
-            }
-        }
-
-        private void OpenAutoCapture()
-        {
-            AutoCaptureForm.Instance.ShowActivate();
-        }
-
-        private void StartAutoCapture()
-        {
-            if (!AutoCaptureForm.IsRunning)
-            {
-                AutoCaptureForm form = AutoCaptureForm.Instance;
-                form.Show();
-                form.Execute();
-            }
-        }
-
-        private void OpenScreenColorPicker(TaskSettings taskSettings = null)
-        {
-            if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
-
-            new ScreenColorPicker(taskSettings).Show();
-        }
-
-        private void OpenHashCheck()
-        {
-            new HashCheckForm().Show();
-        }
-
-        private void OpenIndexFolder()
-        {
-            UploadManager.IndexFolder();
-        }
-
-        private void OpenImageEffects()
-        {
-            string filePath = ImageHelpers.OpenImageFileDialog();
-
-            if (!string.IsNullOrEmpty(filePath))
-            {
-                Image img = ImageHelpers.LoadImage(filePath);
-                ImageEffectsForm form = new ImageEffectsForm(img);
-                form.EditorMode();
-                form.Show();
-            }
-        }
-
-        private void OpenMonitorTest()
-        {
-            using (MonitorTestForm monitorTestForm = new MonitorTestForm())
-            {
-                monitorTestForm.ShowDialog();
-            }
-        }
-
-        private void OpenDNSChanger()
-        {
-            try
-            {
-                ProcessStartInfo psi = new ProcessStartInfo(Path.Combine(Application.StartupPath, "DNSChanger.exe"));
-                psi.UseShellExecute = true;
-                psi.Verb = "runas";
-                Process.Start(psi);
-            }
-            catch { }
-        }
-
-        public static void OpenRuler()
-        {
-            using (Image fullscreen = Screenshot.CaptureFullscreen())
-            using (RectangleRegion surface = new RectangleRegion(fullscreen))
-            {
-                surface.RulerMode = true;
-                surface.Config.QuickCrop = false;
-                surface.Prepare();
-                surface.ShowDialog();
-            }
         }
 
         #region Form events
@@ -712,7 +615,7 @@ namespace ShareX
 
         private void tsbDragDropUpload_Click(object sender, EventArgs e)
         {
-            OpenDropWindow();
+            TaskHelpers.OpenDropWindow();
         }
 
         private void tsddbDestinations_DropDownOpened(object sender, EventArgs e)
@@ -758,14 +661,14 @@ namespace ShareX
             new RegionCapturePreview(Program.DefaultTaskSettings.CaptureSettings.SurfaceOptions).Show();
         }
 
-        private void tsmiScreenRecorderGIF_Click(object sender, EventArgs e)
+        private void tsmiScreenRecorder_Click(object sender, EventArgs e)
         {
-            DoScreenRecorder();
+            TaskHelpers.DoScreenRecorder();
         }
 
         private void tsmiAutoCapture_Click(object sender, EventArgs e)
         {
-            OpenAutoCapture();
+            TaskHelpers.OpenAutoCapture();
         }
 
         private void tsbApplicationSettings_Click(object sender, EventArgs e)
@@ -823,42 +726,59 @@ namespace ShareX
 
         private void tsmiCursorHelper_Click(object sender, EventArgs e)
         {
-            OpenScreenColorPicker();
-        }
-
-        private void tsmiHashCheck_Click(object sender, EventArgs e)
-        {
-            OpenHashCheck();
-        }
-
-        private void tsmiIndexFolder_Click(object sender, EventArgs e)
-        {
-            OpenIndexFolder();
-        }
-
-        private void tsmiImageEffects_Click(object sender, EventArgs e)
-        {
-            OpenImageEffects();
-        }
-
-        private void tsmiMonitorTest_Click(object sender, EventArgs e)
-        {
-            OpenMonitorTest();
-        }
-
-        private void tsmiDNSChanger_Click(object sender, EventArgs e)
-        {
-            OpenDNSChanger();
+            TaskHelpers.OpenScreenColorPicker();
         }
 
         private void tsmiRuler_Click(object sender, EventArgs e)
         {
-            OpenRuler();
+            TaskHelpers.OpenRuler();
+        }
+
+        private void tsmiFTPClient_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenFTPClient();
+        }
+
+        private void tsmiHashCheck_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenHashCheck();
+        }
+
+        private void tsmiIndexFolder_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenIndexFolder();
+        }
+
+        private void tsmiImageEditor_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenImageEditor();
+        }
+
+        private void tsmiImageEffects_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenImageEffects();
+        }
+
+        private void tsmiMonitorTest_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenMonitorTest();
+        }
+
+        private void tsmiDNSChanger_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenDNSChanger();
         }
 
         private void tsbScreenshotsFolder_Click(object sender, EventArgs e)
         {
-            Helpers.OpenFolder(Program.ScreenshotsPath);
+            if (Directory.Exists(Program.ScreenshotsFolder))
+            {
+                Helpers.OpenFolder(Program.ScreenshotsFolder);
+            }
+            else
+            {
+                Helpers.OpenFolder(Program.ScreenshotsParentFolder);
+            }
         }
 
         private void tsbHistory_Click(object sender, EventArgs e)
@@ -897,7 +817,7 @@ namespace ShareX
 
         private void tsbDonate_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync(Links.URL_DONATE);
+            Helpers.OpenURL(Links.URL_DONATE);
         }
 
         private void lblDragAndDropTip_MouseUp(object sender, MouseEventArgs e)
@@ -992,7 +912,7 @@ namespace ShareX
 
             if (!string.IsNullOrEmpty(url))
             {
-                Helpers.LoadBrowserAsync(url);
+                Helpers.OpenURL(url);
             }
         }
 

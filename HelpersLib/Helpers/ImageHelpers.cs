@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -60,9 +60,11 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Net;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace HelpersLib
@@ -660,12 +662,11 @@ namespace HelpersLib
             return newBitmap;
         }
 
-        public static Image AnnotateImage(Image img)
-        {
-            return AnnotateImage(img, false, null, null, null);
-        }
-
-        public static Image AnnotateImage(Image img, bool allowSave, string configPath, Action<Image> clipboardCopyRequested, Action<Image> imageUploadRequested)
+        public static Image AnnotateImage(Image img, string imgPath, bool allowSave, string configPath,
+            Action<Image> clipboardCopyRequested,
+            Action<Image> imageUploadRequested,
+            Action<Image, string> imageSaveRequested,
+            Func<Image, string, string> imageSaveAsRequested)
         {
             if (!IniConfig.isInitialized)
             {
@@ -673,15 +674,18 @@ namespace HelpersLib
                 IniConfig.Init(configPath);
             }
 
-            using (Image cloneImage = (Image)img.Clone())
+            using (Image cloneImage = img != null ? (Image)img.Clone() : ImageHelpers.LoadImage(imgPath))
             using (ICapture capture = new Capture { Image = cloneImage })
             using (Surface surface = new Surface(capture))
             using (ImageEditorForm editor = new ImageEditorForm(surface, true))
             {
+                editor.SetImagePath(imgPath);
                 editor.ClipboardCopyRequested += clipboardCopyRequested;
                 editor.ImageUploadRequested += imageUploadRequested;
+                editor.ImageSaveRequested += imageSaveRequested;
+                editor.ImageSaveAsRequested += imageSaveAsRequested;
 
-                if (editor.ShowDialog() == DialogResult.OK)
+                if (editor.ShowDialog() == DialogResult.OK && img != null)
                 {
                     using (img)
                     {
@@ -1040,50 +1044,67 @@ namespace HelpersLib
             return null;
         }
 
-        public static void SaveImageFileDialog(Image img)
+        public static void SaveImage(Image img, string filePath)
+        {
+            string ext = Helpers.GetProperExtension(filePath);
+
+            if (!string.IsNullOrEmpty(ext))
+            {
+                ImageFormat imageFormat;
+
+                switch (ext)
+                {
+                    default:
+                    case "png":
+                        imageFormat = ImageFormat.Png;
+                        break;
+                    case "jpg":
+                    case "jpeg":
+                    case "jpe":
+                    case "jfif":
+                        imageFormat = ImageFormat.Jpeg;
+                        break;
+                    case "gif":
+                        imageFormat = ImageFormat.Gif;
+                        break;
+                    case "bmp":
+                        imageFormat = ImageFormat.Bmp;
+                        break;
+                    case "tif":
+                    case "tiff":
+                        imageFormat = ImageFormat.Tiff;
+                        break;
+                }
+
+                img.Save(filePath, imageFormat);
+            }
+        }
+
+        public static string SaveImageFileDialog(Image img, string filePath = "")
         {
             using (SaveFileDialog sfd = new SaveFileDialog())
             {
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    string folder = Path.GetDirectoryName(filePath);
+                    if (!string.IsNullOrEmpty(folder))
+                    {
+                        sfd.InitialDirectory = folder;
+                    }
+                    sfd.FileName = Path.GetFileNameWithoutExtension(filePath);
+                }
+
                 sfd.DefaultExt = ".png";
                 sfd.Filter = "PNG (*.png)|*.png|JPEG (*.jpg, *.jpeg, *.jpe, *.jfif)|*.jpg;*.jpeg;*.jpe;*.jfif|GIF (*.gif)|*.gif|BMP (*.bmp)|*.bmp|TIFF (*.tif, *.tiff)|*.tif;*.tiff";
 
                 if (sfd.ShowDialog() == DialogResult.OK)
                 {
-                    string filePath = sfd.FileName;
-                    string ext = Helpers.GetProperExtension(filePath);
-
-                    if (!string.IsNullOrEmpty(ext))
-                    {
-                        ImageFormat imageFormat;
-
-                        switch (ext)
-                        {
-                            default:
-                            case "png":
-                                imageFormat = ImageFormat.Png;
-                                break;
-                            case "jpg":
-                            case "jpeg":
-                            case "jpe":
-                            case "jfif":
-                                imageFormat = ImageFormat.Jpeg;
-                                break;
-                            case "gif":
-                                imageFormat = ImageFormat.Gif;
-                                break;
-                            case "bmp":
-                                imageFormat = ImageFormat.Bmp;
-                                break;
-                            case "tif":
-                            case "tiff":
-                                imageFormat = ImageFormat.Tiff;
-                                break;
-                        }
-
-                        img.Save(filePath, imageFormat);
-                    }
+                    SaveImage(img, sfd.FileName);
+                    return sfd.FileName;
                 }
             }
+
+            return null;
         }
 
         // http://stackoverflow.com/questions/788335/why-does-image-fromfile-keep-a-file-handle-open-sometimes

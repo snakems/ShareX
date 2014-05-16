@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -36,13 +36,12 @@ namespace ImageEffectsLib
     {
         private WatermarkConfig config;
         private bool IsGuiReady;
-        private ContextMenuStrip codesMenu;
 
         public WatermarkForm(WatermarkConfig watermarkConfig)
         {
             InitializeComponent();
             config = watermarkConfig;
-            codesMenu = NameParser.CreateCodesMenu(txtWatermarkText, ReplacementVariables.t);
+            NameParser.CreateCodesMenu(txtWatermarkText, ReplacementVariables.t, ReplacementVariables.pn);
         }
 
         private void WatermarkUI_Load(object sender, EventArgs e)

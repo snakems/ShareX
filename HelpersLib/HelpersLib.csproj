@@ -57,7 +57,10 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net35\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net35\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Starksoft.Net.Proxy">
+      <HintPath>..\Lib\Starksoft.Net.Proxy.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -77,7 +80,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AviWriter.cs" />
     <Compile Include="ClipboardFormat.cs" />
     <Compile Include="ColorMatrixManager.cs" />
     <Compile Include="Colors\CMYK.cs" />
@@ -88,6 +90,7 @@
     <Compile Include="ConvolutionMatrix.cs" />
     <Compile Include="ConvolutionMatrixManager.cs" />
     <Compile Include="EncoderProgram.cs" />
+    <Compile Include="CLI\ExternalCLIManager.cs" />
     <Compile Include="FontSafe.cs" />
     <Compile Include="Helpers\MathHelpers.cs" />
     <Compile Include="MimeTypes.cs" />
@@ -104,6 +107,7 @@
     <Compile Include="Native\NativeConstants.cs" />
     <Compile Include="PingHelper.cs" />
     <Compile Include="PingResult.cs" />
+    <Compile Include="ProxyInfo.cs" />
     <Compile Include="UITypeEditors\EnumDescriptionConverter.cs" />
     <Compile Include="UITypeEditors\DirectoryNameEditor.cs" />
     <Compile Include="UITypeEditors\MyColorConverter.cs" />
@@ -205,11 +209,11 @@
     <Compile Include="UnsafeBitmap.cs" />
     <Compile Include="UpdateChecker\GitHubUpdateChecker.cs" />
     <Compile Include="UpdateChecker\UpdateChecker.cs" />
-    <Compile Include="UpdateChecker\UpdaterForm.cs">
+    <Compile Include="UpdateChecker\DownloaderForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UpdateChecker\UpdaterForm.Designer.cs">
-      <DependentUpon>UpdaterForm.cs</DependentUpon>
+    <Compile Include="UpdateChecker\DownloaderForm.Designer.cs">
+      <DependentUpon>DownloaderForm.cs</DependentUpon>
     </Compile>
     <Compile Include="FileDownloader.cs" />
     <Compile Include="UserControls\BlackStyle\MyButton.cs">
@@ -322,8 +326,8 @@
     <EmbeddedResource Include="Forms\MonitorTestForm.resx">
       <DependentUpon>MonitorTestForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UpdateChecker\UpdaterForm.resx">
-      <DependentUpon>UpdaterForm.cs</DependentUpon>
+    <EmbeddedResource Include="UpdateChecker\DownloaderForm.resx">
+      <DependentUpon>DownloaderForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Printer\PrintForm.resx">
       <DependentUpon>PrintForm.cs</DependentUpon>

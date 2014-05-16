@@ -1,29 +1,4 @@
-﻿#region License Information (GPL v3)
-
-/*
-    ShareX - A program that allows you to upload images, text or files in your clipboard
-    Copyright (C) 2008-2011 ShareX Developers
-
-    This program is free software; you can redistribute it and/or
-    modify it under the terms of the GNU General Public License
-    as published by the Free Software Foundation; either version 2
-    of the License, or (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-
-    Optionally you can also view the license at <http://www.gnu.org/licenses/>.
-*/
-
-#endregion License Information (GPL v3)
-
-namespace ShareX
+﻿namespace ShareX
 {
     partial class MainForm
     {
@@ -91,8 +66,10 @@ namespace ShareX
             this.tsddbTools = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsmiScreenColorPicker = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiRuler = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiFTPClient = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiHashCheck = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiIndexFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiImageEditor = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiImageEffects = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiMonitorTest = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiDNSChanger = new System.Windows.Forms.ToolStripMenuItem();
@@ -133,8 +110,8 @@ namespace ShareX
             this.tsmiOpenDeletionURL = new System.Windows.Forms.ToolStripMenuItem();
             this.tssOpen1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiOpenFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiOpenThumbnailFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiOpenFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiOpenThumbnailFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiCopy = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiCopyURL = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiCopyShortenedURL = new System.Windows.Forms.ToolStripMenuItem();
@@ -144,6 +121,8 @@ namespace ShareX
             this.tsmiCopyFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiCopyImage = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiCopyText = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiCopyThumbnailFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiCopyThumbnailImage = new System.Windows.Forms.ToolStripMenuItem();
             this.tssCopy2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiCopyHTMLLink = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiCopyHTMLImage = new System.Windows.Forms.ToolStripMenuItem();
@@ -204,8 +183,10 @@ namespace ShareX
             this.tsmiTrayTools = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayScreenColorPicker = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayRuler = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTrayFTPClient = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayHashCheck = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayIndexFolder = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTrayImageEditor = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayImageEffects = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayMonitorTest = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayDNSChanger = new System.Windows.Forms.ToolStripMenuItem();
@@ -218,8 +199,6 @@ namespace ShareX
             this.tsmiTrayShow = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayExit = new System.Windows.Forms.ToolStripMenuItem();
             this.ssToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiCopyThumbnailFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiCopyThumbnailImage = new System.Windows.Forms.ToolStripMenuItem();
             this.tsMain.SuspendLayout();
             this.scMain.Panel1.SuspendLayout();
             this.scMain.Panel2.SuspendLayout();
@@ -328,7 +307,7 @@ namespace ShareX
             // 
             // tsmiWindow
             // 
-            this.tsmiWindow.Image = ((System.Drawing.Image)(resources.GetObject("tsmiWindow.Image")));
+            this.tsmiWindow.Image = global::ShareX.Properties.Resources.application_blue;
             this.tsmiWindow.Name = "tsmiWindow";
             this.tsmiWindow.Size = new System.Drawing.Size(181, 22);
             this.tsmiWindow.Text = "Window";
@@ -361,7 +340,7 @@ namespace ShareX
             this.tsmiRoundedRectangle.Image = global::ShareX.Properties.Resources.layer_shape_round;
             this.tsmiRoundedRectangle.Name = "tsmiRoundedRectangle";
             this.tsmiRoundedRectangle.Size = new System.Drawing.Size(181, 22);
-            this.tsmiRoundedRectangle.Text = "Rounded Rectangle";
+            this.tsmiRoundedRectangle.Text = "Rounded rectangle";
             this.tsmiRoundedRectangle.Click += new System.EventHandler(this.tsmiRoundedRectangle_Click);
             // 
             // tsmiEllipse
@@ -401,7 +380,7 @@ namespace ShareX
             this.tsmiFreeHand.Image = global::ShareX.Properties.Resources.layer_shape_curve;
             this.tsmiFreeHand.Name = "tsmiFreeHand";
             this.tsmiFreeHand.Size = new System.Drawing.Size(181, 22);
-            this.tsmiFreeHand.Text = "Free Hand";
+            this.tsmiFreeHand.Text = "Freehand";
             this.tsmiFreeHand.Click += new System.EventHandler(this.tsmiFreeHand_Click);
             // 
             // tsmiLastRegion
@@ -409,7 +388,7 @@ namespace ShareX
             this.tsmiLastRegion.Image = global::ShareX.Properties.Resources.layers_arrange;
             this.tsmiLastRegion.Name = "tsmiLastRegion";
             this.tsmiLastRegion.Size = new System.Drawing.Size(181, 22);
-            this.tsmiLastRegion.Text = "Last Region";
+            this.tsmiLastRegion.Text = "Last region";
             this.tsmiLastRegion.Click += new System.EventHandler(this.tsmiLastRegion_Click);
             // 
             // tsmiScreenRecorder
@@ -417,15 +396,15 @@ namespace ShareX
             this.tsmiScreenRecorder.Image = global::ShareX.Properties.Resources.camcorder_image;
             this.tsmiScreenRecorder.Name = "tsmiScreenRecorder";
             this.tsmiScreenRecorder.Size = new System.Drawing.Size(181, 22);
-            this.tsmiScreenRecorder.Text = "Screen Recorder";
-            this.tsmiScreenRecorder.Click += new System.EventHandler(this.tsmiScreenRecorderGIF_Click);
+            this.tsmiScreenRecorder.Text = "Screen recording";
+            this.tsmiScreenRecorder.Click += new System.EventHandler(this.tsmiScreenRecorder_Click);
             // 
             // tsmiAutoCapture
             // 
             this.tsmiAutoCapture.Image = global::ShareX.Properties.Resources.clock_plus;
             this.tsmiAutoCapture.Name = "tsmiAutoCapture";
             this.tsmiAutoCapture.Size = new System.Drawing.Size(181, 22);
-            this.tsmiAutoCapture.Text = "Auto Capture...";
+            this.tsmiAutoCapture.Text = "Auto capture...";
             this.tsmiAutoCapture.Click += new System.EventHandler(this.tsmiAutoCapture_Click);
             // 
             // tsddbAfterCaptureTasks
@@ -554,8 +533,10 @@ namespace ShareX
             this.tsddbTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmiScreenColorPicker,
             this.tsmiRuler,
+            this.tsmiFTPClient,
             this.tsmiHashCheck,
             this.tsmiIndexFolder,
+            this.tsmiImageEditor,
             this.tsmiImageEffects,
             this.tsmiMonitorTest,
             this.tsmiDNSChanger});
@@ -582,6 +563,14 @@ namespace ShareX
             this.tsmiRuler.Text = "Ruler...";
             this.tsmiRuler.Click += new System.EventHandler(this.tsmiRuler_Click);
             // 
+            // tsmiFTPClient
+            // 
+            this.tsmiFTPClient.Image = global::ShareX.Properties.Resources.application_network;
+            this.tsmiFTPClient.Name = "tsmiFTPClient";
+            this.tsmiFTPClient.Size = new System.Drawing.Size(183, 22);
+            this.tsmiFTPClient.Text = "FTP client...";
+            this.tsmiFTPClient.Click += new System.EventHandler(this.tsmiFTPClient_Click);
+            // 
             // tsmiHashCheck
             // 
             this.tsmiHashCheck.Image = global::ShareX.Properties.Resources.application_task;
@@ -592,11 +581,19 @@ namespace ShareX
             // 
             // tsmiIndexFolder
             // 
-            this.tsmiIndexFolder.Image = ((System.Drawing.Image)(resources.GetObject("tsmiIndexFolder.Image")));
+            this.tsmiIndexFolder.Image = global::ShareX.Properties.Resources.folder_tree;
             this.tsmiIndexFolder.Name = "tsmiIndexFolder";
             this.tsmiIndexFolder.Size = new System.Drawing.Size(183, 22);
             this.tsmiIndexFolder.Text = "Index folder...";
             this.tsmiIndexFolder.Click += new System.EventHandler(this.tsmiIndexFolder_Click);
+            // 
+            // tsmiImageEditor
+            // 
+            this.tsmiImageEditor.Image = global::ShareX.Properties.Resources.Greenshot;
+            this.tsmiImageEditor.Name = "tsmiImageEditor";
+            this.tsmiImageEditor.Size = new System.Drawing.Size(183, 22);
+            this.tsmiImageEditor.Text = "Image editor...";
+            this.tsmiImageEditor.Click += new System.EventHandler(this.tsmiImageEditor_Click);
             // 
             // tsmiImageEffects
             // 
@@ -671,7 +668,7 @@ namespace ShareX
             // 
             // tsmiShowDebugLog
             // 
-            this.tsmiShowDebugLog.Image = ((System.Drawing.Image)(resources.GetObject("tsmiShowDebugLog.Image")));
+            this.tsmiShowDebugLog.Image = global::ShareX.Properties.Resources.application_monitor;
             this.tsmiShowDebugLog.Name = "tsmiShowDebugLog";
             this.tsmiShowDebugLog.Size = new System.Drawing.Size(182, 22);
             this.tsmiShowDebugLog.Text = "Debug log...";
@@ -878,7 +875,7 @@ namespace ShareX
             this.pbPreview.Location = new System.Drawing.Point(0, 0);
             this.pbPreview.Name = "pbPreview";
             this.pbPreview.Size = new System.Drawing.Size(378, 452);
-            this.pbPreview.TabIndex = 1;
+            this.pbPreview.TabIndex = 0;
             // 
             // cmsUploadInfo
             // 
@@ -898,7 +895,7 @@ namespace ShareX
             this.tsmiHidePreview});
             this.cmsUploadInfo.Name = "cmsHistory";
             this.cmsUploadInfo.ShowImageMargin = false;
-            this.cmsUploadInfo.Size = new System.Drawing.Size(155, 280);
+            this.cmsUploadInfo.Size = new System.Drawing.Size(155, 258);
             // 
             // tsmiShowErrors
             // 
@@ -969,19 +966,19 @@ namespace ShareX
             this.tsmiOpenFile.Text = "File";
             this.tsmiOpenFile.Click += new System.EventHandler(this.tsmiOpenFile_Click);
             // 
-            // tsmiOpenThumbnailFile
-            // 
-            this.tsmiOpenThumbnailFile.Name = "tsmiOpenThumbnailFile";
-            this.tsmiOpenThumbnailFile.Size = new System.Drawing.Size(156, 22);
-            this.tsmiOpenThumbnailFile.Text = "Thumbnail file";
-            this.tsmiOpenThumbnailFile.Click += new System.EventHandler(this.tsmiOpenThumbnailFile_Click);
-            // 
             // tsmiOpenFolder
             // 
             this.tsmiOpenFolder.Name = "tsmiOpenFolder";
             this.tsmiOpenFolder.Size = new System.Drawing.Size(156, 22);
             this.tsmiOpenFolder.Text = "Folder";
             this.tsmiOpenFolder.Click += new System.EventHandler(this.tsmiOpenFolder_Click);
+            // 
+            // tsmiOpenThumbnailFile
+            // 
+            this.tsmiOpenThumbnailFile.Name = "tsmiOpenThumbnailFile";
+            this.tsmiOpenThumbnailFile.Size = new System.Drawing.Size(156, 22);
+            this.tsmiOpenThumbnailFile.Text = "Thumbnail file";
+            this.tsmiOpenThumbnailFile.Click += new System.EventHandler(this.tsmiOpenThumbnailFile_Click);
             // 
             // tsmiCopy
             // 
@@ -1067,6 +1064,20 @@ namespace ShareX
             this.tsmiCopyText.Size = new System.Drawing.Size(233, 22);
             this.tsmiCopyText.Text = "Text";
             this.tsmiCopyText.Click += new System.EventHandler(this.tsmiCopyText_Click);
+            // 
+            // tsmiCopyThumbnailFile
+            // 
+            this.tsmiCopyThumbnailFile.Name = "tsmiCopyThumbnailFile";
+            this.tsmiCopyThumbnailFile.Size = new System.Drawing.Size(233, 22);
+            this.tsmiCopyThumbnailFile.Text = "Thumbnail file";
+            this.tsmiCopyThumbnailFile.Click += new System.EventHandler(this.tsmiCopyThumbnailFile_Click);
+            // 
+            // tsmiCopyThumbnailImage
+            // 
+            this.tsmiCopyThumbnailImage.Name = "tsmiCopyThumbnailImage";
+            this.tsmiCopyThumbnailImage.Size = new System.Drawing.Size(233, 22);
+            this.tsmiCopyThumbnailImage.Text = "Thumbnail image";
+            this.tsmiCopyThumbnailImage.Click += new System.EventHandler(this.tsmiCopyThumbnailImage_Click);
             // 
             // tssCopy2
             // 
@@ -1344,7 +1355,7 @@ namespace ShareX
             this.tsmiTrayRoundedRectangle.Image = global::ShareX.Properties.Resources.layer_shape_round;
             this.tsmiTrayRoundedRectangle.Name = "tsmiTrayRoundedRectangle";
             this.tsmiTrayRoundedRectangle.Size = new System.Drawing.Size(184, 22);
-            this.tsmiTrayRoundedRectangle.Text = "Rounded Rectangle";
+            this.tsmiTrayRoundedRectangle.Text = "Rounded rectangle";
             this.tsmiTrayRoundedRectangle.Click += new System.EventHandler(this.tsmiTrayRoundedRectangle_Click);
             // 
             // tsmiTrayEllipse
@@ -1384,7 +1395,7 @@ namespace ShareX
             this.tsmiTrayFreeHand.Image = global::ShareX.Properties.Resources.layer_shape_curve;
             this.tsmiTrayFreeHand.Name = "tsmiTrayFreeHand";
             this.tsmiTrayFreeHand.Size = new System.Drawing.Size(184, 22);
-            this.tsmiTrayFreeHand.Text = "Free Hand";
+            this.tsmiTrayFreeHand.Text = "Freehand";
             this.tsmiTrayFreeHand.Click += new System.EventHandler(this.tsmiTrayFreeHand_Click);
             // 
             // tsmiTrayLastRegion
@@ -1392,7 +1403,7 @@ namespace ShareX
             this.tsmiTrayLastRegion.Image = global::ShareX.Properties.Resources.layers_arrange;
             this.tsmiTrayLastRegion.Name = "tsmiTrayLastRegion";
             this.tsmiTrayLastRegion.Size = new System.Drawing.Size(184, 22);
-            this.tsmiTrayLastRegion.Text = "Last Region";
+            this.tsmiTrayLastRegion.Text = "Last region";
             this.tsmiTrayLastRegion.Click += new System.EventHandler(this.tsmiTrayLastRegion_Click);
             // 
             // tsmiTrayScreenRecorder
@@ -1400,15 +1411,15 @@ namespace ShareX
             this.tsmiTrayScreenRecorder.Image = global::ShareX.Properties.Resources.camcorder_image;
             this.tsmiTrayScreenRecorder.Name = "tsmiTrayScreenRecorder";
             this.tsmiTrayScreenRecorder.Size = new System.Drawing.Size(184, 22);
-            this.tsmiTrayScreenRecorder.Text = "Screen Recorder";
-            this.tsmiTrayScreenRecorder.Click += new System.EventHandler(this.tsmiScreenRecorderGIF_Click);
+            this.tsmiTrayScreenRecorder.Text = "Screen recording";
+            this.tsmiTrayScreenRecorder.Click += new System.EventHandler(this.tsmiScreenRecorder_Click);
             // 
             // tsmiTrayAutoCapture
             // 
             this.tsmiTrayAutoCapture.Image = global::ShareX.Properties.Resources.clock_plus;
             this.tsmiTrayAutoCapture.Name = "tsmiTrayAutoCapture";
             this.tsmiTrayAutoCapture.Size = new System.Drawing.Size(184, 22);
-            this.tsmiTrayAutoCapture.Text = "Auto Capture...";
+            this.tsmiTrayAutoCapture.Text = "Auto capture...";
             this.tsmiTrayAutoCapture.Click += new System.EventHandler(this.tsmiAutoCapture_Click);
             // 
             // tsmiTrayAfterCaptureTasks
@@ -1521,8 +1532,10 @@ namespace ShareX
             this.tsmiTrayTools.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tsmiTrayScreenColorPicker,
             this.tsmiTrayRuler,
+            this.tsmiTrayFTPClient,
             this.tsmiTrayHashCheck,
             this.tsmiTrayIndexFolder,
+            this.tsmiTrayImageEditor,
             this.tsmiTrayImageEffects,
             this.tsmiTrayMonitorTest,
             this.tsmiTrayDNSChanger});
@@ -1547,6 +1560,14 @@ namespace ShareX
             this.tsmiTrayRuler.Text = "Ruler...";
             this.tsmiTrayRuler.Click += new System.EventHandler(this.tsmiRuler_Click);
             // 
+            // tsmiTrayFTPClient
+            // 
+            this.tsmiTrayFTPClient.Image = global::ShareX.Properties.Resources.application_network;
+            this.tsmiTrayFTPClient.Name = "tsmiTrayFTPClient";
+            this.tsmiTrayFTPClient.Size = new System.Drawing.Size(183, 22);
+            this.tsmiTrayFTPClient.Text = "FTP client...";
+            this.tsmiTrayFTPClient.Click += new System.EventHandler(this.tsmiFTPClient_Click);
+            // 
             // tsmiTrayHashCheck
             // 
             this.tsmiTrayHashCheck.Image = global::ShareX.Properties.Resources.application_task;
@@ -1557,11 +1578,19 @@ namespace ShareX
             // 
             // tsmiTrayIndexFolder
             // 
-            this.tsmiTrayIndexFolder.Image = ((System.Drawing.Image)(resources.GetObject("tsmiTrayIndexFolder.Image")));
+            this.tsmiTrayIndexFolder.Image = global::ShareX.Properties.Resources.folder_tree;
             this.tsmiTrayIndexFolder.Name = "tsmiTrayIndexFolder";
             this.tsmiTrayIndexFolder.Size = new System.Drawing.Size(183, 22);
             this.tsmiTrayIndexFolder.Text = "Index folder...";
             this.tsmiTrayIndexFolder.Click += new System.EventHandler(this.tsmiIndexFolder_Click);
+            // 
+            // tsmiTrayImageEditor
+            // 
+            this.tsmiTrayImageEditor.Image = global::ShareX.Properties.Resources.Greenshot;
+            this.tsmiTrayImageEditor.Name = "tsmiTrayImageEditor";
+            this.tsmiTrayImageEditor.Size = new System.Drawing.Size(183, 22);
+            this.tsmiTrayImageEditor.Text = "Image editor...";
+            this.tsmiTrayImageEditor.Click += new System.EventHandler(this.tsmiImageEditor_Click);
             // 
             // tsmiTrayImageEffects
             // 
@@ -1653,20 +1682,6 @@ namespace ShareX
             this.ssToolStripMenuItem.Name = "ssToolStripMenuItem";
             this.ssToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.ssToolStripMenuItem.Text = "ss";
-            // 
-            // tsmiCopyThumbnailFile
-            // 
-            this.tsmiCopyThumbnailFile.Name = "tsmiCopyThumbnailFile";
-            this.tsmiCopyThumbnailFile.Size = new System.Drawing.Size(233, 22);
-            this.tsmiCopyThumbnailFile.Text = "Thumbnail file";
-            this.tsmiCopyThumbnailFile.Click += new System.EventHandler(this.tsmiCopyThumbnailFile_Click);
-            // 
-            // tsmiCopyThumbnailImage
-            // 
-            this.tsmiCopyThumbnailImage.Name = "tsmiCopyThumbnailImage";
-            this.tsmiCopyThumbnailImage.Size = new System.Drawing.Size(233, 22);
-            this.tsmiCopyThumbnailImage.Text = "Thumbnail image";
-            this.tsmiCopyThumbnailImage.Click += new System.EventHandler(this.tsmiCopyThumbnailImage_Click);
             // 
             // MainForm
             // 
@@ -1865,5 +1880,9 @@ namespace ShareX
         private System.Windows.Forms.ToolStripMenuItem tsmiOpenThumbnailFile;
         private System.Windows.Forms.ToolStripMenuItem tsmiCopyThumbnailFile;
         private System.Windows.Forms.ToolStripMenuItem tsmiCopyThumbnailImage;
+        private System.Windows.Forms.ToolStripMenuItem tsmiFTPClient;
+        private System.Windows.Forms.ToolStripMenuItem tsmiTrayFTPClient;
+        private System.Windows.Forms.ToolStripMenuItem tsmiImageEditor;
+        private System.Windows.Forms.ToolStripMenuItem tsmiTrayImageEditor;
     }
 }

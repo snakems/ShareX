@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -174,8 +174,8 @@ namespace ShareX
                 switch (ToastConfig.Action)
                 {
                     case ToastClickAction.AnnotateImage:
-                        if (!string.IsNullOrEmpty(ToastConfig.FilePath))
-                            TaskHelpers.AnnotateImage(Image.FromFile(ToastConfig.FilePath));
+                        if (!string.IsNullOrEmpty(ToastConfig.FilePath) && Helpers.IsImageFile(ToastConfig.FilePath))
+                            TaskHelpers.AnnotateImage(ToastConfig.FilePath);
                         break;
                     case ToastClickAction.CopyImageToClipboard:
                         if (!string.IsNullOrEmpty(ToastConfig.FilePath))
@@ -183,7 +183,7 @@ namespace ShareX
                         break;
                     case ToastClickAction.OpenFile:
                         if (!string.IsNullOrEmpty(ToastConfig.FilePath))
-                            Helpers.LoadBrowserAsync(ToastConfig.FilePath);
+                            Helpers.OpenURL(ToastConfig.FilePath);
                         break;
                     case ToastClickAction.OpenFolder:
                         if (!string.IsNullOrEmpty(ToastConfig.FilePath))
@@ -191,7 +191,7 @@ namespace ShareX
                         break;
                     case ToastClickAction.OpenUrl:
                         if (!string.IsNullOrEmpty(ToastConfig.URL))
-                            Helpers.LoadBrowserAsync(ToastConfig.URL);
+                            Helpers.OpenURL(ToastConfig.URL);
                         break;
                     case ToastClickAction.Upload:
                         if (!string.IsNullOrEmpty(ToastConfig.FilePath))
@@ -237,9 +237,9 @@ namespace ShareX
                 components.Dispose();
             }
 
-            if (ToastConfig.Image != null)
+            if (ToastConfig != null)
             {
-                ToastConfig.Image.Dispose();
+                ToastConfig.Dispose();
             }
 
             if (textFont != null)
@@ -285,12 +285,20 @@ namespace ShareX
         #endregion Windows Form Designer generated code
     }
 
-    public class NotificationFormConfig
+    public class NotificationFormConfig : IDisposable
     {
         public Image Image { get; set; }
         public string Text { get; set; }
         public string FilePath { get; set; }
         public string URL { get; set; }
         public ToastClickAction Action { get; set; }
+
+        public void Dispose()
+        {
+            if (Image != null)
+            {
+                Image.Dispose();
+            }
+        }
     }
 }

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -29,6 +29,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Windows.Forms;
 using UploadersLib;
 
@@ -171,11 +172,29 @@ namespace ShareX
 
                 if (!string.IsNullOrEmpty(text))
                 {
-                    if (taskSettings.UploadSettings.ClipboardUploadAutoDetectURL && Helpers.IsValidURLRegex(text))
+                    string url = text.Trim();
+
+                    if (Helpers.IsValidURLRegex(url))
                     {
-                        ShortenURL(text.Trim(), taskSettings);
+                        if (taskSettings.UploadSettings.ClipboardUploadURLContents)
+                        {
+                            string filename = Helpers.GetURLFilename(url);
+
+                            if (!string.IsNullOrEmpty(filename))
+                            {
+                                DownloadAndUploadFile(url, filename, taskSettings);
+                                return;
+                            }
+                        }
+
+                        if (taskSettings.UploadSettings.ClipboardUploadShortenURL)
+                        {
+                            ShortenURL(url, taskSettings);
+                            return;
+                        }
                     }
-                    else if (taskSettings.UploadSettings.ClipboardUploadAutoIndexFolder && text.Length <= 260 && Directory.Exists(text))
+
+                    if (taskSettings.UploadSettings.ClipboardUploadAutoIndexFolder && text.Length <= 260 && Directory.Exists(text))
                     {
                         IndexFolder(text, taskSettings);
                     }
@@ -309,6 +328,28 @@ namespace ShareX
                 UploadTask task = UploadTask.CreateURLShortenerTask(url, taskSettings);
                 TaskManager.Start(task);
             }
+        }
+
+        public static void DownloadAndUploadFile(string url, string filename, TaskSettings taskSettings = null)
+        {
+            if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
+
+            string downloadPath = null;
+
+            Helpers.AsyncJob(() =>
+            {
+                downloadPath = TaskHelpers.CheckFilePath(taskSettings.CaptureFolder, filename, taskSettings);
+
+                using (WebClient wc = new WebClient())
+                {
+                    wc.Proxy = ProxyInfo.Current.GetWebProxy();
+                    wc.DownloadFile(url, downloadPath);
+                }
+            },
+            () =>
+            {
+                UploadFile(downloadPath, taskSettings);
+            });
         }
     }
 }

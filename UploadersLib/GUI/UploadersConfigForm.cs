@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -110,7 +110,7 @@ namespace UploadersLib
         {
             if (!string.IsNullOrEmpty(Config.ImageShackSettings.Username))
             {
-                Helpers.LoadBrowserAsync("https://imageshack.com/user/" + Config.ImageShackSettings.Username);
+                Helpers.OpenURL("https://imageshack.com/user/" + Config.ImageShackSettings.Username);
             }
             else
             {
@@ -120,7 +120,7 @@ namespace UploadersLib
 
         private void btnImageShackOpenMyImages_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync("https://imageshack.com/my/images");
+            Helpers.OpenURL("https://imageshack.com/my/images");
         }
 
         #endregion ImageShack
@@ -180,7 +180,7 @@ namespace UploadersLib
 
         private void btnTinyPicOpenMyImages_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync("http://tinypic.com/yourstuff.php");
+            Helpers.OpenURL("http://tinypic.com/yourstuff.php");
         }
 
         #endregion TinyPic
@@ -446,12 +446,12 @@ namespace UploadersLib
 
         private void pbDropboxLogo_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync("https://www.dropbox.com");
+            Helpers.OpenURL("https://www.dropbox.com");
         }
 
         private void btnDropboxRegister_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync("http://db.tt/CtPYXvu");
+            Helpers.OpenURL("http://db.tt/CtPYXvu");
         }
 
         private void btnDropboxAuthOpen_Click(object sender, EventArgs e)
@@ -956,7 +956,7 @@ namespace UploadersLib
 
         private void btnMegaRegister_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync("https://mega.co.nz/#register");
+            Helpers.OpenURL("https://mega.co.nz/#register");
         }
 
         private void btnMegaRefreshFolders_Click(object sender, EventArgs e)
@@ -975,7 +975,7 @@ namespace UploadersLib
 
         private void btnAmazonS3AccessKeyOpen_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync("https://console.aws.amazon.com/iam/home?#security_credential");
+            Helpers.OpenURL("https://console.aws.amazon.com/iam/home?#security_credential");
         }
 
         private void txtAmazonS3SecretKey_TextChanged(object sender, EventArgs e)
@@ -991,6 +991,7 @@ namespace UploadersLib
         private void cbAmazonS3Endpoint_TextChanged(object sender, EventArgs e)
         {
             Config.AmazonS3Settings.Endpoint = cbAmazonS3Endpoint.Text;
+            UpdateAmazonS3Status();
         }
 
         private void txtAmazonS3BucketName_TextChanged(object sender, EventArgs e)
@@ -1000,12 +1001,13 @@ namespace UploadersLib
 
         private void btnAmazonS3BucketNameOpen_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync("https://console.aws.amazon.com/s3/home");
+            Helpers.OpenURL("https://console.aws.amazon.com/s3/home");
         }
 
         private void txtAmazonS3ObjectPrefix_TextChanged(object sender, EventArgs e)
         {
             Config.AmazonS3Settings.ObjectPrefix = txtAmazonS3ObjectPrefix.Text;
+            UpdateAmazonS3Status();
         }
 
         private void cbAmazonS3UseRRS_CheckedChanged(object sender, EventArgs e)
@@ -1016,6 +1018,7 @@ namespace UploadersLib
         private void cbAmazonS3CustomCNAME_CheckedChanged(object sender, EventArgs e)
         {
             Config.AmazonS3Settings.UseCustomCNAME = cbAmazonS3CustomCNAME.Checked;
+            UpdateAmazonS3Status();
         }
 
         #endregion Amazon S3
@@ -1379,7 +1382,7 @@ namespace UploadersLib
 
         private void btnCustomUploaderHelp_Click(object sender, EventArgs e)
         {
-            Helpers.LoadBrowserAsync(Links.URL_DOCS_CUSTOM_UPLOADER);
+            Helpers.OpenURL(Links.URL_DOCS_CUSTOM_UPLOADER);
         }
 
         private void btnCustomUploaderShowLastResponse_Click(object sender, EventArgs e)
@@ -1397,7 +1400,7 @@ namespace UploadersLib
 
         private void txtCustomUploaderLog_LinkClicked(object sender, LinkClickedEventArgs e)
         {
-            Helpers.LoadBrowserAsync(e.LinkText);
+            Helpers.OpenURL(e.LinkText);
         }
 
         #endregion Custom Uploaders

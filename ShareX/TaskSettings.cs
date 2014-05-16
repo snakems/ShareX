@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -101,8 +101,8 @@ namespace ShareX
             get
             {
                 return UseDefaultAfterCaptureJob && UseDefaultAfterUploadJob && UseDefaultDestinations && UseDefaultGeneralSettings &&
-                       UseDefaultImageSettings && UseDefaultCaptureSettings && UseDefaultUploadSettings && UseDefaultActions &&
-                       UseDefaultIndexerSettings && UseDefaultAdvancedSettings && !WatchFolderEnabled;
+                    UseDefaultImageSettings && UseDefaultCaptureSettings && UseDefaultUploadSettings && UseDefaultActions &&
+                    UseDefaultIndexerSettings && UseDefaultAdvancedSettings && !WatchFolderEnabled;
             }
         }
 
@@ -110,6 +110,7 @@ namespace ShareX
         {
             TaskSettings taskSettings = new TaskSettings();
             taskSettings.SetDefaultSettings();
+            taskSettings.TaskSettingsReference = Program.DefaultTaskSettings;
             return taskSettings;
         }
 
@@ -202,9 +203,11 @@ namespace ShareX
             get
             {
                 if (!string.IsNullOrEmpty(AdvancedSettings.CapturePath))
+                {
                     return AdvancedSettings.CapturePath;
+                }
 
-                return Program.ScreenshotsPath;
+                return Program.ScreenshotsFolder;
             }
         }
     }
@@ -213,6 +216,7 @@ namespace ShareX
     {
         public bool PlaySoundAfterCapture = true;
         public bool ShowAfterCaptureTasksForm = false;
+        public bool ShowBeforeUploadForm = false;
         public bool PlaySoundAfterUpload = true;
         public PopUpNotificationType PopUpNotification = PopUpNotificationType.ToastNotification;
         public bool ShowAfterUploadForm = false;
@@ -277,12 +281,17 @@ namespace ShareX
 
         #region Capture / Screen recorder
 
-        public ScreenRecordOutput ScreenRecordOutput = ScreenRecordOutput.GIF;
-        public int ScreenRecordFPS = 5;
+        public ScreenRecordOutput ScreenRecordOutput = ScreenRecordOutput.FFmpeg;
+        public AVIOptions AVIOptions = new AVIOptions();
+        public FFmpegOptions FFmpegOptions = new FFmpegOptions();
+
+        public int GIFFPS = 5;
+        public int ScreenRecordFPS = 20;
         public bool ScreenRecordFixedDuration = true;
         public float ScreenRecordDuration = 3f;
         public float ScreenRecordStartDelay = 0.1f;
 
+        public bool RunScreencastCLI = false;
         public int VideoEncoderSelected = 0;
 
         #endregion Capture / Screen recorder
@@ -300,7 +309,8 @@ namespace ShareX
 
         #region Upload / Clipboard upload
 
-        public bool ClipboardUploadAutoDetectURL = false;
+        public bool ClipboardUploadURLContents = false;
+        public bool ClipboardUploadShortenURL = false;
         public bool ClipboardUploadAutoIndexFolder = false;
 
         #endregion Upload / Clipboard upload

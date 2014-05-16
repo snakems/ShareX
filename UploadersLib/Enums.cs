@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -48,8 +48,6 @@ namespace UploadersLib
         Twitsnaps,
         [Description("yfrog.com")]
         yFrog,
-        [Description("mediacru.sh")]
-        MediaCrush,
         [Description("Custom image uploader")]
         CustomImageUploader,
         [Description("File uploader")]
@@ -94,6 +92,8 @@ namespace UploadersLib
         AmazonS3,
         [Description("pushbullet.com")]
         Pushbullet,
+        [Description("mediacru.sh")]
+        MediaCrush,
         [Description("drive.google.com")]
         GoogleDrive,
         [Description("rapidshare.com")]
@@ -160,25 +160,6 @@ namespace UploadersLib
         RedirectionURL,
         [Description("Response headers")]
         Headers
-    }
-
-    public enum ProxyMethod
-    {
-        None,
-        Manual,
-        Automatic
-    }
-
-    public enum ProxyType
-    {
-        [Description("HTTP proxy")]
-        HTTP,
-        [Description("SOCKS v4 proxy")]
-        SOCKS4,
-        [Description("SOCKS v4a proxy")]
-        SOCKS4a,
-        [Description("SOCKS v5 proxy")]
-        SOCKS5
     }
 
     public enum FTPProtocol

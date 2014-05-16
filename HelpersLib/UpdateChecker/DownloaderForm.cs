@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -35,8 +35,11 @@ using System.Windows.Forms;
 
 namespace HelpersLib
 {
-    public partial class UpdaterForm : Form
+    public partial class DownloaderForm : Form
     {
+        public delegate void DownloaderInstallEventHandler(string filePath);
+        public event DownloaderInstallEventHandler InstallRequested;
+
         public string URL { get; set; }
         public string Filename { get; set; }
         public string SavePath { get; private set; }
@@ -47,12 +50,13 @@ namespace HelpersLib
         public InstallType InstallType { get; set; }
         public bool AutoStartInstall { get; set; }
         public DownloaderFormStatus Status { get; private set; }
+        public bool RunInstallerInBackground { get; set; }
 
         private FileDownloader fileDownloader;
         private FileStream fileStream;
         private Rectangle fillRect;
 
-        private UpdaterForm()
+        private DownloaderForm()
         {
             InitializeComponent();
             Icon = ShareXResources.Icon;
@@ -67,20 +71,31 @@ namespace HelpersLib
             AutoStartDownload = true;
             InstallType = InstallType.Silent;
             AutoStartInstall = true;
+            RunInstallerInBackground = true;
         }
 
-        public UpdaterForm(UpdateChecker updateChecker)
-            : this()
+        public DownloaderForm(UpdateChecker updateChecker)
+            : this(updateChecker.UpdateInfo)
         {
-            URL = updateChecker.UpdateInfo.DownloadURL;
             Proxy = updateChecker.Proxy;
-            Filename = updateChecker.UpdateInfo.Filename;
-            lblFilename.Text = "Filename: " + Filename;
 
             if (updateChecker is GitHubUpdateChecker)
             {
                 AcceptHeader = "application/octet-stream";
             }
+        }
+
+        public DownloaderForm(UpdateInfo updateInfo)
+            : this(updateInfo.DownloadURL, updateInfo.Filename)
+        {
+        }
+
+        public DownloaderForm(string url, string filename)
+            : this()
+        {
+            URL = url;
+            Filename = filename;
+            lblFilename.Text = "Filename: " + Filename;
         }
 
         private void UpdaterForm_Paint(object sender, PaintEventArgs e)
@@ -111,10 +126,12 @@ namespace HelpersLib
                 }
                 else if (Status == DownloaderFormStatus.DownloadCompleted)
                 {
+                    DialogResult = DialogResult.OK;
                     Install();
                 }
                 else
                 {
+                    DialogResult = DialogResult.Cancel;
                     Close();
                 }
             }
@@ -134,38 +151,62 @@ namespace HelpersLib
         // This function will give time for ShareX to close so installer won't tell ShareX is already running
         private void RunInstallerWithDelay(int delay = 1000)
         {
-            Thread thread = new Thread(() =>
+            if (RunInstallerInBackground)
             {
-                Thread.Sleep(delay);
+                Thread thread = new Thread(() =>
+                {
+                    Thread.Sleep(delay);
+                    RunInstaller();
+                });
+                thread.Start();
+            }
+            else
+            {
+                Hide();
                 RunInstaller();
-            });
-            thread.Start();
+            }
         }
 
         private void RunInstaller()
         {
-            try
+            if (InstallType == InstallType.Event)
             {
-                ProcessStartInfo psi = new ProcessStartInfo(SavePath);
-
-                if (InstallType == InstallType.Silent)
-                {
-                    psi.Arguments = "/SILENT";
-                }
-                else if (InstallType == InstallType.VerySilent)
-                {
-                    psi.Arguments = "/VERYSILENT";
-                }
-
-                if (Helpers.IsDefaultInstallDir())
-                {
-                    psi.Verb = "runas";
-                }
-
-                psi.UseShellExecute = true;
-                Process.Start(psi);
+                OnInstallRequested();
             }
-            catch { }
+            else
+            {
+                try
+                {
+                    ProcessStartInfo psi = new ProcessStartInfo(SavePath);
+
+                    if (InstallType == InstallType.Silent)
+                    {
+                        psi.Arguments = "/SILENT";
+                    }
+                    else if (InstallType == InstallType.VerySilent)
+                    {
+                        psi.Arguments = "/VERYSILENT";
+                    }
+
+                    if (Helpers.IsDefaultInstallDir())
+                    {
+                        psi.Verb = "runas";
+                    }
+
+                    psi.UseShellExecute = true;
+                    Process.Start(psi);
+                }
+                catch { }
+            }
+        }
+
+        protected void OnInstallRequested()
+        {
+            if (InstallRequested != null)
+            {
+                DialogResult = DialogResult.OK;
+                InstallRequested(SavePath);
+            }
         }
 
         private void ChangeStatus(string status)
@@ -179,8 +220,8 @@ namespace HelpersLib
             {
                 pbProgress.Value = (int)Math.Round(fileDownloader.DownloadPercentage);
                 lblProgress.Text = String.Format(CultureInfo.CurrentCulture,
-                    "Progress: {0:0.##}%\nDownload speed: {1:0.##} kB/s\nFile size: {2:n0} / {3:n0} kB",
-                    fileDownloader.DownloadPercentage, fileDownloader.DownloadSpeed / 1024, fileDownloader.DownloadedSize / 1024,
+                    "Progress: {0:0.0}%\nDownload speed: {1:0.0} kB/s\nFile size: {2:n0} / {3:n0} KiB",
+                    fileDownloader.DownloadPercentage, fileDownloader.DownloadSpeed / 1000, fileDownloader.DownloadedSize / 1024,
                     fileDownloader.FileSize / 1024);
             }
         }
@@ -196,7 +237,7 @@ namespace HelpersLib
                 fileStream = new FileStream(SavePath, FileMode.Create, FileAccess.Write, FileShare.Read);
                 fileDownloader = new FileDownloader(URL, fileStream, Proxy, AcceptHeader);
                 fileDownloader.FileSizeReceived += (v1, v2) => ChangeProgress();
-                fileDownloader.DownloadStarted += (v1, v2) => ChangeStatus("Download started.");
+                fileDownloader.DownloadStarted += (v1, v2) => ChangeStatus("Downloading.");
                 fileDownloader.ProgressChanged += (v1, v2) => ChangeProgress();
                 fileDownloader.DownloadCompleted += fileDownloader_DownloadCompleted;
                 fileDownloader.ExceptionThrowed += (v1, v2) => ChangeStatus(fileDownloader.LastException.Message);

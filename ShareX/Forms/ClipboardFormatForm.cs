@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -31,7 +31,6 @@ namespace ShareX
 {
     public partial class ClipboardFormatForm : Form
     {
-        private ContextMenuStrip cmsFormatPattern;
         public ClipboardFormat ClipboardFormat { get; private set; }
 
         public ClipboardFormatForm()
@@ -45,7 +44,7 @@ namespace ShareX
             ClipboardFormat = cbf;
             txtDescription.Text = cbf.Description ?? "";
             txtFormat.Text = cbf.Format ?? "";
-            cmsFormatPattern = NameParser.CreateCodesMenu(txtFormat);
+            NameParser.CreateCodesMenu(txtFormat);
             lblExample.Text = "Supported variables: $result, $url, $shorturl, $thumbnailurl, $deletionurl, $filepath, $filename, $filenamenoext, $thumbnailfilename, $thumbnailfilenamenoext, $folderpath, $foldername, $uploadtime and other variables such as %y-%mo-%d etc.";
         }
 

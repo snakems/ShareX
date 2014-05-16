@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -26,37 +26,38 @@
 using HelpersLib;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ScreenCaptureLib
 {
-    public class AVICache : IDisposable
+    public abstract class ImageCache : IDisposable
     {
-        public bool IsWorking { get; private set; }
-        public string OutputPath { get; private set; }
-        public int FPS { get; private set; }
-        public Size Size { get; private set; }
-        public bool ShowOptions { get; private set; }
+        public bool IsWorking { get; protected set; }
+        public ScreencastOptions Options { get; set; }
 
-        private AVIWriter aviWriter;
-        private Task task;
-        private BlockingCollection<Image> imageQueue;
-        private int position;
+        protected Task task;
+        protected BlockingCollection<Image> imageQueue;
 
-        public AVICache(string outputPath, int fps, Size size, bool showOptions = false)
+        public ImageCache()
         {
-            OutputPath = outputPath;
-            FPS = fps;
-            Size = size;
-            ShowOptions = showOptions;
-
-            Helpers.CreateDirectoryIfNotExist(OutputPath);
-            aviWriter = new AVIWriter(OutputPath, FPS, Size.Width, Size.Height, ShowOptions);
             imageQueue = new BlockingCollection<Image>();
         }
 
-        private void StartConsumerThread()
+        public void AddImageAsync(Image img)
+        {
+            if (!IsWorking)
+            {
+                StartConsumerThread();
+            }
+
+            imageQueue.Add(img);
+        }
+
+        protected virtual void StartConsumerThread()
         {
             if (!IsWorking)
             {
@@ -66,8 +67,6 @@ namespace ScreenCaptureLib
                 {
                     try
                     {
-                        position = 0;
-
                         while (!imageQueue.IsCompleted)
                         {
                             Image img = null;
@@ -78,9 +77,8 @@ namespace ScreenCaptureLib
 
                                 if (img != null)
                                 {
-                                    //using (new DebugTimer("Frame saved"))
-                                    aviWriter.AddFrame((Bitmap)img);
-                                    position++;
+                                    //using (new DebugTimer("WriteFrame"))
+                                    WriteFrame(img);
                                 }
                             }
                             catch (InvalidOperationException)
@@ -100,20 +98,7 @@ namespace ScreenCaptureLib
             }
         }
 
-        public void AddImageAsync(Image img)
-        {
-            if (!IsWorking)
-            {
-                StartConsumerThread();
-            }
-
-            /*if (imageQueue.Count > 0)
-            {
-                Debug.WriteLine("ImageQueue count: " + imageQueue.Count);
-            }*/
-
-            imageQueue.Add(img);
-        }
+        protected abstract void WriteFrame(Image img);
 
         public void Finish()
         {
@@ -126,13 +111,8 @@ namespace ScreenCaptureLib
             Dispose();
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
-            if (aviWriter != null)
-            {
-                aviWriter.Dispose();
-            }
-
             if (imageQueue != null)
             {
                 imageQueue.Dispose();

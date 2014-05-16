@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -88,6 +88,8 @@ namespace ScreenCaptureLib
 
         public ScreenRecordOutput OutputType { get; private set; }
 
+        public ScreencastOptions Options { get; set; }
+
         public delegate void ProgressEventHandler(int progress);
 
         public event ProgressEventHandler EncodingProgressChanged;
@@ -95,31 +97,36 @@ namespace ScreenCaptureLib
         private int fps, delay, frameCount;
         private float durationSeconds;
         private Rectangle captureRectangle;
-        private HardDiskCache hdCache;
-        private AVICache aviCache;
+        private ImageCache imgCache;
+        private FFmpegHelper ffMpegCli;
         private bool stopRequest;
 
-        public ScreenRecorder(int fps, float durationSeconds, Rectangle captureRectangle, string cachePath, ScreenRecordOutput outputType)
+        public ScreenRecorder(ScreencastOptions options, Rectangle captureRectangle, ScreenRecordOutput outputType)
         {
-            if (string.IsNullOrEmpty(cachePath))
+            if (string.IsNullOrEmpty(options.OutputPath))
             {
                 throw new Exception("Screen recorder cache path is empty.");
             }
 
-            FPS = fps;
-            DurationSeconds = durationSeconds;
+            FPS = outputType == ScreenRecordOutput.GIF ? options.GIFFPS : options.ScreenRecordFPS;
+            DurationSeconds = options.Duration;
             CaptureRectangle = captureRectangle;
-            CachePath = cachePath;
+            CachePath = options.OutputPath;
             OutputType = outputType;
 
-            if (OutputType == ScreenRecordOutput.AVI || OutputType == ScreenRecordOutput.AVICommandLine)
+            Options = options;
+
+            switch (OutputType)
             {
-                bool showOptions = OutputType == ScreenRecordOutput.AVI;
-                aviCache = new AVICache(CachePath, FPS, CaptureRectangle.Size, showOptions);
-            }
-            else if (OutputType == ScreenRecordOutput.GIF)
-            {
-                hdCache = new HardDiskCache(CachePath);
+                case ScreenRecordOutput.AVI:
+                    imgCache = new AVICache(Options);
+                    break;
+                case ScreenRecordOutput.FFmpeg:
+                    ffMpegCli = new FFmpegHelper(Options);
+                    break;
+                case ScreenRecordOutput.GIF:
+                    imgCache = new HardDiskCache(Options);
+                    break;
             }
         }
 
@@ -136,6 +143,23 @@ namespace ScreenCaptureLib
                 IsRecording = true;
                 stopRequest = false;
 
+                if (OutputType == ScreenRecordOutput.FFmpeg)
+                {
+                    ffMpegCli.Record();
+                }
+                else
+                {
+                    RecordUsingCache();
+                }
+            }
+
+            IsRecording = false;
+        }
+
+        private void RecordUsingCache()
+        {
+            try
+            {
                 for (int i = 0; !stopRequest && (frameCount == 0 || i < frameCount); i++)
                 {
                     Stopwatch timer = Stopwatch.StartNew();
@@ -143,14 +167,7 @@ namespace ScreenCaptureLib
                     Image img = Screenshot.CaptureRectangle(CaptureRectangle);
                     //DebugHelper.WriteLine("Screen capture: " + (int)timer.ElapsedMilliseconds);
 
-                    if (OutputType == ScreenRecordOutput.AVI || OutputType == ScreenRecordOutput.AVICommandLine)
-                    {
-                        aviCache.AddImageAsync(img);
-                    }
-                    else if (OutputType == ScreenRecordOutput.GIF)
-                    {
-                        hdCache.AddImageAsync(img);
-                    }
+                    imgCache.AddImageAsync(img);
 
                     if (!stopRequest && (frameCount == 0 || i + 1 < frameCount))
                     {
@@ -162,33 +179,33 @@ namespace ScreenCaptureLib
                         }
                         else if (sleepTime < 0)
                         {
-                            //DebugHelper.WriteLine("FPS drop: " + -sleepTime);
+                            // Need to handle FPS drops
                         }
                     }
                 }
-
-                if (OutputType == ScreenRecordOutput.AVI || OutputType == ScreenRecordOutput.AVICommandLine)
-                {
-                    aviCache.Finish();
-                }
-                else if (OutputType == ScreenRecordOutput.GIF)
-                {
-                    hdCache.Finish();
-                }
             }
-
-            IsRecording = false;
+            finally
+            {
+                imgCache.Finish();
+            }
         }
 
         public void StopRecording()
         {
             stopRequest = true;
+
+            if (ffMpegCli != null)
+            {
+                ffMpegCli.Close();
+            }
         }
 
         public void SaveAsGIF(string path, GIFQuality quality)
         {
-            if (!IsRecording)
+            if (imgCache != null && imgCache is HardDiskCache && !IsRecording)
             {
+                HardDiskCache hdCache = imgCache as HardDiskCache;
+
                 using (GifCreator gifEncoder = new GifCreator(delay))
                 {
                     int i = 0;
@@ -211,12 +228,12 @@ namespace ScreenCaptureLib
             }
         }
 
-        public void EncodeUsingCommandLine(VideoEncoder encoder, string targetFilePath)
+        public void EncodeUsingCommandLine(VideoEncoder encoder, string sourceFilePath, string targetFilePath)
         {
-            if (!string.IsNullOrEmpty(CachePath) && File.Exists(CachePath))
+            if (!string.IsNullOrEmpty(sourceFilePath) && File.Exists(sourceFilePath))
             {
                 OnEncodingProgressChanged(-1);
-                encoder.Encode(CachePath, targetFilePath);
+                encoder.Encode(sourceFilePath, targetFilePath);
                 OnEncodingProgressChanged(100);
             }
         }
@@ -231,14 +248,9 @@ namespace ScreenCaptureLib
 
         public void Dispose()
         {
-            if (hdCache != null)
+            if (imgCache != null)
             {
-                hdCache.Dispose();
-            }
-
-            if (aviCache != null)
-            {
-                aviCache.Dispose();
+                imgCache.Dispose();
             }
         }
     }

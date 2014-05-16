@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -248,25 +248,40 @@ namespace ShareX
 
                     TaskbarManager.SetProgressState(Program.MainForm, TaskbarProgressBarStatus.Normal);
 
-                    if (threadWorker != null)
+                    DialogResult beforeUploadResult = DialogResult.OK;
+
+                    if (Info.TaskSettings.GeneralSettings.ShowBeforeUploadForm)
                     {
-                        threadWorker.InvokeAsync(OnUploadStarted);
+                        BeforeUploadForm form = new BeforeUploadForm(Info);
+                        beforeUploadResult = form.ShowDialog();
                     }
-                    else
+
+                    if (beforeUploadResult == DialogResult.OK)
                     {
-                        OnUploadStarted();
-                    }
-
-                    bool isError = DoUpload();
-
-                    if (isError && Program.Settings.MaxUploadFailRetry > 0)
-                    {
-                        DebugHelper.WriteLine("Upload failed. Retrying upload.");
-
-                        for (int retry = 1; isError && retry <= Program.Settings.MaxUploadFailRetry; retry++)
+                        if (threadWorker != null)
                         {
-                            isError = DoUpload(retry);
+                            threadWorker.InvokeAsync(OnUploadStarted);
                         }
+                        else
+                        {
+                            OnUploadStarted();
+                        }
+
+                        bool isError = DoUpload();
+
+                        if (isError && Program.Settings.MaxUploadFailRetry > 0)
+                        {
+                            DebugHelper.WriteLine("Upload failed. Retrying upload.");
+
+                            for (int retry = 1; isError && retry <= Program.Settings.MaxUploadFailRetry; retry++)
+                            {
+                                isError = DoUpload(retry);
+                            }
+                        }
+                    }
+                    else if (beforeUploadResult == DialogResult.Cancel)
+                    {
+                        Info.Result.IsURLExpected = false;
                     }
                 }
             }
@@ -377,7 +392,7 @@ namespace ShareX
 
             if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.AnnotateImage))
             {
-                tempImage = TaskHelpers.AnnotateImage(tempImage);
+                tempImage = TaskHelpers.AnnotateImage(tempImage, Info.FileName);
             }
 
             if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyImageToClipboard))
@@ -658,9 +673,6 @@ namespace ShareX
                     yFrogOptions.Source = Application.ProductName;
                     imageUploader = new YfrogUploader(yFrogOptions);
                     break;
-                case ImageDestination.MediaCrush:
-                    imageUploader = new MediaCrushUploader();
-                    break;
                 case ImageDestination.CustomImageUploader:
                     if (Program.UploadersConfig.CustomUploadersList.IsValidIndex(Program.UploadersConfig.CustomImageUploaderSelected))
                     {
@@ -885,6 +897,9 @@ namespace ShareX
                     break;
                 case FileDestination.Pushbullet:
                     fileUploader = new Pushbullet(Program.UploadersConfig.PushbulletSettings);
+                    break;
+                case FileDestination.MediaCrush:
+                    fileUploader = new MediaCrushUploader();
                     break;
             }
 

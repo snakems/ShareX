@@ -75,7 +75,7 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.2\lib\net35\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net35\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
@@ -94,6 +94,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\BeforeUploadControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\BeforeUploadControl.Designer.cs">
+      <DependentUpon>BeforeUploadControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\BeforeUploadForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BeforeUploadForm.Designer.cs">
+      <DependentUpon>BeforeUploadForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\ClipboardFormatForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -240,6 +252,9 @@
     <Compile Include="WatchFolder.cs" />
     <Compile Include="WatchFolderManager.cs" />
     <Compile Include="WatchFolderSettings.cs" />
+    <EmbeddedResource Include="Controls\BeforeUploadControl.resx">
+      <DependentUpon>BeforeUploadControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\AboutForm.resx">
       <DependentUpon>AboutForm.cs</DependentUpon>
       <SubType>Designer</SubType>
@@ -249,6 +264,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\AutoCaptureForm.resx">
       <DependentUpon>AutoCaptureForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\BeforeUploadForm.resx">
+      <DependentUpon>BeforeUploadForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\ClipboardFormatForm.resx">
       <DependentUpon>ClipboardFormatForm.cs</DependentUpon>
@@ -459,15 +477,26 @@
     <None Include="Resources\bug.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="LICENSE.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Resources\checkbox_uncheck.png" />
     <None Include="Resources\checkbox_check.png" />
     <None Include="Resources\network-ip.png" />
     <None Include="Resources\inbox--plus.png" />
     <None Include="Resources\ruler-triangle.png" />
     <None Include="Resources\Test.png" />
+    <None Include="Resources\application-network.png" />
+    <None Include="Resources\Greenshot.png" />
+    <None Include="..\Docs\LICENSE.txt">
+      <Link>LICENSE.txt</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Lib\7z-x64.dll">
+      <Link>7z-x64.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="..\Lib\7z.dll">
+      <Link>7z.dll</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <Content Include="ShareX_Icon.ico" />
     <None Include="Resources\ru.png" />
     <None Include="Resources\keyboard--pencil.png" />
@@ -480,9 +509,10 @@
     <None Include="Resources\folder-tree.png" />
     <None Include="Resources\fr.png" />
     <None Include="Resources\color.png" />
-    <Content Include="..\Docs\VersionHistory.txt">
+    <None Include="..\Docs\VersionHistory.txt">
       <Link>VersionHistory.txt</Link>
-    </Content>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\image-saturation.png" />
     <None Include="Resources\pipette.png" />
   </ItemGroup>

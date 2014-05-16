@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -330,9 +330,7 @@ namespace HelpersLib
         public static void TrimMemoryUse()
         {
             GC.Collect();
-#if !__MonoCS__
             GC.WaitForFullGCComplete();
-#endif
             SetProcessWorkingSetSize(Process.GetCurrentProcess().Handle, (IntPtr)(-1), (IntPtr)(-1));
         }
 
@@ -379,7 +377,7 @@ namespace HelpersLib
         /// <param name="options">Stream options.</param>
         ///
         /// <returns>Returns TRUE if the user pressed OK, FALSE for CANCEL, or an error otherwise.</returns>
-        public static int AVISaveOptions(IntPtr stream, ref AVICOMPRESSOPTIONS options)
+        public static int AVISaveOptions(IntPtr stream, ref AVICOMPRESSOPTIONS options, IntPtr parentWindow)
         {
             IntPtr[] streams = new IntPtr[1];
             IntPtr[] infPtrs = new IntPtr[1];
@@ -394,7 +392,7 @@ namespace HelpersLib
             infPtrs[0] = mem;
 
             // show dialog with a list of available compresors and configuration
-            int ret = AVISaveOptions(IntPtr.Zero, 0, 1, streams, infPtrs);
+            int ret = AVISaveOptions(parentWindow, 0, 1, streams, infPtrs);
 
             // copy from unmanaged memory to managed structure
             options = (AVICOMPRESSOPTIONS)Marshal.PtrToStructure(mem, typeof(AVICOMPRESSOPTIONS));
@@ -446,6 +444,27 @@ namespace HelpersLib
                     chs[i] = ' ';
             }
             return new string(chs);
+        }
+
+        public static bool Is64Bit()
+        {
+            if (IntPtr.Size == 8 || (IntPtr.Size == 4 && Is32BitProcessOn64BitProcessor()))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private static bool Is32BitProcessOn64BitProcessor()
+        {
+            bool retVal;
+
+            IsWow64Process(Process.GetCurrentProcess().Handle, out retVal);
+
+            return retVal;
         }
     }
 }

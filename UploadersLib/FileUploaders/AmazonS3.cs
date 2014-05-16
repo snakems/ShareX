@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -59,16 +59,16 @@ namespace UploadersLib.FileUploaders
             }
         }
 
-        private string GetPolicyDocument(string fileName)
+        private string GetPolicyDocument(string fileName, string objectKey)
         {
             var policyDocument = new
             {
-                expiration = DateTime.UtcNow.AddDays(2).ToString("o"), // The policy is valid for 2 days
+                expiration = DateTime.UtcNow.AddDays(2).ToString("yyyy-MM-ddTHH:mm:ssZ"), // The policy is valid for 2 days
                 conditions = new List<S3PolicyCondition> {
                     new S3PolicyCondition("acl", "public-read"),
                     new S3PolicyCondition("bucket", S3Settings.Bucket),
                     new S3PolicyCondition("Content-Type", Helpers.GetMimeType(fileName)),
-                    new S3PolicyCondition("key", GetObjectKey(fileName)),
+                    new S3PolicyCondition("key", objectKey),
                     new S3PolicyCondition("x-amz-storage-class", GetObjectStorageClass())
                 }
             };
@@ -120,9 +120,14 @@ namespace UploadersLib.FileUploaders
             }
         }
 
+        public string GetURL(string fileName)
+        {
+            return GetObjectURL(GetObjectKey(fileName));
+        }
+
         private Dictionary<string, string> GetParameters(string fileName, string objectKey)
         {
-            var policyDocument = GetPolicyDocument(fileName);
+            var policyDocument = GetPolicyDocument(fileName, objectKey);
             var policyBytes = Encoding.ASCII.GetBytes(policyDocument);
             var signature = CreateSignature(S3Settings.SecretAccessKey, policyBytes);
 

@@ -133,6 +133,16 @@ namespace ShareX.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap application_network {
+            get {
+                object obj = ResourceManager.GetObject("application_network", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap application_pencil {
             get {
                 object obj = ResourceManager.GetObject("application_pencil", resourceCulture);
@@ -445,6 +455,16 @@ namespace ShareX.Properties {
         public static System.Drawing.Bitmap globe_share {
             get {
                 object obj = ResourceManager.GetObject("globe_share", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap Greenshot {
+            get {
+                object obj = ResourceManager.GetObject("Greenshot", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

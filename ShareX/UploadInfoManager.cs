@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -96,32 +96,32 @@ namespace ShareX
 
         public void OpenURL()
         {
-            if (IsItemSelected && SelectedItem.IsURLExist) Helpers.LoadBrowserAsync(SelectedItem.Info.Result.URL);
+            if (IsItemSelected && SelectedItem.IsURLExist) Helpers.OpenURL(SelectedItem.Info.Result.URL);
         }
 
         public void OpenShortenedURL()
         {
-            if (IsItemSelected && SelectedItem.IsShortenedURLExist) Helpers.LoadBrowserAsync(SelectedItem.Info.Result.ShortenedURL);
+            if (IsItemSelected && SelectedItem.IsShortenedURLExist) Helpers.OpenURL(SelectedItem.Info.Result.ShortenedURL);
         }
 
         public void OpenThumbnailURL()
         {
-            if (IsItemSelected && SelectedItem.IsThumbnailURLExist) Helpers.LoadBrowserAsync(SelectedItem.Info.Result.ThumbnailURL);
+            if (IsItemSelected && SelectedItem.IsThumbnailURLExist) Helpers.OpenURL(SelectedItem.Info.Result.ThumbnailURL);
         }
 
         public void OpenDeletionURL()
         {
-            if (IsItemSelected && SelectedItem.IsDeletionURLExist) Helpers.LoadBrowserAsync(SelectedItem.Info.Result.DeletionURL);
+            if (IsItemSelected && SelectedItem.IsDeletionURLExist) Helpers.OpenURL(SelectedItem.Info.Result.DeletionURL);
         }
 
         public void OpenFile()
         {
-            if (IsItemSelected && SelectedItem.IsFileExist) Helpers.LoadBrowserAsync(SelectedItem.Info.FilePath);
+            if (IsItemSelected && SelectedItem.IsFileExist) Helpers.OpenURL(SelectedItem.Info.FilePath);
         }
 
         public void OpenThumbnailFile()
         {
-            if (IsItemSelected && SelectedItem.IsThumbnailFileExist) Helpers.LoadBrowserAsync(SelectedItem.Info.ThumbnailFilePath);
+            if (IsItemSelected && SelectedItem.IsThumbnailFileExist) Helpers.OpenURL(SelectedItem.Info.ThumbnailFilePath);
         }
 
         public void OpenFolder()
@@ -135,15 +135,15 @@ namespace ShareX
             {
                 if (SelectedItem.IsShortenedURLExist)
                 {
-                    Helpers.LoadBrowserAsync(SelectedItem.Info.Result.ShortenedURL);
+                    Helpers.OpenURL(SelectedItem.Info.Result.ShortenedURL);
                 }
                 else if (SelectedItem.IsURLExist)
                 {
-                    Helpers.LoadBrowserAsync(SelectedItem.Info.Result.URL);
+                    Helpers.OpenURL(SelectedItem.Info.Result.URL);
                 }
                 else if (SelectedItem.IsFileExist)
                 {
-                    Helpers.LoadBrowserAsync(SelectedItem.Info.FilePath);
+                    Helpers.OpenURL(SelectedItem.Info.FilePath);
                 }
             }
         }

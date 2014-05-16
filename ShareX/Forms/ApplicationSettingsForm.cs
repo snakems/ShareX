@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -38,7 +38,6 @@ namespace ShareX
     {
         private bool loaded;
         private const int MaxBufferSizePower = 14;
-        private ContextMenuStrip cmsSaveImageSubFolderPattern;
 
         public ApplicationSettingsForm()
         {
@@ -72,7 +71,7 @@ namespace ShareX
             cbUseCustomScreenshotsPath.Checked = Program.Settings.UseCustomScreenshotsPath;
             txtCustomScreenshotsPath.Text = Program.Settings.CustomScreenshotsPath;
             txtSaveImageSubFolderPattern.Text = Program.Settings.SaveImageSubFolderPattern;
-            cmsSaveImageSubFolderPattern = NameParser.CreateCodesMenu(txtSaveImageSubFolderPattern, ReplacementVariables.n);
+            NameParser.CreateCodesMenu(txtSaveImageSubFolderPattern, ReplacementVariables.n);
 
             // Proxy
             cbProxyMethod.Items.AddRange(Enum.GetNames(typeof(ProxyMethod)));
@@ -124,8 +123,10 @@ namespace ShareX
             // Profiles
             if (Program.Settings.VideoEncoders.Count == 0)
             {
-                Program.Settings.VideoEncoders.Add(new VideoEncoder() { Name = "x264 encoder to MP4", Path = "x264.exe", Args = "--output %output %input", OutputExtension = "mp4" });
-                Program.Settings.VideoEncoders.Add(new VideoEncoder() { Name = "ffmpeg encoder to WebM", Path = "ffmpeg.exe", Args = "-i %input -c:v libvpx -crf 12 -b:v 500K %output", OutputExtension = "webm" });
+                Program.Settings.VideoEncoders.Add(new VideoEncoder() { Name = "Encode using x264.exe to H.264", Path = "x264.exe", Args = "--output %output %input", OutputExtension = "mp4" });
+                Program.Settings.VideoEncoders.Add(new VideoEncoder() { Name = "Encode using ffmpeg.exe to WebM", Path = "ffmpeg.exe", Args = "-i %input -c:v libvpx -crf 12 -b:v 500K %output", OutputExtension = "webm" });
+                Program.Settings.VideoEncoders.Add(new VideoEncoder() { Name = "Change container to MP4 using ffmpeg.exe", Path = "ffmpeg.exe", Args = "-i %input -c:v copy %output", OutputExtension = "mp4" });
+                Program.Settings.VideoEncoders.Add(new VideoEncoder() { Name = "Optimize GIF using gifsicle.exe", Path = "gifsicle.exe", Args = "-O2 %input -o %output", OutputExtension = "gif" });
             }
             Program.Settings.VideoEncoders.ForEach(x => AddVideoEncoder(x));
 
@@ -279,13 +280,13 @@ namespace ShareX
         private void cbUseCustomScreenshotsPath_CheckedChanged(object sender, EventArgs e)
         {
             Program.Settings.UseCustomScreenshotsPath = cbUseCustomScreenshotsPath.Checked;
-            lblSaveImageSubFolderPatternPreview.Text = Program.ScreenshotsPath;
+            lblSaveImageSubFolderPatternPreview.Text = Program.ScreenshotsFolder;
         }
 
         private void txtCustomScreenshotsPath_TextChanged(object sender, EventArgs e)
         {
             Program.Settings.CustomScreenshotsPath = txtCustomScreenshotsPath.Text;
-            lblSaveImageSubFolderPatternPreview.Text = Program.ScreenshotsPath;
+            lblSaveImageSubFolderPatternPreview.Text = Program.ScreenshotsFolder;
         }
 
         private void btnBrowseCustomScreenshotsPath_Click(object sender, EventArgs e)
@@ -296,7 +297,7 @@ namespace ShareX
         private void txtSaveImageSubFolderPattern_TextChanged(object sender, EventArgs e)
         {
             Program.Settings.SaveImageSubFolderPattern = txtSaveImageSubFolderPattern.Text;
-            lblSaveImageSubFolderPatternPreview.Text = Program.ScreenshotsPath;
+            lblSaveImageSubFolderPatternPreview.Text = Program.ScreenshotsFolder;
         }
 
         private void btnOpenScreenshotsFolder_Click(object sender, EventArgs e)

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -46,6 +46,7 @@ namespace ShareX
 
         public EncoderProgramForm(VideoEncoder encoder)
         {
+            Icon = ShareXResources.Icon;
             this.encoder = encoder;
             InitializeComponent();
             txtName.Text = encoder.Name ?? "";
@@ -61,10 +62,23 @@ namespace ShareX
 
         private void btnOK_Click(object sender, EventArgs e)
         {
+            if (string.IsNullOrEmpty(txtPath.Text))
+            {
+                MessageBox.Show("Path can't be empty.", "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (string.IsNullOrEmpty(txtExtension.Text))
+            {
+                MessageBox.Show("Extension can't be empty.", "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             encoder.Name = txtName.Text;
             encoder.Path = txtPath.Text;
             encoder.Args = txtArguments.Text;
             encoder.OutputExtension = txtExtension.Text;
+
             DialogResult = DialogResult.OK;
         }
 

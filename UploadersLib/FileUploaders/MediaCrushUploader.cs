@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -28,17 +28,20 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
 using System.Threading;
 
-namespace UploadersLib.ImageUploaders
+namespace UploadersLib.FileUploaders
 {
-    public class MediaCrushUploader : ImageUploader
+    public class MediaCrushUploader : FileUploader
     {
         public override UploadResult Upload(Stream stream, string fileName)
         {
+            SuppressWebExceptions = true;
+
             string hash = CreateHash(stream);
 
             UploadResult result = CheckExists(hash);
@@ -50,7 +53,7 @@ namespace UploadersLib.ImageUploaders
 
             try
             {
-                result = UploadData(stream, "https://mediacru.sh/api/upload/file", fileName, suppressWebExceptions: false);
+                result = UploadData(stream, "https://mediacru.sh/api/upload/file", fileName);
             }
             catch (WebException e)
             {
@@ -161,6 +164,8 @@ namespace UploadersLib.ImageUploaders
             public string Path { get; set; }
             [JsonProperty("type")]
             public string Mimetype { get; set; }
+            [JsonProperty("url")]
+            public string URL { get; set; }
         }
 
         [JsonProperty("blob_type")]
@@ -192,9 +197,16 @@ namespace UploadersLib.ImageUploaders
         {
             get
             {
-                if (Files != null && Files.Length > 0 && IsDirectURLPossible(Files[0]))
+                if (Files != null && Files.Length > 0)
                 {
-                    return "https://mediacru.sh" + Files[0].Path;
+                    if (BlobType == "image")
+                    {
+                        return Files[0].URL;
+                    }
+                    else if (BlobType == "video" || BlobType == "audio")
+                    {
+                        return "https://mediacru.sh/" + Hash + "/direct";
+                    }
                 }
 
                 return URL;
@@ -208,19 +220,6 @@ namespace UploadersLib.ImageUploaders
             {
                 return "https://mediacru.sh/" + Hash + "/delete";
             }
-        }
-
-        private bool IsDirectURLPossible(MediaCrushFile file)
-        {
-            switch (file.Mimetype)
-            {
-                case "image/png":
-                case "image/jpeg":
-                case "image/bmp":
-                    return true;
-            }
-
-            return false;
         }
     }
 }

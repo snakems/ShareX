@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -22,6 +22,8 @@
 */
 
 #endregion License Information (GPL v3)
+
+using System.ComponentModel;
 
 namespace ScreenCaptureLib
 {
@@ -43,5 +45,47 @@ namespace ScreenCaptureLib
         Bottom,
         BottomLeft,
         Left
+    }
+
+    public enum FFmpegVideoCodec
+    {
+        [Description("x264")]
+        libx264,
+        [Description("VP8")]
+        libvpx,
+        [Description("XviD")]
+        libxvid
+    }
+
+    public enum FFmpegPreset
+    {
+        [Description("Ultra fast")]
+        ultrafast,
+        [Description("Super fast")]
+        superfast,
+        [Description("Very fast")]
+        veryfast,
+        [Description("Faster")]
+        faster,
+        [Description("Fast")]
+        fast,
+        [Description("Medium")]
+        medium,
+        [Description("Slow")]
+        slow,
+        [Description("Slower")]
+        slower,
+        [Description("Very slow")]
+        veryslow,
+    }
+
+    public enum FFmpegAudioCodec
+    {
+        [Description("AAC")]
+        libvoaacenc,
+        [Description("Vorbis")]
+        libvorbis,
+        [Description("MP3")]
+        libmp3lame
     }
 }

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -26,17 +26,18 @@
 using HelpersLib;
 using ScreenCaptureLib;
 using ShareX.Properties;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using UploadersLib;
 
 namespace ShareX
 {
     public class ScreenRecordForm : TrayForm
     {
-        public Rectangle CaptureRectangle { get; private set; }
         public bool IsRecording { get; private set; }
 
         private static ScreenRecordForm instance;
@@ -56,6 +57,7 @@ namespace ShareX
         }
 
         private ScreenRecorder screenRecorder;
+        private Rectangle captureRectangle;
 
         private ScreenRecordForm()
         {
@@ -73,16 +75,15 @@ namespace ShareX
 
         private void SelectRegion()
         {
-            Rectangle rect;
-            if (TaskHelpers.SelectRegion(out rect) && !rect.IsEmpty)
+            if (TaskHelpers.SelectRegion(out captureRectangle) && !captureRectangle.IsEmpty)
             {
-                CaptureRectangle = CaptureHelpers.EvenRectangleSize(rect);
+                captureRectangle = CaptureHelpers.EvenRectangleSize(captureRectangle);
             }
         }
 
         public async void StartRecording(TaskSettings TaskSettings)
         {
-            if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVICommandLine)
+            if (TaskSettings.CaptureSettings.RunScreencastCLI)
             {
                 if (!Program.Settings.VideoEncoders.IsValidIndex(TaskSettings.CaptureSettings.VideoEncoderSelected))
                 {
@@ -91,20 +92,40 @@ namespace ShareX
                 }
                 else if (!Program.Settings.VideoEncoders[TaskSettings.CaptureSettings.VideoEncoderSelected].IsValid())
                 {
-                    MessageBox.Show("There is a problem with the CLI video encoder file path.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show("CLI video encoder file does not exist: " + Program.Settings.VideoEncoders[TaskSettings.CaptureSettings.VideoEncoderSelected].Path,
+                        Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+
+            if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.FFmpeg && !File.Exists(TaskSettings.CaptureSettings.FFmpegOptions.CLIPath))
+            {
+                string ffmpegText = string.IsNullOrEmpty(TaskSettings.CaptureSettings.FFmpegOptions.CLIPath) ? "ffmpeg.exe" : TaskSettings.CaptureSettings.FFmpegOptions.CLIPath;
+
+                if (MessageBox.Show(ffmpegText + " does not exist." + Environment.NewLine + Environment.NewLine + "Would you like to automatically download it?",
+                    Application.ProductName + " - Missing ffmpeg.exe", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                {
+                    if (FFmpegHelper.DownloadFFmpeg(false, DownloaderForm_InstallRequested) == DialogResult.OK)
+                    {
+                        Program.DefaultTaskSettings.CaptureSettings.FFmpegOptions.CLIPath = TaskSettings.TaskSettingsReference.CaptureSettings.FFmpegOptions.CLIPath =
+                           TaskSettings.CaptureSettings.FFmpegOptions.CLIPath = Path.Combine(Program.ToolsFolder, "ffmpeg.exe");
+                    }
+                }
+                else
+                {
                     return;
                 }
             }
 
             SelectRegion();
-            Screenshot.CaptureCursor = TaskSettings.CaptureSettings.ShowCursor;
 
-            if (IsRecording || CaptureRectangle.IsEmpty || screenRecorder != null)
+            if (IsRecording || captureRectangle.IsEmpty || screenRecorder != null)
             {
                 return;
             }
 
             IsRecording = true;
+            Screenshot.CaptureCursor = TaskSettings.CaptureSettings.ShowCursor;
 
             TrayIcon.Icon = Resources.control_record_yellow.ToIcon();
             TrayIcon.Visible = true;
@@ -115,7 +136,7 @@ namespace ShareX
             {
                 using (ScreenRegionManager screenRegionManager = new ScreenRegionManager())
                 {
-                    screenRegionManager.Start(CaptureRectangle);
+                    screenRegionManager.Start(captureRectangle);
 
                     await TaskEx.Run(() =>
                     {
@@ -123,15 +144,28 @@ namespace ShareX
                         {
                             path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, "avi"));
                         }
+                        else if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.FFmpeg)
+                        {
+                            path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, TaskSettings.CaptureSettings.FFmpegOptions.Extension));
+                        }
                         else
                         {
                             path = Program.ScreenRecorderCacheFilePath;
                         }
 
-                        float duration = TaskSettings.CaptureSettings.ScreenRecordFixedDuration ? TaskSettings.CaptureSettings.ScreenRecordDuration : 0;
+                        ScreencastOptions options = new ScreencastOptions()
+                        {
+                            CaptureArea = captureRectangle,
+                            GIFFPS = TaskSettings.CaptureSettings.GIFFPS,
+                            ScreenRecordFPS = TaskSettings.CaptureSettings.ScreenRecordFPS,
+                            OutputPath = path,
+                            Duration = TaskSettings.CaptureSettings.ScreenRecordFixedDuration ? TaskSettings.CaptureSettings.ScreenRecordDuration : 0,
+                            AVI = TaskSettings.CaptureSettings.AVIOptions,
+                            FFmpeg = TaskSettings.CaptureSettings.FFmpegOptions,
+                            DrawCursor = TaskSettings.CaptureSettings.ShowCursor
+                        };
 
-                        screenRecorder = new ScreenRecorder(TaskSettings.CaptureSettings.ScreenRecordFPS, duration, CaptureRectangle, path,
-                            TaskSettings.CaptureSettings.ScreenRecordOutput);
+                        screenRecorder = new ScreenRecorder(options, captureRectangle, TaskSettings.CaptureSettings.ScreenRecordOutput);
 
                         int delay = (int)(TaskSettings.CaptureSettings.ScreenRecordStartDelay * 1000);
 
@@ -148,23 +182,32 @@ namespace ShareX
                     });
                 }
 
-                if (screenRecorder != null && TaskSettings.CaptureSettings.ScreenRecordOutput != ScreenRecordOutput.AVI)
+                if (screenRecorder != null)
                 {
                     TrayIcon.Icon = Resources.camcorder__pencil.ToIcon();
 
                     await TaskEx.Run(() =>
                     {
-                        switch (TaskSettings.CaptureSettings.ScreenRecordOutput)
+                        string sourceFilePath = path;
+
+                        if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.GIF)
                         {
-                            case ScreenRecordOutput.GIF:
-                                path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, "gif"));
-                                screenRecorder.SaveAsGIF(path, TaskSettings.ImageSettings.ImageGIFQuality);
-                                break;
-                            case ScreenRecordOutput.AVICommandLine:
-                                VideoEncoder encoder = Program.Settings.VideoEncoders[TaskSettings.CaptureSettings.VideoEncoderSelected];
-                                path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, encoder.OutputExtension));
-                                screenRecorder.EncodeUsingCommandLine(encoder, path);
-                                break;
+                            if (TaskSettings.CaptureSettings.RunScreencastCLI)
+                            {
+                                sourceFilePath = Path.ChangeExtension(Program.ScreenRecorderCacheFilePath, "gif");
+                            }
+                            else
+                            {
+                                sourceFilePath = path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, "gif"));
+                            }
+                            screenRecorder.SaveAsGIF(sourceFilePath, TaskSettings.ImageSettings.ImageGIFQuality);
+                        }
+
+                        if (TaskSettings.CaptureSettings.RunScreencastCLI)
+                        {
+                            VideoEncoder encoder = Program.Settings.VideoEncoders[TaskSettings.CaptureSettings.VideoEncoderSelected];
+                            path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, encoder.OutputExtension));
+                            screenRecorder.EncodeUsingCommandLine(encoder, sourceFilePath, path);
                         }
                     });
                 }
@@ -173,7 +216,7 @@ namespace ShareX
             {
                 if (screenRecorder != null)
                 {
-                    if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVICommandLine &&
+                    if (TaskSettings.CaptureSettings.RunScreencastCLI &&
                         !string.IsNullOrEmpty(screenRecorder.CachePath) && File.Exists(screenRecorder.CachePath))
                     {
                         File.Delete(screenRecorder.CachePath);
@@ -207,6 +250,21 @@ namespace ShareX
             }
 
             IsRecording = false;
+        }
+
+        private void DownloaderForm_InstallRequested(string filePath)
+        {
+            string extractPath = Path.Combine(Program.ToolsFolder, "ffmpeg.exe");
+            bool result = FFmpegHelper.ExtractFFmpeg(filePath, extractPath);
+
+            if (result)
+            {
+                MessageBox.Show("FFmpeg successfully downloaded.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                MessageBox.Show("Download of FFmpeg failed.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         public void StopRecording()

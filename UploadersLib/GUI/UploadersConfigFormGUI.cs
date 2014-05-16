@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -37,8 +37,6 @@ namespace UploadersLib
 {
     public partial class UploadersConfigForm : Form
     {
-        private ContextMenuStrip cmsCustomUploaderArgValue;
-
         private void ControlSettings()
         {
             ImageList imageUploadersImageList = new ImageList();
@@ -126,7 +124,9 @@ namespace UploadersLib
             tpUpaste.ImageKey = "Upaste";
             tpAmazonS3.ImageKey = "AmazonS3";
 
-            cmsCustomUploaderArgValue = NameParser.CreateCodesMenu(txtCustomUploaderArgValue, ReplacementVariables.n);
+            NameParser.CreateCodesMenu(txtDropboxPath, ReplacementVariables.n, ReplacementVariables.t, ReplacementVariables.pn);
+            NameParser.CreateCodesMenu(txtAmazonS3ObjectPrefix, ReplacementVariables.n, ReplacementVariables.t, ReplacementVariables.pn);
+            NameParser.CreateCodesMenu(txtCustomUploaderArgValue, ReplacementVariables.n);
 
             txtCustomUploaderLog.AddContextMenu();
         }
@@ -223,24 +223,6 @@ namespace UploadersLib
             // Paste.ee
 
             txtPaste_eeUserAPIKey.Text = Config.Paste_eeUserAPIKey;
-
-            //Pushbullet
-
-            txtPushbulletUserKey.Text = Config.PushbulletSettings.UserAPIKey;
-
-            if (Config.PushbulletSettings.DeviceList.Count > 0)
-            {
-                Config.PushbulletSettings.DeviceList.ForEach(x => cboPushbulletDevices.Items.Add(x.Name));
-
-                if (Config.PushbulletSettings.DeviceList.IsValidIndex(Config.PushbulletSettings.SelectedDevice))
-                {
-                    cboPushbulletDevices.SelectedIndex = Config.PushbulletSettings.SelectedDevice;
-                }
-                else
-                {
-                    cboPushbulletDevices.SelectedIndex = 0;
-                }
-            }
 
             // Gist
 
@@ -423,6 +405,24 @@ namespace UploadersLib
             // Mega
 
             MegaConfigureTab(false);
+
+            //Pushbullet
+
+            txtPushbulletUserKey.Text = Config.PushbulletSettings.UserAPIKey;
+
+            if (Config.PushbulletSettings.DeviceList.Count > 0)
+            {
+                Config.PushbulletSettings.DeviceList.ForEach(x => cboPushbulletDevices.Items.Add(x.Name ?? "Invalid device name"));
+
+                if (Config.PushbulletSettings.DeviceList.IsValidIndex(Config.PushbulletSettings.SelectedDevice))
+                {
+                    cboPushbulletDevices.SelectedIndex = Config.PushbulletSettings.SelectedDevice;
+                }
+                else
+                {
+                    cboPushbulletDevices.SelectedIndex = 0;
+                }
+            }
 
             // Amazon S3
 
@@ -684,7 +684,7 @@ namespace UploadersLib
                 if (!string.IsNullOrEmpty(url))
                 {
                     Config.TwitterOAuthInfoList[Config.TwitterSelectedAccount] = acc;
-                    Helpers.LoadBrowserAsync(url);
+                    Helpers.OpenURL(url);
                     ucTwitterAccounts.pgSettings.SelectedObject = acc;
                 }
             }

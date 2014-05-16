@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2008-2014 ShareX Developers
+    Copyright (C) 2007-2014 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -85,7 +85,7 @@ namespace ShareX
                     UploadManager.UploadFile(taskSettings);
                     break;
                 case HotkeyType.DragDropUpload:
-                    OpenDropWindow();
+                    TaskHelpers.OpenDropWindow();
                     break;
                 case HotkeyType.PrintScreen:
                     CaptureScreenshot(CaptureType.Screen, taskSettings, false);
@@ -124,25 +124,28 @@ namespace ShareX
                     CaptureScreenshot(CaptureType.LastRegion, taskSettings, false);
                     break;
                 case HotkeyType.ScreenRecorder:
-                    DoScreenRecorder(taskSettings);
+                    TaskHelpers.DoScreenRecorder(taskSettings);
                     break;
                 case HotkeyType.AutoCapture:
-                    OpenAutoCapture();
+                    TaskHelpers.OpenAutoCapture();
                     break;
                 case HotkeyType.ScreenColorPicker:
-                    OpenScreenColorPicker(taskSettings);
-                    break;
-                case HotkeyType.HashCheck:
-                    OpenHashCheck();
-                    break;
-                case HotkeyType.IndexFolder:
-                    OpenIndexFolder();
-                    break;
-                case HotkeyType.ImageEffects:
-                    OpenImageEffects();
+                    TaskHelpers.OpenScreenColorPicker(taskSettings);
                     break;
                 case HotkeyType.Ruler:
-                    OpenRuler();
+                    TaskHelpers.OpenRuler();
+                    break;
+                case HotkeyType.FTPClient:
+                    TaskHelpers.OpenFTPClient();
+                    break;
+                case HotkeyType.HashCheck:
+                    TaskHelpers.OpenHashCheck();
+                    break;
+                case HotkeyType.IndexFolder:
+                    TaskHelpers.OpenIndexFolder();
+                    break;
+                case HotkeyType.ImageEffects:
+                    TaskHelpers.OpenImageEffects();
                     break;
             }
         }
@@ -247,7 +250,7 @@ namespace ShareX
 
                 if (taskSettings.GeneralSettings.ShowAfterCaptureTasksForm)
                 {
-                    using (AfterCaptureForm afterCaptureForm = new AfterCaptureForm(img, taskSettings.AfterCaptureJob))
+                    using (AfterCaptureForm afterCaptureForm = new AfterCaptureForm(img, taskSettings))
                     {
                         afterCaptureForm.ShowDialog();
 
