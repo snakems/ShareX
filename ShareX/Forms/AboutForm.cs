@@ -54,6 +54,11 @@ namespace ShareX
             cLogo.Start(50);
         }
 
+        private void lblProductName_Click(object sender, EventArgs e)
+        {
+            Helpers.OpenURL(Links.URL_VERSION_HISTORY);
+        }
+
         private void pbBerkURL_Click(object sender, EventArgs e)
         {
             Helpers.OpenURL(Links.URL_BERK);
@@ -72,16 +77,6 @@ namespace ShareX
         private void pbMikeSteamURL_Click(object sender, EventArgs e)
         {
             Helpers.OpenURL(Links.URL_MIKE_STEAM);
-        }
-
-        private void pbGregoire_Click(object sender, EventArgs e)
-        {
-            Helpers.OpenURL(Links.URL_GREGOIRE);
-        }
-
-        private void pbDana_Click(object sender, EventArgs e)
-        {
-            Helpers.OpenURL(Links.URL_DANA);
         }
 
         private void rtb_LinkClicked(object sender, LinkClickedEventArgs e)

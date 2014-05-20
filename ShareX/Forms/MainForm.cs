@@ -108,6 +108,34 @@ namespace ShareX
 
             TaskManager.ListViewControl = lvUploads;
             uim = new UploadInfoManager(lvUploads);
+
+            ((ToolStripDropDownMenu)tsddbWorkflows.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayWorkflows.DropDown).ShowImageMargin =
+                ((ToolStripDropDownMenu)tsmiMonitor.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayMonitor.DropDown).ShowImageMargin = false;
+        }
+
+        private void UpdateWorkflowsMenu()
+        {
+            tsddbWorkflows.DropDownItems.Clear();
+            tsmiTrayWorkflows.DropDownItems.Clear();
+
+            foreach (HotkeySettings hotkeySetting in Program.HotkeyManager.Hotkeys)
+            {
+                if (hotkeySetting.TaskSettings.Job != HotkeyType.None && (!Program.Settings.WorkflowsOnlyShowEdited || !hotkeySetting.TaskSettings.IsUsingDefaultSettings))
+                {
+                    tsddbWorkflows.DropDownItems.Add(WorkflowMenuItem(hotkeySetting));
+                    tsmiTrayWorkflows.DropDownItems.Add(WorkflowMenuItem(hotkeySetting));
+                }
+            }
+
+            tsddbWorkflows.Visible = tsmiTrayWorkflows.Visible = tsddbWorkflows.DropDownItems.Count > 0;
+        }
+
+        private ToolStripMenuItem WorkflowMenuItem(HotkeySettings hotkeySetting)
+        {
+            ToolStripMenuItem tsmi = new ToolStripMenuItem(hotkeySetting.TaskSettings.Description);
+            if (hotkeySetting.HotkeyInfo.IsValidHotkey) tsmi.ShortcutKeyDisplayString = "  " + hotkeySetting.HotkeyInfo.ToString();
+            tsmi.Click += (sender, e) => HandleTask(hotkeySetting.TaskSettings);
+            return tsmi;
         }
 
         private void UpdateDestinationStates()
@@ -679,6 +707,7 @@ namespace ShareX
             }
 
             AfterSettingsJobs();
+            UpdateWorkflowsMenu();
             Program.Settings.SaveAsync(Program.ApplicationConfigFilePath);
 
             Program.ConfigureUploadersConfigWatcher();
@@ -706,6 +735,7 @@ namespace ShareX
                 hotkeySettingsForm.ShowDialog();
             }
 
+            UpdateWorkflowsMenu();
             Program.HotkeysConfig.SaveAsync(Program.HotkeysConfigFilePath);
         }
 
