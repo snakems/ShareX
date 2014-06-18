@@ -40,10 +40,9 @@ namespace UploadersLib
 {
     public class Uploader
     {
-        public static string UserAgent = string.Format("{0} {1}", Application.ProductName, Application.ProductVersion);
+        private static readonly string UserAgent = string.Format("{0} {1}", Application.ProductName, Application.ProductVersion);
 
         public delegate void ProgressEventHandler(ProgressManager progress);
-
         public event ProgressEventHandler ProgressChanged;
 
         public List<string> Errors { get; private set; }
@@ -53,6 +52,8 @@ namespace UploadersLib
         public bool SuppressWebExceptions { get; set; }
 
         protected bool stopUpload;
+
+        private HttpWebRequest currentRequest;
 
         public Uploader()
         {
@@ -84,6 +85,18 @@ namespace UploadersLib
             if (IsUploading)
             {
                 stopUpload = true;
+
+                if (currentRequest != null)
+                {
+                    try
+                    {
+                        currentRequest.Abort();
+                    }
+                    catch (Exception e)
+                    {
+                        DebugHelper.WriteException(e);
+                    }
+                }
             }
         }
 
@@ -177,17 +190,17 @@ namespace UploadersLib
 
                 return (HttpWebResponse)request.GetResponse();
             }
-            catch (WebException e)
-            {
-                if (SuppressWebExceptions) throw;
-                if (!stopUpload) AddWebError(e);
-            }
             catch (Exception e)
             {
-                if (!stopUpload) AddWebError(e);
+                if (!stopUpload)
+                {
+                    if (SuppressWebExceptions && e is WebException) throw;
+                    AddWebError(e);
+                }
             }
             finally
             {
+                currentRequest = null;
                 IsUploading = false;
             }
 
@@ -254,17 +267,17 @@ namespace UploadersLib
 
                 return (HttpWebResponse)request.GetResponse();
             }
-            catch (WebException e)
-            {
-                if (SuppressWebExceptions) throw;
-                if (!stopUpload) AddWebError(e);
-            }
             catch (Exception e)
             {
-                if (!stopUpload) AddWebError(e);
+                if (!stopUpload)
+                {
+                    if (SuppressWebExceptions && e is WebException) throw;
+                    AddWebError(e);
+                }
             }
             finally
             {
+                currentRequest = null;
                 IsUploading = false;
             }
 
@@ -302,17 +315,17 @@ namespace UploadersLib
                 result.Response = ResponseToString(request.GetResponse(), responseType);
                 result.IsSuccess = true;
             }
-            catch (WebException e)
-            {
-                if (SuppressWebExceptions) throw;
-                if (!stopUpload) result.Response = AddWebError(e);
-            }
             catch (Exception e)
             {
-                if (!stopUpload) result.Response = AddWebError(e);
+                if (!stopUpload)
+                {
+                    if (SuppressWebExceptions && e is WebException) throw;
+                    AddWebError(e);
+                }
             }
             finally
             {
+                currentRequest = null;
                 IsUploading = false;
             }
 
@@ -323,10 +336,10 @@ namespace UploadersLib
 
         #region Helper methods
 
-        private HttpWebRequest PreparePostWebRequest(string url, string boundary, long length, string contentType, CookieCollection cookies = null,
-            NameValueCollection headers = null)
+        private HttpWebRequest PreparePostWebRequest(string url, string boundary, long length, string contentType, CookieCollection cookies = null, NameValueCollection headers = null)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+
             if (headers != null && headers["Accept"] != null)
             {
                 request.Accept = headers["Accept"];
@@ -349,6 +362,8 @@ namespace UploadersLib
             request.Timeout = -1;
             request.UserAgent = UserAgent;
 
+            currentRequest = request;
+
             return request;
         }
 
@@ -363,6 +378,8 @@ namespace UploadersLib
             IWebProxy proxy = ProxyInfo.Current.GetWebProxy();
             if (proxy != null) request.Proxy = proxy;
             request.UserAgent = UserAgent;
+
+            currentRequest = request;
 
             return request;
         }

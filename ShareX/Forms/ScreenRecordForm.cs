@@ -30,9 +30,7 @@ using System;
 using System.Drawing;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using UploadersLib;
 
 namespace ShareX
 {
@@ -61,7 +59,7 @@ namespace ShareX
 
         private ScreenRecordForm()
         {
-            TrayIcon.Text = "ShareX - Screen recording";
+            TrayIcon.Text = "ShareX";
             TrayIcon.MouseClick += TrayIcon_MouseClick;
         }
 
@@ -81,7 +79,28 @@ namespace ShareX
             }
         }
 
-        public async void StartRecording(TaskSettings TaskSettings)
+        private void ActiveWindowRegion(TaskSettings taskSettings)
+        {
+            IntPtr handle = NativeMethods.GetForegroundWindow();
+
+            if (handle.ToInt32() > 0)
+            {
+                if (taskSettings.CaptureSettings.CaptureClientArea)
+                {
+                    captureRectangle = NativeMethods.GetClientRect(handle);
+                }
+                else
+                {
+                    captureRectangle = CaptureHelpers.GetWindowRectangle(handle);
+                }
+            }
+            else
+            {
+                SelectRegion();
+            }
+        }
+
+        public void StartRecording(TaskSettings TaskSettings)
         {
             if (TaskSettings.CaptureSettings.RunScreencastCLI)
             {
@@ -117,7 +136,14 @@ namespace ShareX
                 }
             }
 
-            SelectRegion();
+            if (TaskSettings.AdvancedSettings.ScreenRecorderUseActiveWindow)
+            {
+                ActiveWindowRegion(TaskSettings);
+            }
+            else
+            {
+                SelectRegion();
+            }
 
             if (IsRecording || captureRectangle.IsEmpty || screenRecorder != null)
             {
@@ -127,67 +153,78 @@ namespace ShareX
             IsRecording = true;
             Screenshot.CaptureCursor = TaskSettings.CaptureSettings.ShowCursor;
 
+            TrayIcon.Text = "ShareX - Waiting...";
             TrayIcon.Icon = Resources.control_record_yellow.ToIcon();
             TrayIcon.Visible = true;
 
             string path = "";
 
-            try
+            ScreenRegionManager screenRegionManager = new ScreenRegionManager();
+            screenRegionManager.Start(captureRectangle);
+
+            TaskEx.Run(() =>
             {
-                using (ScreenRegionManager screenRegionManager = new ScreenRegionManager())
+                try
                 {
-                    screenRegionManager.Start(captureRectangle);
-
-                    await TaskEx.Run(() =>
+                    if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVI)
                     {
-                        if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVI)
-                        {
-                            path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, "avi"));
-                        }
-                        else if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.FFmpeg)
-                        {
-                            path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, TaskSettings.CaptureSettings.FFmpegOptions.Extension));
-                        }
-                        else
-                        {
-                            path = Program.ScreenRecorderCacheFilePath;
-                        }
+                        path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, "avi"));
+                    }
+                    else if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.FFmpeg)
+                    {
+                        path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, TaskSettings.CaptureSettings.FFmpegOptions.Extension));
+                    }
+                    else
+                    {
+                        path = Program.ScreenRecorderCacheFilePath;
+                    }
 
-                        ScreencastOptions options = new ScreencastOptions()
-                        {
-                            CaptureArea = captureRectangle,
-                            GIFFPS = TaskSettings.CaptureSettings.GIFFPS,
-                            ScreenRecordFPS = TaskSettings.CaptureSettings.ScreenRecordFPS,
-                            OutputPath = path,
-                            Duration = TaskSettings.CaptureSettings.ScreenRecordFixedDuration ? TaskSettings.CaptureSettings.ScreenRecordDuration : 0,
-                            AVI = TaskSettings.CaptureSettings.AVIOptions,
-                            FFmpeg = TaskSettings.CaptureSettings.FFmpegOptions,
-                            DrawCursor = TaskSettings.CaptureSettings.ShowCursor
-                        };
+                    ScreencastOptions options = new ScreencastOptions()
+                    {
+                        FFmpeg = TaskSettings.CaptureSettings.FFmpegOptions,
+                        AVI = TaskSettings.CaptureSettings.AVIOptions,
+                        ScreenRecordFPS = TaskSettings.CaptureSettings.ScreenRecordFPS,
+                        GIFFPS = TaskSettings.CaptureSettings.GIFFPS,
+                        Duration = TaskSettings.CaptureSettings.ScreenRecordFixedDuration ? TaskSettings.CaptureSettings.ScreenRecordDuration : 0,
+                        OutputPath = path,
+                        CaptureArea = captureRectangle,
+                        DrawCursor = TaskSettings.CaptureSettings.ShowCursor
+                    };
 
-                        screenRecorder = new ScreenRecorder(options, captureRectangle, TaskSettings.CaptureSettings.ScreenRecordOutput);
+                    screenRecorder = new ScreenRecorder(options, captureRectangle, TaskSettings.CaptureSettings.ScreenRecordOutput);
 
-                        int delay = (int)(TaskSettings.CaptureSettings.ScreenRecordStartDelay * 1000);
+                    int delay = (int)(TaskSettings.CaptureSettings.ScreenRecordStartDelay * 1000);
 
-                        if (delay > 0)
-                        {
-                            Thread.Sleep(delay);
-                        }
+                    if (delay > 0)
+                    {
+                        Thread.Sleep(delay);
+                    }
 
-                        screenRegionManager.ChangeColor();
-
-                        this.InvokeSafe(() => TrayIcon.Icon = Resources.control_record.ToIcon());
-
-                        screenRecorder.StartRecording();
+                    this.InvokeSafe(() =>
+                    {
+                        screenRegionManager.ChangeColor(Color.FromArgb(0, 255, 0));
                     });
+
+                    TrayIcon.Text = "ShareX - Click tray icon to stop recording.";
+                    TrayIcon.Icon = Resources.control_record.ToIcon();
+
+                    screenRecorder.StartRecording();
+                }
+                finally
+                {
+                    if (screenRegionManager != null)
+                    {
+                        this.InvokeSafe(() => screenRegionManager.Dispose());
+                    }
                 }
 
-                if (screenRecorder != null)
+                try
                 {
-                    TrayIcon.Icon = Resources.camcorder__pencil.ToIcon();
-
-                    await TaskEx.Run(() =>
+                    if (screenRecorder != null)
                     {
+                        TrayIcon.Text = "ShareX - Encoding...";
+                        TrayIcon.Icon = Resources.camcorder_pencil.ToIcon();
+
                         string sourceFilePath = path;
 
                         if (TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.GIF)
@@ -200,6 +237,7 @@ namespace ShareX
                             {
                                 sourceFilePath = path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, "gif"));
                             }
+
                             screenRecorder.SaveAsGIF(sourceFilePath, TaskSettings.ImageSettings.ImageGIFQuality);
                         }
 
@@ -209,47 +247,37 @@ namespace ShareX
                             path = Path.Combine(TaskSettings.CaptureFolder, TaskHelpers.GetFilename(TaskSettings, encoder.OutputExtension));
                             screenRecorder.EncodeUsingCommandLine(encoder, sourceFilePath, path);
                         }
-                    });
-                }
-            }
-            finally
-            {
-                if (screenRecorder != null)
-                {
-                    if (TaskSettings.CaptureSettings.RunScreencastCLI &&
-                        !string.IsNullOrEmpty(screenRecorder.CachePath) && File.Exists(screenRecorder.CachePath))
-                    {
-                        File.Delete(screenRecorder.CachePath);
                     }
-
-                    screenRecorder.Dispose();
-                    screenRecorder = null;
                 }
+                finally
+                {
+                    if (screenRecorder != null)
+                    {
+                        if (TaskSettings.CaptureSettings.RunScreencastCLI && !string.IsNullOrEmpty(screenRecorder.CachePath) && File.Exists(screenRecorder.CachePath))
+                        {
+                            File.Delete(screenRecorder.CachePath);
+                        }
 
+                        screenRecorder.Dispose();
+                        screenRecorder = null;
+                    }
+                }
+            },
+            () =>
+            {
                 if (TrayIcon.Visible)
                 {
                     TrayIcon.Visible = false;
                 }
-            }
 
-            if (!string.IsNullOrEmpty(path) && File.Exists(path))
-            {
-                if (TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.UploadImageToHost))
+                IsRecording = false;
+
+                if (!string.IsNullOrEmpty(path) && File.Exists(path))
                 {
-                    UploadManager.UploadFile(path, TaskSettings);
+                    UploadTask task = UploadTask.CreateFileJobTask(path, TaskSettings);
+                    TaskManager.Start(task);
                 }
-                else
-                {
-                    if (TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFilePathToClipboard))
-                    {
-                        ClipboardHelpers.CopyText(path);
-                    }
-
-                    TaskHelpers.ShowResultNotifications(path, TaskSettings, path);
-                }
-            }
-
-            IsRecording = false;
+            });
         }
 
         private void DownloaderForm_InstallRequested(string filePath)

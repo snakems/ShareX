@@ -24,9 +24,6 @@
 #endregion License Information (GPL v3)
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace ScreenCaptureLib
 {
@@ -41,6 +38,8 @@ namespace ScreenCaptureLib
         public string CLIPath { get; set; }
         public string UserArgs { get; set; }
         public bool ShowError { get; set; }
+        public bool UseCustomCommands { get; set; }
+        public string CustomCommands { get; set; }
 
         // H.264 - x264
         public FFmpegPreset Preset { get; set; }
@@ -67,10 +66,11 @@ namespace ScreenCaptureLib
             Extension = "mp4";
             CLIPath = "ffmpeg.exe";
             UserArgs = "";
+            ShowError = true;
 
             // x264
-            x264_CRF = 20;
-            Preset = FFmpegPreset.medium;
+            x264_CRF = 30;
+            Preset = FFmpegPreset.fast;
 
             // VPx
             VPx_CRF = 12;
@@ -79,9 +79,9 @@ namespace ScreenCaptureLib
             XviD_qscale = 3;
 
             // Audio
+            AAC_bitrate = 128;
             Vorbis_qscale = 3;
             MP3_qscale = 4;
-            AAC_bitrate = 128;
         }
 
         public bool IsAudioSourceSelected()

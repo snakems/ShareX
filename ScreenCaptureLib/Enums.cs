@@ -27,6 +27,16 @@ using System.ComponentModel;
 
 namespace ScreenCaptureLib
 {
+    public enum ScreenRecordOutput
+    {
+        [Description("FFmpeg")]
+        FFmpeg,
+        [Description("Animated GIF")]
+        GIF,
+        [Description("Video Compression Manager (VCM)")]
+        AVI
+    }
+
     public enum SurfaceResult
     {
         None,
@@ -53,7 +63,7 @@ namespace ScreenCaptureLib
         libx264,
         [Description("VP8")]
         libvpx,
-        [Description("XviD")]
+        [Description("Xvid")]
         libxvid
     }
 
@@ -76,7 +86,7 @@ namespace ScreenCaptureLib
         [Description("Slower")]
         slower,
         [Description("Very slow")]
-        veryslow,
+        veryslow
     }
 
     public enum FFmpegAudioCodec

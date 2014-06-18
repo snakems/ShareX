@@ -34,13 +34,13 @@
             this.tsbClipboardUpload = new System.Windows.Forms.ToolStripButton();
             this.tsbFileUpload = new System.Windows.Forms.ToolStripButton();
             this.tsbDragDropUpload = new System.Windows.Forms.ToolStripButton();
-            this.tsddbWorkflows = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsddbCapture = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsmiFullscreen = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiMonitor = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiRectangle = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiWindowRectangle = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiRectangleLight = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiRoundedRectangle = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiEllipse = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTriangle = new System.Windows.Forms.ToolStripMenuItem();
@@ -50,6 +50,7 @@
             this.tsmiLastRegion = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiScreenRecorder = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiAutoCapture = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsddbWorkflows = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsddbAfterCaptureTasks = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsddbAfterUploadTasks = new System.Windows.Forms.ToolStripDropDownButton();
             this.tsddbDestinations = new System.Windows.Forms.ToolStripDropDownButton();
@@ -74,6 +75,8 @@
             this.tsmiImageEffects = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiMonitorTest = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiDNSChanger = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiQRCode = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTweetMessage = new System.Windows.Forms.ToolStripMenuItem();
             this.tsbScreenshotsFolder = new System.Windows.Forms.ToolStripButton();
             this.tsbHistory = new System.Windows.Forms.ToolStripButton();
             this.tsbImageHistory = new System.Windows.Forms.ToolStripButton();
@@ -139,6 +142,7 @@
             this.tsmiCopyFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.tssCopy5 = new System.Windows.Forms.ToolStripSeparator();
             this.tsmiShowResponse = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiShowQRCode = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiUploadSelectedFile = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiClearList = new System.Windows.Forms.ToolStripMenuItem();
             this.tssUploadInfo1 = new System.Windows.Forms.ToolStripSeparator();
@@ -152,13 +156,13 @@
             this.tsmiTrayClipboardUpload = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayFileUpload = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayDragDropUpload = new System.Windows.Forms.ToolStripMenuItem();
-            this.tsmiTrayWorkflows = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayCapture = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayFullscreen = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayWindow = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayMonitor = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayRectangle = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayWindowRectangle = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTrayRectangleLight = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayRoundedRectangle = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayEllipse = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayTriangle = new System.Windows.Forms.ToolStripMenuItem();
@@ -168,6 +172,7 @@
             this.tsmiTrayLastRegion = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayScreenRecorder = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayAutoCapture = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTrayWorkflows = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayAfterCaptureTasks = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayAfterUploadTasks = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayDestinations = new System.Windows.Forms.ToolStripMenuItem();
@@ -192,6 +197,7 @@
             this.tsmiTrayImageEffects = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayMonitorTest = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayDNSChanger = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTrayQRCode = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiScreenshotsFolder = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayHistory = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayImageHistory = new System.Windows.Forms.ToolStripMenuItem();
@@ -201,7 +207,9 @@
             this.tsmiTrayShow = new System.Windows.Forms.ToolStripMenuItem();
             this.tsmiTrayExit = new System.Windows.Forms.ToolStripMenuItem();
             this.ssToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.tsmiTrayTweetMessage = new System.Windows.Forms.ToolStripMenuItem();
             this.tsMain.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.scMain)).BeginInit();
             this.scMain.Panel1.SuspendLayout();
             this.scMain.Panel2.SuspendLayout();
             this.scMain.SuspendLayout();
@@ -219,8 +227,8 @@
             this.tsbClipboardUpload,
             this.tsbFileUpload,
             this.tsbDragDropUpload,
-            this.tsddbWorkflows,
             this.tsddbCapture,
+            this.tsddbWorkflows,
             this.tsddbAfterCaptureTasks,
             this.tsddbAfterUploadTasks,
             this.tsddbDestinations,
@@ -275,15 +283,6 @@
             this.tsbDragDropUpload.Text = "Drag and drop upload...";
             this.tsbDragDropUpload.Click += new System.EventHandler(this.tsbDragDropUpload_Click);
             // 
-            // tsddbWorkflows
-            // 
-            this.tsddbWorkflows.Image = global::ShareX.Properties.Resources.application_wave;
-            this.tsddbWorkflows.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
-            this.tsddbWorkflows.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsddbWorkflows.Name = "tsddbWorkflows";
-            this.tsddbWorkflows.Size = new System.Drawing.Size(157, 20);
-            this.tsddbWorkflows.Text = "Workflows";
-            // 
             // tsddbCapture
             // 
             this.tsddbCapture.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -292,6 +291,7 @@
             this.tsmiMonitor,
             this.tsmiRectangle,
             this.tsmiWindowRectangle,
+            this.tsmiRectangleLight,
             this.tsmiRoundedRectangle,
             this.tsmiEllipse,
             this.tsmiTriangle,
@@ -346,6 +346,14 @@
             this.tsmiWindowRectangle.Size = new System.Drawing.Size(181, 22);
             this.tsmiWindowRectangle.Text = "Rectangle / Window";
             this.tsmiWindowRectangle.Click += new System.EventHandler(this.tsmiWindowRectangle_Click);
+            // 
+            // tsmiRectangleLight
+            // 
+            this.tsmiRectangleLight.Image = global::ShareX.Properties.Resources.Rectangle;
+            this.tsmiRectangleLight.Name = "tsmiRectangleLight";
+            this.tsmiRectangleLight.Size = new System.Drawing.Size(181, 22);
+            this.tsmiRectangleLight.Text = "Rectangle (Light)";
+            this.tsmiRectangleLight.Click += new System.EventHandler(this.tsmiRectangleLight_Click);
             // 
             // tsmiRoundedRectangle
             // 
@@ -418,6 +426,15 @@
             this.tsmiAutoCapture.Size = new System.Drawing.Size(181, 22);
             this.tsmiAutoCapture.Text = "Auto capture...";
             this.tsmiAutoCapture.Click += new System.EventHandler(this.tsmiAutoCapture_Click);
+            // 
+            // tsddbWorkflows
+            // 
+            this.tsddbWorkflows.Image = global::ShareX.Properties.Resources.application_wave;
+            this.tsddbWorkflows.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
+            this.tsddbWorkflows.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsddbWorkflows.Name = "tsddbWorkflows";
+            this.tsddbWorkflows.Size = new System.Drawing.Size(157, 20);
+            this.tsddbWorkflows.Text = "Workflows";
             // 
             // tsddbAfterCaptureTasks
             // 
@@ -551,7 +568,9 @@
             this.tsmiImageEditor,
             this.tsmiImageEffects,
             this.tsmiMonitorTest,
-            this.tsmiDNSChanger});
+            this.tsmiDNSChanger,
+            this.tsmiQRCode,
+            this.tsmiTweetMessage});
             this.tsddbTools.Image = global::ShareX.Properties.Resources.toolbox;
             this.tsddbTools.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.tsddbTools.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -630,6 +649,22 @@
             this.tsmiDNSChanger.Size = new System.Drawing.Size(183, 22);
             this.tsmiDNSChanger.Text = "DNS changer...";
             this.tsmiDNSChanger.Click += new System.EventHandler(this.tsmiDNSChanger_Click);
+            // 
+            // tsmiQRCode
+            // 
+            this.tsmiQRCode.Image = global::ShareX.Properties.Resources.barcode_2d;
+            this.tsmiQRCode.Name = "tsmiQRCode";
+            this.tsmiQRCode.Size = new System.Drawing.Size(183, 22);
+            this.tsmiQRCode.Text = "QR code...";
+            this.tsmiQRCode.Click += new System.EventHandler(this.tsmiQRCode_Click);
+            // 
+            // tsmiTweetMessage
+            // 
+            this.tsmiTweetMessage.Image = global::ShareX.Properties.Resources.Twitter;
+            this.tsmiTweetMessage.Name = "tsmiTweetMessage";
+            this.tsmiTweetMessage.Size = new System.Drawing.Size(183, 22);
+            this.tsmiTweetMessage.Text = "Tweet message...";
+            this.tsmiTweetMessage.Click += new System.EventHandler(this.tsmiTweetMessage_Click);
             // 
             // tsbScreenshotsFolder
             // 
@@ -897,6 +932,7 @@
             this.tsmiOpen,
             this.tsmiCopy,
             this.tsmiShowResponse,
+            this.tsmiShowQRCode,
             this.tsmiUploadSelectedFile,
             this.tsmiClearList,
             this.tssUploadInfo1,
@@ -907,7 +943,7 @@
             this.tsmiHidePreview});
             this.cmsUploadInfo.Name = "cmsHistory";
             this.cmsUploadInfo.ShowImageMargin = false;
-            this.cmsUploadInfo.Size = new System.Drawing.Size(155, 258);
+            this.cmsUploadInfo.Size = new System.Drawing.Size(155, 280);
             // 
             // tsmiShowErrors
             // 
@@ -1189,6 +1225,13 @@
             this.tsmiShowResponse.Text = "Show response";
             this.tsmiShowResponse.Click += new System.EventHandler(this.tsmiShowResponse_Click);
             // 
+            // tsmiShowQRCode
+            // 
+            this.tsmiShowQRCode.Name = "tsmiShowQRCode";
+            this.tsmiShowQRCode.Size = new System.Drawing.Size(154, 22);
+            this.tsmiShowQRCode.Text = "Show QR code";
+            this.tsmiShowQRCode.Click += new System.EventHandler(this.tsmiShowQRCode_Click);
+            // 
             // tsmiUploadSelectedFile
             // 
             this.tsmiUploadSelectedFile.Name = "tsmiUploadSelectedFile";
@@ -1255,8 +1298,8 @@
             this.tsmiTrayClipboardUpload,
             this.tsmiTrayFileUpload,
             this.tsmiTrayDragDropUpload,
-            this.tsmiTrayWorkflows,
             this.tsmiTrayCapture,
+            this.tsmiTrayWorkflows,
             this.tsmiTrayAfterCaptureTasks,
             this.tsmiTrayAfterUploadTasks,
             this.tsmiTrayDestinations,
@@ -1276,7 +1319,7 @@
             this.tsmiTrayShow,
             this.tsmiTrayExit});
             this.cmsTray.Name = "cmsTray";
-            this.cmsTray.Size = new System.Drawing.Size(200, 462);
+            this.cmsTray.Size = new System.Drawing.Size(200, 484);
             // 
             // tsmiTrayClipboardUpload
             // 
@@ -1302,13 +1345,6 @@
             this.tsmiTrayDragDropUpload.Text = "Drag and drop upload...";
             this.tsmiTrayDragDropUpload.Click += new System.EventHandler(this.tsbDragDropUpload_Click);
             // 
-            // tsmiTrayWorkflows
-            // 
-            this.tsmiTrayWorkflows.Image = global::ShareX.Properties.Resources.application_wave;
-            this.tsmiTrayWorkflows.Name = "tsmiTrayWorkflows";
-            this.tsmiTrayWorkflows.Size = new System.Drawing.Size(199, 22);
-            this.tsmiTrayWorkflows.Text = "Workflows";
-            // 
             // tsmiTrayCapture
             // 
             this.tsmiTrayCapture.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -1317,6 +1353,7 @@
             this.tsmiTrayMonitor,
             this.tsmiTrayRectangle,
             this.tsmiTrayWindowRectangle,
+            this.tsmiTrayRectangleLight,
             this.tsmiTrayRoundedRectangle,
             this.tsmiTrayEllipse,
             this.tsmiTrayTriangle,
@@ -1369,6 +1406,14 @@
             this.tsmiTrayWindowRectangle.Size = new System.Drawing.Size(184, 22);
             this.tsmiTrayWindowRectangle.Text = "Rectangle + Window";
             this.tsmiTrayWindowRectangle.Click += new System.EventHandler(this.tsmiTrayWindowRectangle_Click);
+            // 
+            // tsmiTrayRectangleLight
+            // 
+            this.tsmiTrayRectangleLight.Image = global::ShareX.Properties.Resources.Rectangle;
+            this.tsmiTrayRectangleLight.Name = "tsmiTrayRectangleLight";
+            this.tsmiTrayRectangleLight.Size = new System.Drawing.Size(184, 22);
+            this.tsmiTrayRectangleLight.Text = "Rectangle (Light)";
+            this.tsmiTrayRectangleLight.Click += new System.EventHandler(this.tsmiTrayRectangleLight_Click);
             // 
             // tsmiTrayRoundedRectangle
             // 
@@ -1441,6 +1486,13 @@
             this.tsmiTrayAutoCapture.Size = new System.Drawing.Size(184, 22);
             this.tsmiTrayAutoCapture.Text = "Auto capture...";
             this.tsmiTrayAutoCapture.Click += new System.EventHandler(this.tsmiAutoCapture_Click);
+            // 
+            // tsmiTrayWorkflows
+            // 
+            this.tsmiTrayWorkflows.Image = global::ShareX.Properties.Resources.application_wave;
+            this.tsmiTrayWorkflows.Name = "tsmiTrayWorkflows";
+            this.tsmiTrayWorkflows.Size = new System.Drawing.Size(199, 22);
+            this.tsmiTrayWorkflows.Text = "Workflows";
             // 
             // tsmiTrayAfterCaptureTasks
             // 
@@ -1558,7 +1610,9 @@
             this.tsmiTrayImageEditor,
             this.tsmiTrayImageEffects,
             this.tsmiTrayMonitorTest,
-            this.tsmiTrayDNSChanger});
+            this.tsmiTrayDNSChanger,
+            this.tsmiTrayQRCode,
+            this.tsmiTrayTweetMessage});
             this.tsmiTrayTools.Image = global::ShareX.Properties.Resources.toolbox;
             this.tsmiTrayTools.Name = "tsmiTrayTools";
             this.tsmiTrayTools.Size = new System.Drawing.Size(199, 22);
@@ -1636,6 +1690,14 @@
             this.tsmiTrayDNSChanger.Text = "DNS changer...";
             this.tsmiTrayDNSChanger.Click += new System.EventHandler(this.tsmiDNSChanger_Click);
             // 
+            // tsmiTrayQRCode
+            // 
+            this.tsmiTrayQRCode.Image = global::ShareX.Properties.Resources.barcode_2d;
+            this.tsmiTrayQRCode.Name = "tsmiTrayQRCode";
+            this.tsmiTrayQRCode.Size = new System.Drawing.Size(183, 22);
+            this.tsmiTrayQRCode.Text = "QR code...";
+            this.tsmiTrayQRCode.Click += new System.EventHandler(this.tsmiQRCode_Click);
+            // 
             // tsmiScreenshotsFolder
             // 
             this.tsmiScreenshotsFolder.Image = global::ShareX.Properties.Resources.folder_open_image;
@@ -1703,6 +1765,14 @@
             this.ssToolStripMenuItem.Size = new System.Drawing.Size(152, 22);
             this.ssToolStripMenuItem.Text = "ss";
             // 
+            // tsmiTrayTweetMessage
+            // 
+            this.tsmiTrayTweetMessage.Image = global::ShareX.Properties.Resources.Twitter;
+            this.tsmiTrayTweetMessage.Name = "tsmiTrayTweetMessage";
+            this.tsmiTrayTweetMessage.Size = new System.Drawing.Size(183, 22);
+            this.tsmiTrayTweetMessage.Text = "Tweet message...";
+            this.tsmiTrayTweetMessage.Click += new System.EventHandler(this.tsmiTweetMessage_Click);
+            // 
             // MainForm
             // 
             this.AllowDrop = true;
@@ -1713,6 +1783,7 @@
             this.Controls.Add(this.tsMain);
             this.DoubleBuffered = true;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MinimumSize = new System.Drawing.Size(400, 250);
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "ShareX";
@@ -1726,6 +1797,7 @@
             this.tsMain.PerformLayout();
             this.scMain.Panel1.ResumeLayout(false);
             this.scMain.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.scMain)).EndInit();
             this.scMain.ResumeLayout(false);
             this.cmsUploadInfo.ResumeLayout(false);
             this.cmsTray.ResumeLayout(false);
@@ -1906,5 +1978,12 @@
         private System.Windows.Forms.ToolStripMenuItem tsmiTrayImageEditor;
         private System.Windows.Forms.ToolStripDropDownButton tsddbWorkflows;
         private System.Windows.Forms.ToolStripMenuItem tsmiTrayWorkflows;
+        private System.Windows.Forms.ToolStripMenuItem tsmiShowQRCode;
+        private System.Windows.Forms.ToolStripMenuItem tsmiQRCode;
+        private System.Windows.Forms.ToolStripMenuItem tsmiTrayQRCode;
+        private System.Windows.Forms.ToolStripMenuItem tsmiRectangleLight;
+        private System.Windows.Forms.ToolStripMenuItem tsmiTrayRectangleLight;
+        private System.Windows.Forms.ToolStripMenuItem tsmiTweetMessage;
+        private System.Windows.Forms.ToolStripMenuItem tsmiTrayTweetMessage;
     }
 }

@@ -145,16 +145,7 @@ namespace UploadersLib.FileUploaders
         {
             if (Connect())
             {
-                try
-                {
-                    string workingDirectory = client.WorkingDirectory;
-                    client.ChangeDirectory(path);
-                    client.ChangeDirectory(workingDirectory);
-                    return true;
-                }
-                catch (SftpPathNotFoundException)
-                {
-                }
+                return client.Exists(path);
             }
 
             return false;
@@ -164,13 +155,14 @@ namespace UploadersLib.FileUploaders
         {
             List<string> directoryList = new List<string>();
 
-            IEnumerable<string> paths = FTPHelpers.GetPaths(path).Select(x => x.TrimStart('/'));
+            IEnumerable<string> paths = URLHelpers.GetPaths(path).Select(x => x.TrimStart('/'));
 
             foreach (string directory in paths)
             {
                 if (!DirectoryExists(directory))
                 {
                     CreateDirectory(directory);
+                    DebugHelper.WriteLine("FTP directory created: " + path);
                     directoryList.Add(directory);
                 }
             }
@@ -186,7 +178,7 @@ namespace UploadersLib.FileUploaders
             {
                 fileName = Helpers.GetValidURL(fileName);
                 string folderPath = Account.GetSubFolderPath();
-                string filePath = Helpers.CombineURL(folderPath, fileName);
+                string filePath = URLHelpers.CombineURL(folderPath, fileName);
 
                 try
                 {

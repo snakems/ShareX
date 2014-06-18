@@ -55,11 +55,8 @@ namespace ShareX
             this.lblSaveImageSubFolderPatternPreview = new System.Windows.Forms.Label();
             this.txtSaveImageSubFolderPattern = new System.Windows.Forms.TextBox();
             this.tpProxy = new System.Windows.Forms.TabPage();
-            this.lblProxyNote = new System.Windows.Forms.Label();
             this.cbProxyMethod = new System.Windows.Forms.ComboBox();
             this.lblProxyMethod = new System.Windows.Forms.Label();
-            this.cbProxyType = new System.Windows.Forms.ComboBox();
-            this.lblProxyType = new System.Windows.Forms.Label();
             this.lblProxyHost = new System.Windows.Forms.Label();
             this.txtProxyHost = new System.Windows.Forms.TextBox();
             this.nudProxyPort = new System.Windows.Forms.NumericUpDown();
@@ -421,11 +418,8 @@ namespace ShareX
             // 
             // tpProxy
             // 
-            this.tpProxy.Controls.Add(this.lblProxyNote);
             this.tpProxy.Controls.Add(this.cbProxyMethod);
             this.tpProxy.Controls.Add(this.lblProxyMethod);
-            this.tpProxy.Controls.Add(this.cbProxyType);
-            this.tpProxy.Controls.Add(this.lblProxyType);
             this.tpProxy.Controls.Add(this.lblProxyHost);
             this.tpProxy.Controls.Add(this.txtProxyHost);
             this.tpProxy.Controls.Add(this.nudProxyPort);
@@ -442,20 +436,11 @@ namespace ShareX
             this.tpProxy.Text = "Proxy";
             this.tpProxy.UseVisualStyleBackColor = true;
             // 
-            // lblProxyNote
-            // 
-            this.lblProxyNote.AutoSize = true;
-            this.lblProxyNote.Location = new System.Drawing.Point(264, 48);
-            this.lblProxyNote.Name = "lblProxyNote";
-            this.lblProxyNote.Size = new System.Drawing.Size(196, 13);
-            this.lblProxyNote.TabIndex = 4;
-            this.lblProxyNote.Text = "SOCKS proxy is only supported by FTP. ";
-            // 
             // cbProxyMethod
             // 
             this.cbProxyMethod.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbProxyMethod.FormattingEnabled = true;
-            this.cbProxyMethod.Location = new System.Drawing.Point(120, 12);
+            this.cbProxyMethod.Location = new System.Drawing.Point(128, 12);
             this.cbProxyMethod.Name = "cbProxyMethod";
             this.cbProxyMethod.Size = new System.Drawing.Size(136, 21);
             this.cbProxyMethod.TabIndex = 1;
@@ -470,29 +455,10 @@ namespace ShareX
             this.lblProxyMethod.TabIndex = 0;
             this.lblProxyMethod.Text = "Proxy configuration:";
             // 
-            // cbProxyType
-            // 
-            this.cbProxyType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbProxyType.FormattingEnabled = true;
-            this.cbProxyType.Location = new System.Drawing.Point(120, 44);
-            this.cbProxyType.Name = "cbProxyType";
-            this.cbProxyType.Size = new System.Drawing.Size(136, 21);
-            this.cbProxyType.TabIndex = 3;
-            this.cbProxyType.SelectedIndexChanged += new System.EventHandler(this.cboProxyType_SelectedIndexChanged);
-            // 
-            // lblProxyType
-            // 
-            this.lblProxyType.AutoSize = true;
-            this.lblProxyType.Location = new System.Drawing.Point(16, 48);
-            this.lblProxyType.Name = "lblProxyType";
-            this.lblProxyType.Size = new System.Drawing.Size(34, 13);
-            this.lblProxyType.TabIndex = 2;
-            this.lblProxyType.Text = "Type:";
-            // 
             // lblProxyHost
             // 
             this.lblProxyHost.AutoSize = true;
-            this.lblProxyHost.Location = new System.Drawing.Point(16, 80);
+            this.lblProxyHost.Location = new System.Drawing.Point(16, 48);
             this.lblProxyHost.Name = "lblProxyHost";
             this.lblProxyHost.Size = new System.Drawing.Size(32, 13);
             this.lblProxyHost.TabIndex = 5;
@@ -500,7 +466,7 @@ namespace ShareX
             // 
             // txtProxyHost
             // 
-            this.txtProxyHost.Location = new System.Drawing.Point(120, 76);
+            this.txtProxyHost.Location = new System.Drawing.Point(128, 44);
             this.txtProxyHost.Name = "txtProxyHost";
             this.txtProxyHost.Size = new System.Drawing.Size(232, 20);
             this.txtProxyHost.TabIndex = 6;
@@ -508,7 +474,7 @@ namespace ShareX
             // 
             // nudProxyPort
             // 
-            this.nudProxyPort.Location = new System.Drawing.Point(392, 76);
+            this.nudProxyPort.Location = new System.Drawing.Point(400, 44);
             this.nudProxyPort.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -523,7 +489,7 @@ namespace ShareX
             // lblProxyPort
             // 
             this.lblProxyPort.AutoSize = true;
-            this.lblProxyPort.Location = new System.Drawing.Point(360, 80);
+            this.lblProxyPort.Location = new System.Drawing.Point(368, 48);
             this.lblProxyPort.Name = "lblProxyPort";
             this.lblProxyPort.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.lblProxyPort.Size = new System.Drawing.Size(26, 13);
@@ -533,7 +499,7 @@ namespace ShareX
             // lblProxyPassword
             // 
             this.lblProxyPassword.AutoSize = true;
-            this.lblProxyPassword.Location = new System.Drawing.Point(16, 144);
+            this.lblProxyPassword.Location = new System.Drawing.Point(16, 112);
             this.lblProxyPassword.Name = "lblProxyPassword";
             this.lblProxyPassword.Size = new System.Drawing.Size(56, 13);
             this.lblProxyPassword.TabIndex = 11;
@@ -541,17 +507,17 @@ namespace ShareX
             // 
             // txtProxyPassword
             // 
-            this.txtProxyPassword.Location = new System.Drawing.Point(120, 140);
+            this.txtProxyPassword.Location = new System.Drawing.Point(128, 108);
             this.txtProxyPassword.Name = "txtProxyPassword";
-            this.txtProxyPassword.PasswordChar = '●';
             this.txtProxyPassword.Size = new System.Drawing.Size(232, 20);
             this.txtProxyPassword.TabIndex = 12;
+            this.txtProxyPassword.UseSystemPasswordChar = true;
             this.txtProxyPassword.TextChanged += new System.EventHandler(this.txtProxyPassword_TextChanged);
             // 
             // lblProxyUsername
             // 
             this.lblProxyUsername.AutoSize = true;
-            this.lblProxyUsername.Location = new System.Drawing.Point(16, 112);
+            this.lblProxyUsername.Location = new System.Drawing.Point(16, 80);
             this.lblProxyUsername.Name = "lblProxyUsername";
             this.lblProxyUsername.Size = new System.Drawing.Size(58, 13);
             this.lblProxyUsername.TabIndex = 9;
@@ -559,7 +525,7 @@ namespace ShareX
             // 
             // txtProxyUsername
             // 
-            this.txtProxyUsername.Location = new System.Drawing.Point(120, 108);
+            this.txtProxyUsername.Location = new System.Drawing.Point(128, 76);
             this.txtProxyUsername.Name = "txtProxyUsername";
             this.txtProxyUsername.Size = new System.Drawing.Size(232, 20);
             this.txtProxyUsername.TabIndex = 10;
@@ -1167,12 +1133,9 @@ namespace ShareX
         private System.Windows.Forms.TextBox txtProxyPassword;
         private System.Windows.Forms.Label lblProxyUsername;
         private System.Windows.Forms.TextBox txtProxyUsername;
-        private System.Windows.Forms.ComboBox cbProxyType;
-        private System.Windows.Forms.Label lblProxyType;
         private System.Windows.Forms.CheckBox cbShellContextMenu;
         private System.Windows.Forms.ComboBox cbProxyMethod;
         private System.Windows.Forms.Label lblProxyMethod;
-        private System.Windows.Forms.Label lblProxyNote;
         private System.Windows.Forms.TabPage tpUpload;
         private System.Windows.Forms.Label cbIfUploadFailRetryOnce;
         private System.Windows.Forms.Label lblUploadLimit;

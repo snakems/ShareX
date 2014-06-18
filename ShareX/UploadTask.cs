@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using IndexerLib;
 using System;
 using System.Drawing;
 using System.IO;
@@ -63,7 +62,7 @@ namespace ShareX
             }
         }
 
-        public bool IsStopped { get; private set; }
+        public bool StopRequested { get; private set; }
         public bool RequestSettingUpdate { get; private set; }
 
         public Stream Data { get; set; }
@@ -109,7 +108,7 @@ namespace ShareX
 
             if (task.Info.TaskSettings.AdvancedSettings.ProcessImagesDuringFileUpload && dataType == EDataType.Image)
             {
-                task.Info.Job = TaskJob.ImageJob;
+                task.Info.Job = TaskJob.Job;
                 task.tempImage = ImageHelpers.LoadImage(filePath);
             }
             else
@@ -125,7 +124,7 @@ namespace ShareX
         {
             UploadTask task = new UploadTask(taskSettings);
 
-            task.Info.Job = TaskJob.ImageJob;
+            task.Info.Job = TaskJob.Job;
             task.Info.DataType = EDataType.Image;
             task.Info.FileName = TaskHelpers.GetImageFilename(taskSettings, image);
             task.tempImage = image;
@@ -152,11 +151,35 @@ namespace ShareX
             return task;
         }
 
+        public static UploadTask CreateFileJobTask(string filePath, TaskSettings taskSettings)
+        {
+            EDataType dataType = Helpers.FindDataType(filePath);
+            UploadTask task = new UploadTask(taskSettings);
+
+            task.Info.DataType = dataType;
+            task.Info.FilePath = filePath;
+
+            if (task.Info.TaskSettings.UploadSettings.FileUploadUseNamePattern)
+            {
+                string ext = Path.GetExtension(task.Info.FilePath);
+                task.Info.FileName = TaskHelpers.GetFilename(task.Info.TaskSettings, ext);
+            }
+
+            task.Info.Job = TaskJob.Job;
+
+            if (task.Info.IsUploadJob)
+            {
+                task.Data = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+
+            return task;
+        }
+
         #endregion Constructors
 
         public void Start()
         {
-            if (Status == TaskStatus.InQueue && !IsStopped)
+            if (Status == TaskStatus.InQueue && !StopRequested)
             {
                 Prepare();
                 threadWorker = new ThreadWorker();
@@ -168,7 +191,7 @@ namespace ShareX
 
         public void StartSync()
         {
-            if (Status == TaskStatus.InQueue && !IsStopped)
+            if (Status == TaskStatus.InQueue && !StopRequested)
             {
                 Prepare();
                 ThreadDoWork();
@@ -182,7 +205,7 @@ namespace ShareX
 
             switch (Info.Job)
             {
-                case TaskJob.ImageJob:
+                case TaskJob.Job:
                 case TaskJob.TextUpload:
                     Info.Status = "Preparing";
                     break;
@@ -198,21 +221,20 @@ namespace ShareX
 
         public void Stop()
         {
-            if (Status != TaskStatus.Stopping && Status != TaskStatus.Completed)
-            {
-                IsStopped = true;
-                Status = TaskStatus.Stopping;
-                Info.Status = "Stopping";
+            StopRequested = true;
 
-                if (Status == TaskStatus.InQueue)
-                {
+            switch (Status)
+            {
+                case TaskStatus.InQueue:
                     OnUploadCompleted();
-                }
-                else if (IsWorking && uploader != null)
-                {
+                    break;
+                case TaskStatus.Preparing:
+                case TaskStatus.Working:
+                    if (uploader != null) uploader.StopUpload();
+                    Status = TaskStatus.Stopping;
+                    Info.Status = "Stopping";
                     OnStatusChanged();
-                    uploader.StopUpload();
-                }
+                    break;
             }
         }
 
@@ -290,11 +312,11 @@ namespace ShareX
                 Info.Result.IsURLExpected = false;
             }
 
-            if (!IsStopped && Info.Result != null && Info.Result.IsURLExpected && !Info.Result.IsError)
+            if (!StopRequested && Info.Result != null && Info.Result.IsURLExpected && !Info.Result.IsError)
             {
                 if (string.IsNullOrEmpty(Info.Result.URL))
                 {
-                    Info.Result.Errors.Add("URL is empty.\r\n\r\n" + Info.Result.ErrorsToString());
+                    Info.Result.Errors.Add("URL is empty.");
                 }
                 else
                 {
@@ -342,7 +364,7 @@ namespace ShareX
             }
             catch (Exception e)
             {
-                if (!IsStopped)
+                if (!StopRequested)
                 {
                     DebugHelper.WriteException(e);
                     isError = true;
@@ -362,9 +384,14 @@ namespace ShareX
 
         private void DoThreadJob()
         {
-            if (Info.Job == TaskJob.ImageJob && tempImage != null)
+            if (Info.Job == TaskJob.Job)
             {
-                DoAfterCaptureJobs();
+                if (tempImage != null)
+                {
+                    DoAfterCaptureJobs();
+                }
+
+                DoFileJobs();
             }
             else if (Info.Job == TaskJob.TextUpload && !string.IsNullOrEmpty(tempText))
             {
@@ -420,8 +447,7 @@ namespace ShareX
                 }
             }
 
-            if (Info.TaskSettings.AfterCaptureJob.HasFlagAny(AfterCaptureTasks.SaveImageToFile, AfterCaptureTasks.SaveImageToFileWithDialog,
-                AfterCaptureTasks.UploadImageToHost))
+            if (Info.TaskSettings.AfterCaptureJob.HasFlagAny(AfterCaptureTasks.SaveImageToFile, AfterCaptureTasks.SaveImageToFileWithDialog, AfterCaptureTasks.UploadImageToHost))
             {
                 using (tempImage)
                 {
@@ -488,36 +514,40 @@ namespace ShareX
                             DebugHelper.WriteLine("SaveThumbnailImageToFile: " + Info.ThumbnailFilePath);
                         }
                     }
+                }
+            }
+        }
 
-                    if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFileToClipboard) && !string.IsNullOrEmpty(Info.FilePath) &&
-                        File.Exists(Info.FilePath))
-                    {
-                        ClipboardHelpers.CopyFile(Info.FilePath);
-                    }
-                    else if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFilePathToClipboard) && !string.IsNullOrEmpty(Info.FilePath))
-                    {
-                        ClipboardHelpers.CopyText(Info.FilePath);
-                    }
+        private void DoFileJobs()
+        {
+            if (!string.IsNullOrEmpty(Info.FilePath) && File.Exists(Info.FilePath))
+            {
+                if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFileToClipboard))
+                {
+                    ClipboardHelpers.CopyFile(Info.FilePath);
+                }
+                else if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFilePathToClipboard))
+                {
+                    ClipboardHelpers.CopyText(Info.FilePath);
+                }
 
-                    if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.PerformActions) && Info.TaskSettings.ExternalPrograms != null &&
-                        !string.IsNullOrEmpty(Info.FilePath) && File.Exists(Info.FilePath))
-                    {
-                        var actions = Info.TaskSettings.ExternalPrograms.Where(x => x.IsActive);
+                if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.PerformActions) && Info.TaskSettings.ExternalPrograms != null)
+                {
+                    var actions = Info.TaskSettings.ExternalPrograms.Where(x => x.IsActive);
 
-                        if (actions.Count() > 0)
+                    if (actions.Count() > 0)
+                    {
+                        if (Data != null)
                         {
-                            if (Data != null)
-                            {
-                                Data.Dispose();
-                            }
-
-                            foreach (ExternalProgram fileAction in actions)
-                            {
-                                fileAction.Run(Info.FilePath);
-                            }
-
-                            Data = new FileStream(Info.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                            Data.Dispose();
                         }
+
+                        foreach (ExternalProgram fileAction in actions)
+                        {
+                            fileAction.Run(Info.FilePath);
+                        }
+
+                        Data = new FileStream(Info.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     }
                 }
             }
@@ -540,17 +570,7 @@ namespace ShareX
 
                 if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.ShareURLToSocialNetworkingService))
                 {
-                    OAuthInfo twitterOAuth = Program.UploadersConfig.TwitterOAuthInfoList.ReturnIfValidIndex(Program.UploadersConfig.TwitterSelectedAccount);
-
-                    if (twitterOAuth != null)
-                    {
-                        using (TwitterMsg twitter = new TwitterMsg(twitterOAuth))
-                        {
-                            twitter.Message = Info.Result.ToString();
-                            twitter.Config = Program.UploadersConfig.TwitterClientConfig;
-                            twitter.ShowDialog();
-                        }
-                    }
+                    DoSocialNetworkingService();
                 }
 
                 if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.SendURLWithEmail))
@@ -597,6 +617,16 @@ namespace ShareX
                     {
                         ClipboardHelpers.CopyText(txt);
                     }
+                }
+
+                if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.OpenURL))
+                {
+                    Helpers.OpenURL(Info.Result.ToString());
+                }
+
+                if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.ShowQRCode))
+                {
+                    threadWorker.InvokeAsync(() => new QRCodeForm(Info.Result.ToString()).Show());
                 }
             }
             catch (Exception e)
@@ -646,32 +676,9 @@ namespace ShareX
                         AlbumID = Program.UploadersConfig.PicasaAlbumID
                     };
                     break;
-                case ImageDestination.Twitpic:
-                    int indexTwitpic = Program.UploadersConfig.TwitterSelectedAccount;
-
-                    if (Program.UploadersConfig.TwitterOAuthInfoList != null && Program.UploadersConfig.TwitterOAuthInfoList.IsValidIndex(indexTwitpic))
-                    {
-                        imageUploader = new TwitPicUploader(APIKeys.TwitPicKey, Program.UploadersConfig.TwitterOAuthInfoList[indexTwitpic])
-                        {
-                            TwitPicThumbnailMode = Program.UploadersConfig.TwitPicThumbnailMode,
-                            ShowFull = Program.UploadersConfig.TwitPicShowFull
-                        };
-                    }
-                    break;
-                case ImageDestination.Twitsnaps:
-                    int indexTwitsnaps = Program.UploadersConfig.TwitterSelectedAccount;
-
-                    if (Program.UploadersConfig.TwitterOAuthInfoList.IsValidIndex(indexTwitsnaps))
-                    {
-                        imageUploader = new TwitSnapsUploader(APIKeys.TwitsnapsKey, Program.UploadersConfig.TwitterOAuthInfoList[indexTwitsnaps]);
-                    }
-                    break;
-                case ImageDestination.yFrog:
-                    YfrogOptions yFrogOptions = new YfrogOptions(APIKeys.ImageShackKey);
-                    yFrogOptions.Username = Program.UploadersConfig.YFrogUsername;
-                    yFrogOptions.Password = Program.UploadersConfig.YFrogPassword;
-                    yFrogOptions.Source = Application.ProductName;
-                    imageUploader = new YfrogUploader(yFrogOptions);
+                case ImageDestination.Twitter:
+                    OAuthInfo twitterOAuth = Program.UploadersConfig.TwitterOAuthInfoList.ReturnIfValidIndex(Program.UploadersConfig.TwitterSelectedAccount);
+                    imageUploader = new Twitter(twitterOAuth);
                     break;
                 case ImageDestination.CustomImageUploader:
                     if (Program.UploadersConfig.CustomUploadersList.IsValidIndex(Program.UploadersConfig.CustomImageUploaderSelected))
@@ -720,9 +727,8 @@ namespace ShareX
                     textUploader = new Paste_ee(Program.UploadersConfig.Paste_eeUserAPIKey);
                     break;
                 case TextDestination.Gist:
-                    textUploader = Program.UploadersConfig.GistAnonymousLogin
-                        ? new Gist(Program.UploadersConfig.GistPublishPublic)
-                        : new Gist(Program.UploadersConfig.GistPublishPublic, Program.UploadersConfig.GistOAuth2Info);
+                    textUploader = Program.UploadersConfig.GistAnonymousLogin ? new Gist(Program.UploadersConfig.GistPublishPublic) :
+                        new Gist(Program.UploadersConfig.GistPublishPublic, Program.UploadersConfig.GistOAuth2Info);
                     break;
                 case TextDestination.Upaste:
                     textUploader = new Upaste(Program.UploadersConfig.UpasteUserKey)
@@ -770,13 +776,18 @@ namespace ShareX
             switch (fileDestination)
             {
                 case FileDestination.Dropbox:
-                    NameParser parser = new NameParser(NameParserType.URL);
-                    string uploadPath = parser.Parse(Dropbox.TidyUploadPath(Program.UploadersConfig.DropboxUploadPath));
-                    fileUploader = new Dropbox(Program.UploadersConfig.DropboxOAuthInfo, Program.UploadersConfig.DropboxAccountInfo)
+                    fileUploader = new Dropbox(Program.UploadersConfig.DropboxOAuth2Info, Program.UploadersConfig.DropboxAccountInfo)
                     {
-                        UploadPath = uploadPath,
+                        UploadPath = NameParser.Parse(NameParserType.URL, Dropbox.TidyUploadPath(Program.UploadersConfig.DropboxUploadPath)),
                         AutoCreateShareableLink = Program.UploadersConfig.DropboxAutoCreateShareableLink,
                         ShareURLType = Program.UploadersConfig.DropboxURLType
+                    };
+                    break;
+                case FileDestination.Copy:
+                    fileUploader = new Copy(Program.UploadersConfig.CopyOAuthInfo, Program.UploadersConfig.CopyAccountInfo)
+                    {
+                        UploadPath = NameParser.Parse(NameParserType.URL, Copy.TidyUploadPath(Program.UploadersConfig.CopyUploadPath)),
+                        URLType = Program.UploadersConfig.CopyURLType
                     };
                     break;
                 case FileDestination.GoogleDrive:
@@ -811,6 +822,9 @@ namespace ShareX
                         Share = Program.UploadersConfig.BoxShare
                     };
                     break;
+                case FileDestination.Gfycat:
+                    fileUploader = new GfycatUploader();
+                    break;
                 case FileDestination.Ge_tt:
                     if (Program.UploadersConfig.IsActive(FileDestination.Ge_tt))
                     {
@@ -833,19 +847,28 @@ namespace ShareX
                     }
                     break;
                 case FileDestination.FTP:
-                    int index = Info.TaskSettings.OverrideFTP ? Info.TaskSettings.FTPIndex.BetweenOrDefault(0, Program.UploadersConfig.FTPAccountList.Count - 1) : Program.UploadersConfig.GetFTPIndex(Info.DataType);
+                    int index;
+
+                    if (Info.TaskSettings.OverrideFTP)
+                    {
+                        index = Info.TaskSettings.FTPIndex.BetweenOrDefault(0, Program.UploadersConfig.FTPAccountList.Count - 1);
+                    }
+                    else
+                    {
+                        index = Program.UploadersConfig.GetFTPIndex(Info.DataType);
+                    }
 
                     FTPAccount account = Program.UploadersConfig.FTPAccountList.ReturnIfValidIndex(index);
 
                     if (account != null)
                     {
-                        if (account.Protocol == FTPProtocol.SFTP)
+                        if (account.Protocol == FTPProtocol.FTP || account.Protocol == FTPProtocol.FTPS)
+                        {
+                            fileUploader = new FTP(account);
+                        }
+                        else if (account.Protocol == FTPProtocol.SFTP)
                         {
                             fileUploader = new SFTP(account);
-                        }
-                        else
-                        {
-                            fileUploader = new FTPUploader(account);
                         }
                     }
                     break;
@@ -882,7 +905,7 @@ namespace ShareX
                         }
                         else
                         {
-                            IsStopped = true;
+                            StopRequested = true;
                         }
                     }
                     break;
@@ -924,7 +947,10 @@ namespace ShareX
                         Program.UploadersConfig.BitlyOAuth2Info = new OAuth2Info(APIKeys.BitlyClientID, APIKeys.BitlyClientSecret);
                     }
 
-                    urlShortener = new BitlyURLShortener(Program.UploadersConfig.BitlyOAuth2Info);
+                    urlShortener = new BitlyURLShortener(Program.UploadersConfig.BitlyOAuth2Info)
+                    {
+                        Domain = Program.UploadersConfig.BitlyDomain
+                    };
                     break;
                 case UrlShortenerType.Google:
                     urlShortener = new GoogleURLShortener(Program.UploadersConfig.GoogleURLShortenerAccountType, APIKeys.GoogleAPIKey,
@@ -965,6 +991,25 @@ namespace ShareX
             }
 
             return null;
+        }
+
+        public void DoSocialNetworkingService()
+        {
+            switch (Info.TaskSettings.SocialNetworkingServiceDestination)
+            {
+                case SocialNetworkingService.Twitter:
+                    OAuthInfo twitterOAuth = Program.UploadersConfig.TwitterOAuthInfoList.ReturnIfValidIndex(Program.UploadersConfig.TwitterSelectedAccount);
+
+                    if (twitterOAuth != null)
+                    {
+                        using (TwitterTweetForm twitter = new TwitterTweetForm(twitterOAuth))
+                        {
+                            twitter.Message = Info.Result.ToString();
+                            twitter.ShowDialog();
+                        }
+                    }
+                    break;
+            }
         }
 
         private void ThreadCompleted()
@@ -1031,13 +1076,13 @@ namespace ShareX
         {
             Status = TaskStatus.Completed;
 
-            if (!IsStopped)
+            if (StopRequested)
             {
-                Info.Status = "Done";
+                Info.Status = "Stopped";
             }
             else
             {
-                Info.Status = "Stopped";
+                Info.Status = "Done";
             }
 
             if (UploadCompleted != null)

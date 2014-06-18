@@ -96,7 +96,7 @@ namespace HelpersLib
                     break;
                 case SerializationType.Json:
                     StreamWriter streamWriter = new StreamWriter(stream);
-                    JsonWriter jsonWriter = new JsonTextWriter(streamWriter);
+                    JsonTextWriter jsonWriter = new JsonTextWriter(streamWriter);
                     jsonWriter.Formatting = Formatting.Indented;
                     JsonSerializer serializer = new JsonSerializer();
                     serializer.ContractResolver = new WritablePropertiesOnlyResolver();

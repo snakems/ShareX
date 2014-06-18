@@ -174,11 +174,11 @@ namespace ShareX
                 {
                     string url = text.Trim();
 
-                    if (Helpers.IsValidURLRegex(url))
+                    if (URLHelpers.IsValidURLRegex(url))
                     {
                         if (taskSettings.UploadSettings.ClipboardUploadURLContents)
                         {
-                            string filename = Helpers.GetURLFilename(url);
+                            string filename = URLHelpers.GetFileName(url, true);
 
                             if (!string.IsNullOrEmpty(filename))
                             {
@@ -337,7 +337,7 @@ namespace ShareX
             string downloadPath = null;
             bool isDownloaded = false;
 
-            Helpers.AsyncJob(() =>
+            TaskEx.Run(() =>
             {
                 downloadPath = TaskHelpers.CheckFilePath(taskSettings.CaptureFolder, filename, taskSettings);
 
@@ -355,6 +355,7 @@ namespace ShareX
                     }
                     catch (Exception e)
                     {
+                        DebugHelper.WriteException(e);
                         MessageBox.Show("Download failed: " + e.ToString(), "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }

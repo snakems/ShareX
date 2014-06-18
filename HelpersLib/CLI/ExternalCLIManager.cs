@@ -24,12 +24,8 @@
 #endregion License Information (GPL v3)
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
 
 namespace HelpersLib
 {
@@ -37,9 +33,6 @@ namespace HelpersLib
     {
         public event DataReceivedEventHandler OutputDataReceived;
         public event DataReceivedEventHandler ErrorDataReceived;
-
-        public StringBuilder Output { get; private set; }
-        public StringBuilder Errors { get; private set; }
 
         private Process process = new Process();
 
@@ -49,9 +42,6 @@ namespace HelpersLib
 
             if (File.Exists(path))
             {
-                Output = new StringBuilder();
-                Errors = new StringBuilder();
-
                 ProcessStartInfo psi = new ProcessStartInfo(path);
                 psi.UseShellExecute = false;
                 psi.CreateNoWindow = true;
@@ -62,11 +52,12 @@ namespace HelpersLib
                 psi.WorkingDirectory = Path.GetDirectoryName(path);
 
                 process.EnableRaisingEvents = true;
-                process.OutputDataReceived += cli_OutputDataReceived;
-                process.ErrorDataReceived += cli_ErrorDataReceived;
+                if (psi.RedirectStandardOutput) process.OutputDataReceived += cli_OutputDataReceived;
+                if (psi.RedirectStandardError) process.ErrorDataReceived += cli_ErrorDataReceived;
                 process.StartInfo = psi;
                 process.Start();
-                process.BeginErrorReadLine();
+                if (psi.RedirectStandardOutput) process.BeginOutputReadLine();
+                if (psi.RedirectStandardError) process.BeginErrorReadLine();
                 process.WaitForExit();
                 return process.ExitCode;
             }
@@ -78,8 +69,6 @@ namespace HelpersLib
         {
             if (e.Data != null)
             {
-                Output.AppendLine(e.Data);
-
                 if (OutputDataReceived != null)
                 {
                     OutputDataReceived(sender, e);
@@ -91,8 +80,6 @@ namespace HelpersLib
         {
             if (e.Data != null)
             {
-                Errors.AppendLine(e.Data);
-
                 if (ErrorDataReceived != null)
                 {
                     ErrorDataReceived(sender, e);

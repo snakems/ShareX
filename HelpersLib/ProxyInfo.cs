@@ -23,8 +23,6 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
-using Starksoft.Net.Proxy;
 using System;
 using System.Net;
 using System.Reflection;
@@ -53,7 +51,6 @@ namespace HelpersLib
         }
 
         public ProxyMethod ProxyMethod { get; set; }
-        public ProxyType ProxyType { get; set; }
         public string Host { get; set; }
         public int Port { get; set; }
         public string Username { get; set; }
@@ -62,7 +59,6 @@ namespace HelpersLib
         public ProxyInfo()
         {
             ProxyMethod = ProxyMethod.Manual;
-            ProxyType = ProxyType.HTTP;
         }
 
         public bool IsValidProxy()
@@ -80,7 +76,6 @@ namespace HelpersLib
                 {
                     Host = systemProxy.Address.Host;
                     Port = systemProxy.Address.Port;
-                    ProxyType = ProxyType.HTTP;
                     return true;
                 }
             }
@@ -88,7 +83,6 @@ namespace HelpersLib
             return false;
         }
 
-        // Proxy for HTTP
         public IWebProxy GetWebProxy()
         {
             if (IsValidProxy())
@@ -96,39 +90,6 @@ namespace HelpersLib
                 NetworkCredential credentials = new NetworkCredential(Username, Password);
                 string address = string.Format("{0}:{1}", Host, Port);
                 return new WebProxy(address, true, null, credentials);
-            }
-
-            return null;
-        }
-
-        // Proxy for FTP
-        public IProxyClient GetProxyClient()
-        {
-            if (IsValidProxy())
-            {
-                Starksoft.Net.Proxy.ProxyType proxyType;
-
-                switch (ProxyType)
-                {
-                    case ProxyType.HTTP:
-                        proxyType = Starksoft.Net.Proxy.ProxyType.Http;
-                        break;
-                    case ProxyType.SOCKS4:
-                        proxyType = Starksoft.Net.Proxy.ProxyType.Socks4;
-                        break;
-                    case ProxyType.SOCKS4a:
-                        proxyType = Starksoft.Net.Proxy.ProxyType.Socks4a;
-                        break;
-                    case ProxyType.SOCKS5:
-                        proxyType = Starksoft.Net.Proxy.ProxyType.Socks5;
-                        break;
-                    default:
-                        proxyType = Starksoft.Net.Proxy.ProxyType.None;
-                        break;
-                }
-
-                ProxyClientFactory proxy = new ProxyClientFactory();
-                return proxy.CreateProxyClient(proxyType, Host, Port, Username, Password);
             }
 
             return null;
@@ -152,7 +113,7 @@ namespace HelpersLib
 
         public override string ToString()
         {
-            return string.Format("{0} - {1}:{2} ({3})", Username, Host, Port, ProxyType);
+            return string.Format("{0} - {1}:{2}", Username, Host, Port);
         }
     }
 }

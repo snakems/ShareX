@@ -166,7 +166,7 @@ namespace ShareX
                 lvi.SubItems.Add(string.Empty);
                 lvi.SubItems.Add(string.Empty);
                 lvi.SubItems.Add(info.DataType.ToString());
-                lvi.SubItems.Add(info.IsUploadJob ? info.UploaderHost : string.Empty);
+                lvi.SubItems.Add(info.UploaderHost);
                 lvi.SubItems.Add(string.Empty);
                 lvi.ImageIndex = 3;
                 if (Program.Settings.ShowMostRecentTaskFirst)
@@ -270,8 +270,7 @@ namespace ShareX
                         }
                         else
                         {
-                            DebugHelper.WriteLine("Task completed. Filename: {0}, URL: {1}, Duration: {2} ms",
-                                info.FileName, info.Result.ToString(), (int)info.UploadDuration.TotalMilliseconds);
+                            DebugHelper.WriteLine("Task completed. Filename: {0}, URL: {1}, Duration: {2} ms", info.FileName, info.Result.ToString(), (int)info.UploadDuration.TotalMilliseconds);
 
                             string result = info.Result.ToString();
 
@@ -293,7 +292,7 @@ namespace ShareX
                                 }
                             }
 
-                            if (!task.IsStopped && !string.IsNullOrEmpty(result))
+                            if (!task.StopRequested && !string.IsNullOrEmpty(result))
                             {
                                 if (task.Info.TaskSettings.GeneralSettings.SaveHistory)
                                 {

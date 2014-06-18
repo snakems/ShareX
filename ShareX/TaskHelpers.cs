@@ -36,6 +36,7 @@ using System.IO;
 using System.Media;
 using System.Windows.Forms;
 using UploadersLib;
+using UploadersLib.HelperClasses;
 
 namespace ShareX
 {
@@ -488,6 +489,7 @@ namespace ShareX
             {
                 surface.RulerMode = true;
                 surface.Config.QuickCrop = false;
+                surface.Config.ShowInfo = true;
                 surface.Prepare();
                 surface.ShowDialog();
             }
@@ -545,6 +547,34 @@ namespace ShareX
                 Process.Start(psi);
             }
             catch { }
+        }
+
+        public static void OpenQRCode()
+        {
+            new QRCodeForm().Show();
+        }
+
+        public static void TweetMessage()
+        {
+            TaskEx.Run(() =>
+            {
+                OAuthInfo twitterOAuth = Program.UploadersConfig.TwitterOAuthInfoList.ReturnIfValidIndex(Program.UploadersConfig.TwitterSelectedAccount);
+
+                if (twitterOAuth != null)
+                {
+                    using (TwitterTweetForm twitter = new TwitterTweetForm(twitterOAuth))
+                    {
+                        if (twitter.ShowDialog() == DialogResult.OK && twitter.IsTweetSent)
+                        {
+                            if (Program.MainForm.niTray.Visible)
+                            {
+                                Program.MainForm.niTray.Tag = null;
+                                Program.MainForm.niTray.ShowBalloonTip(5000, "ShareX - Twitter", "Tweet successfully sent.", ToolTipIcon.Info);
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         public static void OpenFTPClient()

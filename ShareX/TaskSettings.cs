@@ -51,6 +51,7 @@ namespace ShareX
                 description = value;
             }
         }
+
         public HotkeyType Job = HotkeyType.None;
 
         public bool UseDefaultAfterCaptureJob = true;
@@ -67,6 +68,7 @@ namespace ShareX
         public FileDestination FileDestination = FileDestination.Dropbox;
         public UrlShortenerType URLShortenerDestination = UrlShortenerType.BITLY;
         public SocialNetworkingService SocialNetworkingServiceDestination = SocialNetworkingService.Twitter;
+
         public bool OverrideFTP = false;
         public int FTPIndex = 0;
 
@@ -111,9 +113,9 @@ namespace ShareX
         {
             get
             {
-                return UseDefaultAfterCaptureJob && UseDefaultAfterUploadJob && UseDefaultDestinations && UseDefaultGeneralSettings &&
-                    UseDefaultImageSettings && UseDefaultCaptureSettings && UseDefaultUploadSettings && UseDefaultActions &&
-                    UseDefaultIndexerSettings && UseDefaultAdvancedSettings && !WatchFolderEnabled;
+                return UseDefaultAfterCaptureJob && UseDefaultAfterUploadJob && UseDefaultDestinations && !OverrideFTP && UseDefaultGeneralSettings &&
+                    UseDefaultImageSettings && UseDefaultCaptureSettings && UseDefaultUploadSettings && UseDefaultActions && UseDefaultIndexerSettings &&
+                    UseDefaultAdvancedSettings && !WatchFolderEnabled;
             }
         }
 
@@ -249,7 +251,7 @@ namespace ShareX
 
         #region Image / Effects
 
-        [JsonProperty(ItemTypeNameHandling = TypeNameHandling.All)]
+        [JsonProperty(ItemTypeNameHandling = TypeNameHandling.Auto)]
         public List<ImageEffect> ImageEffects = new List<ImageEffect>();
 
         public bool ShowImageEffectsWindowAfterCapture = false;
@@ -293,17 +295,17 @@ namespace ShareX
         #region Capture / Screen recorder
 
         public ScreenRecordOutput ScreenRecordOutput = ScreenRecordOutput.FFmpeg;
-        public AVIOptions AVIOptions = new AVIOptions();
         public FFmpegOptions FFmpegOptions = new FFmpegOptions();
-
-        public int GIFFPS = 5;
-        public int ScreenRecordFPS = 20;
-        public bool ScreenRecordFixedDuration = true;
-        public float ScreenRecordDuration = 3f;
-        public float ScreenRecordStartDelay = 0.1f;
+        public AVIOptions AVIOptions = new AVIOptions();
 
         public bool RunScreencastCLI = false;
         public int VideoEncoderSelected = 0;
+
+        public int ScreenRecordFPS = 20;
+        public int GIFFPS = 5;
+        public bool ScreenRecordFixedDuration = false;
+        public float ScreenRecordDuration = 3f;
+        public float ScreenRecordStartDelay = 0.5f;
 
         #endregion Capture / Screen recorder
     }
@@ -394,9 +396,6 @@ namespace ShareX
         [Category("After upload"), DefaultValue(false), Description("After upload form will be automatically closed after 60 seconds.")]
         public bool AutoCloseAfterUploadForm { get; set; }
 
-        [Category("Capture"), DefaultValue(false), Description("Light version of rectangle region for better performance.")]
-        public bool UseLightRectangleCrop { get; set; }
-
         [Category("Interaction"), DefaultValue(false), Description("Disable notifications")]
         public bool DisableNotifications { get; set; }
 
@@ -411,6 +410,9 @@ namespace ShareX
 
         [Category("Name pattern"), DefaultValue(50), Description("Maximum name pattern title (%t) length for file name.")]
         public int NamePatternMaxTitleLength { get; set; }
+
+        [Category("Screen recorder"), DefaultValue(false), Description("Use active window region instead of showing region selection window for screen recorder.")]
+        public bool ScreenRecorderUseActiveWindow { get; set; }
 
         public TaskSettingsAdvanced()
         {

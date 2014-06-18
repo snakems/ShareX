@@ -24,18 +24,11 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using ScreenCaptureLib;
-using SevenZip;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace ScreenCaptureLib
@@ -48,17 +41,16 @@ namespace ScreenCaptureLib
         public FFmpegOptionsForm(ScreencastOptions options)
         {
             InitializeComponent();
-
             Icon = ShareXResources.Icon;
-            Text = string.Format("{0} - FFmpeg Options", Application.ProductName);
-
             Options = options;
+            eiFFmpeg.ObjectType = typeof(FFmpegOptions);
+            cboVideoCodec.Items.AddRange(Helpers.GetEnumDescriptions<FFmpegVideoCodec>());
+            cboAudioCodec.Items.AddRange(Helpers.GetEnumDescriptions<FFmpegAudioCodec>());
+            cbPreset.Items.AddRange(Helpers.GetEnumDescriptions<FFmpegPreset>());
 
             if (Options != null)
             {
                 SettingsLoad();
-                BindUpdatePreview(Controls);
-                UpdateUI();
             }
         }
 
@@ -66,10 +58,10 @@ namespace ScreenCaptureLib
         {
             // General
             RefreshSourcesAsync();
-            cboVideoCodec.Items.AddRange(Helpers.GetEnumDescriptions<FFmpegVideoCodec>());
+
             cboVideoCodec.SelectedIndex = (int)Options.FFmpeg.VideoCodec;
-            cboAudioCodec.Items.AddRange(Helpers.GetEnumDescriptions<FFmpegAudioCodec>());
             cboAudioCodec.SelectedIndex = (int)Options.FFmpeg.AudioCodec;
+            cbShowError.Checked = Options.FFmpeg.ShowError;
 
             string cli = "ffmpeg.exe";
             if (string.IsNullOrEmpty(Options.FFmpeg.CLIPath) && File.Exists(cli))
@@ -83,13 +75,12 @@ namespace ScreenCaptureLib
 
             // x264
             nudx264CRF.Value = Options.FFmpeg.x264_CRF.Between((int)nudx264CRF.Minimum, (int)nudx264CRF.Maximum);
-            cbPreset.Items.AddRange(Helpers.GetEnumDescriptions<FFmpegPreset>());
             cbPreset.SelectedIndex = (int)Options.FFmpeg.Preset;
 
             // VPx
             nudVPxCRF.Value = Options.FFmpeg.VPx_CRF.Between((int)nudVPxCRF.Minimum, (int)nudVPxCRF.Maximum);
 
-            // XviD
+            // Xvid
             nudQscale.Value = Options.FFmpeg.XviD_qscale.Between((int)nudQscale.Minimum, (int)nudQscale.Maximum);
 
             // AAC
@@ -100,13 +91,23 @@ namespace ScreenCaptureLib
 
             // MP3
             tbMP3_qscale.Value = FFmpegHelper.libmp3lame_qscale_end - Options.FFmpeg.MP3_qscale; // 0-9 where a lower value is a higher quality
+
+            cbCustomCommands.Checked = Options.FFmpeg.UseCustomCommands;
+
+            if (Options.FFmpeg.UseCustomCommands)
+            {
+                txtCommandLinePreview.Text = Options.FFmpeg.CustomCommands;
+            }
+
+            UpdateUI();
         }
 
         private void RefreshSourcesAsync()
         {
             btnRefreshSources.Enabled = false;
             DirectShowDevices devices = null;
-            Helpers.AsyncJob(() =>
+
+            TaskEx.Run(() =>
             {
                 using (FFmpegHelper ffmpeg = new FFmpegHelper(Options))
                 {
@@ -130,37 +131,16 @@ namespace ScreenCaptureLib
             });
         }
 
-        private void BindUpdatePreview(System.Windows.Forms.Control.ControlCollection controls)
-        {
-            controls.Cast<Control>().ForEach(x => { if (x.HasChildren) BindUpdatePreview(x.Controls); });
-
-            foreach (Control ctl in controls)
-            {
-                if (ctl is NumericUpDown)
-                {
-                    ((NumericUpDown)ctl).ValueChanged += (sender, e) => UpdateUI();
-                }
-                else if (ctl is TrackBar)
-                {
-                    ((TrackBar)ctl).ValueChanged += (sender, e) => UpdateUI();
-                }
-                else if (ctl is TextBox && ctl != txtCommandLinePreview)
-                {
-                    ((TextBox)ctl).TextChanged += (sender, e) => UpdateUI();
-                }
-                else if (ctl is ComboBox)
-                {
-                    ((ComboBox)ctl).SelectedIndexChanged += (sender, e) => UpdateUI();
-                }
-            }
-        }
-
         public void UpdateUI()
         {
             lblVorbisQuality.Text = "Quality: " + Options.FFmpeg.Vorbis_qscale;
             lblMP3Quality.Text = "Quality: " + Options.FFmpeg.MP3_qscale;
             lblAACQuality.Text = string.Format("Bitrate: {0}k", Options.FFmpeg.AAC_bitrate);
-            txtCommandLinePreview.Text = "ffmpeg " + Options.GetFFmpegArgs();
+
+            if (!Options.FFmpeg.UseCustomCommands)
+            {
+                txtCommandLinePreview.Text = Options.GetFFmpegArgs();
+            }
         }
 
         public void UpdateExtensions()
@@ -197,47 +177,56 @@ namespace ScreenCaptureLib
         private void cboVideoSource_SelectedIndexChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.VideoSource = cboVideoSource.Text;
+            UpdateUI();
         }
 
         private void cboAudioSource_SelectedIndexChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.AudioSource = cboAudioSource.Text;
+            UpdateUI();
         }
 
         private void cboVideoCodec_SelectedIndexChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.VideoCodec = (FFmpegVideoCodec)cboVideoCodec.SelectedIndex;
             UpdateExtensions();
+            UpdateUI();
         }
 
         private void cboAudioCodec_SelectedIndexChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.AudioCodec = (FFmpegAudioCodec)cboAudioCodec.SelectedIndex;
+            UpdateUI();
         }
 
         private void cbExtension_SelectedIndexChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.Extension = cboExtension.Text;
+            UpdateUI();
         }
 
         private void nudx264CRF_ValueChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.x264_CRF = (int)nudx264CRF.Value;
+            UpdateUI();
         }
 
         private void cbPreset_SelectedIndexChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.Preset = (FFmpegPreset)cbPreset.SelectedIndex;
+            UpdateUI();
         }
 
         private void nudVPxCRF_ValueChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.VPx_CRF = (int)nudVPxCRF.Value;
+            UpdateUI();
         }
 
         private void nudQscale_ValueChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.XviD_qscale = (int)nudQscale.Value;
+            UpdateUI();
         }
 
         private void tbAACBitrate_Scroll(object sender, EventArgs e)
@@ -258,6 +247,11 @@ namespace ScreenCaptureLib
             UpdateUI();
         }
 
+        private void cbShowError_CheckedChanged(object sender, EventArgs e)
+        {
+            Options.FFmpeg.ShowError = cbShowError.Checked;
+        }
+
         private void tbFFmpegPath_TextChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.CLIPath = txtFFmpegPath.Text;
@@ -275,6 +269,7 @@ namespace ScreenCaptureLib
         private void tbUserArgs_TextChanged(object sender, EventArgs e)
         {
             Options.FFmpeg.UserArgs = tbUserArgs.Text;
+            UpdateUI();
         }
 
         private void buttonFFmpegHelp_Click(object sender, EventArgs e)
@@ -300,6 +295,7 @@ namespace ScreenCaptureLib
                     RefreshSourcesAsync();
                     UpdateUI();
                 });
+
                 MessageBox.Show("Successfully downloaded FFmpeg.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
@@ -317,7 +313,7 @@ namespace ScreenCaptureLib
                     using (Process process = new Process())
                     {
                         ProcessStartInfo psi = new ProcessStartInfo("cmd.exe");
-                        psi.Arguments = "/k ffmpeg " + Options.GetFFmpegArgs();
+                        psi.Arguments = "/k ffmpeg " + Options.GetFFmpegCommands();
                         psi.WorkingDirectory = Path.GetDirectoryName(Options.FFmpeg.CLIPath);
 
                         process.StartInfo = psi;
@@ -333,7 +329,50 @@ namespace ScreenCaptureLib
 
         private void btnCopyPreview_Click(object sender, EventArgs e)
         {
-            ClipboardHelpers.CopyText(txtCommandLinePreview.Text);
+            ClipboardHelpers.CopyText("ffmpeg " + Options.GetFFmpegCommands());
+        }
+
+        private void cbCustomCommands_CheckedChanged(object sender, EventArgs e)
+        {
+            Options.FFmpeg.UseCustomCommands = cbCustomCommands.Checked;
+            txtCommandLinePreview.ReadOnly = !Options.FFmpeg.UseCustomCommands;
+
+            if (Options.FFmpeg.UseCustomCommands)
+            {
+                txtCommandLinePreview.Text = Options.GetFFmpegArgs(true);
+            }
+            else
+            {
+                txtCommandLinePreview.Text = Options.GetFFmpegArgs();
+            }
+        }
+
+        private void txtCommandLinePreview_TextChanged(object sender, EventArgs e)
+        {
+            Options.FFmpeg.CustomCommands = txtCommandLinePreview.Text;
+        }
+
+        private void btnHelp_Click(object sender, EventArgs e)
+        {
+            Helpers.OpenURL("https://docs.google.com/document/d/1aKLSqsouoeC5Tjf-Z3P880V3rpzvQU0A2Clayn9ElZo/edit?usp=sharing");
+        }
+
+        private object eiFFmpeg_ExportRequested()
+        {
+            return Options.FFmpeg;
+        }
+
+        private void eiFFmpeg_ImportRequested(object obj)
+        {
+            FFmpegOptions ffmpegOptions = obj as FFmpegOptions;
+
+            if (ffmpegOptions != null)
+            {
+                string tempFFmpegPath = Options.FFmpeg.CLIPath;
+                Options.FFmpeg = ffmpegOptions;
+                Options.FFmpeg.CLIPath = tempFFmpegPath;
+                SettingsLoad();
+            }
         }
     }
 }

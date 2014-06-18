@@ -55,8 +55,7 @@ namespace ScreenCaptureLib
         {
             get
             {
-                return new Rectangle(SelectionRectangle.X - ScreenRectangle.X, SelectionRectangle.Y - ScreenRectangle.Y,
-                    SelectionRectangle.Width, SelectionRectangle.Height);
+                return new Rectangle(SelectionRectangle.X - ScreenRectangle.X, SelectionRectangle.Y - ScreenRectangle.Y, SelectionRectangle.Width, SelectionRectangle.Height);
             }
         }
 
@@ -141,7 +140,7 @@ namespace ScreenCaptureLib
 
         private void RectangleLight_Shown(object sender, EventArgs e)
         {
-            Activate();
+            this.ShowActivate();
         }
 
         private void RectangleLight_KeyUp(object sender, KeyEventArgs e)

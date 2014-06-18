@@ -28,7 +28,6 @@ using ImageEffectsLib;
 using ScreenCaptureLib;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -165,8 +164,8 @@ namespace ShareX
             chkRunScreencastCLI.Checked = TaskSettings.CaptureSettings.RunScreencastCLI;
             UpdateVideoEncoders();
 
-            nudGIFFPS.Value = TaskSettings.CaptureSettings.GIFFPS;
-            nudScreenRecordFPS.Value = TaskSettings.CaptureSettings.ScreenRecordFPS;
+            nudScreenRecordFPS.Value = TaskSettings.CaptureSettings.ScreenRecordFPS.Between((int)nudScreenRecordFPS.Minimum, (int)nudScreenRecordFPS.Maximum);
+            nudGIFFPS.Value = TaskSettings.CaptureSettings.GIFFPS.Between((int)nudGIFFPS.Minimum, (int)nudGIFFPS.Maximum);
             cbScreenRecorderFixedDuration.Checked = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
             nudScreenRecorderDuration.Enabled = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
             nudScreenRecorderDuration.Value = (decimal)TaskSettings.CaptureSettings.ScreenRecordDuration;
@@ -432,6 +431,11 @@ namespace ShareX
             TaskSettings.Description = tbDescription.Text;
         }
 
+        private void btnDescriptionAutoFill_Click(object sender, EventArgs e)
+        {
+            tbDescription.Text = TaskSettings.Job.GetDescription();
+        }
+
         private void cbUseDefaultAfterCaptureSettings_CheckedChanged(object sender, EventArgs e)
         {
             TaskSettings.UseDefaultAfterCaptureJob = cbUseDefaultAfterCaptureSettings.Checked;
@@ -664,15 +668,16 @@ namespace ShareX
         {
             ScreencastOptions options = new ScreencastOptions
             {
-                AVI = TaskSettings.CaptureSettings.AVIOptions,
                 FFmpeg = TaskSettings.CaptureSettings.FFmpegOptions,
+                AVI = TaskSettings.CaptureSettings.AVIOptions,
                 ShowAVIOptionsDialog = true,
-                GIFFPS = TaskSettings.CaptureSettings.GIFFPS,
                 ScreenRecordFPS = TaskSettings.CaptureSettings.ScreenRecordFPS,
+                GIFFPS = TaskSettings.CaptureSettings.GIFFPS,
+                Duration = TaskSettings.CaptureSettings.ScreenRecordFixedDuration ? TaskSettings.CaptureSettings.ScreenRecordDuration : 0,
                 OutputPath = "output.mp4",
-                ParentWindow = this.Handle,
                 CaptureArea = Screen.PrimaryScreen.Bounds,
-                DrawCursor = true
+                DrawCursor = TaskSettings.CaptureSettings.ShowCursor,
+                ParentWindow = this.Handle
             };
 
             switch (TaskSettings.CaptureSettings.ScreenRecordOutput)
@@ -912,6 +917,7 @@ namespace ShareX
         private void txtNameFormatPatternActiveWindow_TextChanged(object sender, EventArgs e)
         {
             TaskSettings.UploadSettings.NameFormatPatternActiveWindow = txtNameFormatPatternActiveWindow.Text;
+
             NameParser nameParser = new NameParser(NameParserType.FileName)
             {
                 AutoIncrementNumber = Program.Settings.NameParserAutoIncrementNumber,
@@ -920,6 +926,7 @@ namespace ShareX
                 MaxNameLength = TaskSettings.AdvancedSettings.NamePatternMaxLength,
                 MaxTitleLength = TaskSettings.AdvancedSettings.NamePatternMaxTitleLength
             };
+
             lblNameFormatPatternPreviewActiveWindow.Text = "Preview: " + nameParser.Parse(TaskSettings.UploadSettings.NameFormatPatternActiveWindow);
         }
 
@@ -931,12 +938,14 @@ namespace ShareX
         private void txtNameFormatPattern_TextChanged(object sender, EventArgs e)
         {
             TaskSettings.UploadSettings.NameFormatPattern = txtNameFormatPattern.Text;
+
             NameParser nameParser = new NameParser(NameParserType.FileName)
             {
                 AutoIncrementNumber = Program.Settings.NameParserAutoIncrementNumber,
                 MaxNameLength = TaskSettings.AdvancedSettings.NamePatternMaxLength,
                 MaxTitleLength = TaskSettings.AdvancedSettings.NamePatternMaxTitleLength
             };
+
             lblNameFormatPatternPreview.Text = "Preview: " + nameParser.Parse(TaskSettings.UploadSettings.NameFormatPattern);
         }
 

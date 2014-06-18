@@ -40,16 +40,15 @@ namespace ShareX
             Text = Program.Title;
             lblProductName.Text = Program.Title;
 
-            uclUpdate.CheckUpdate(TaskHelpers.CheckUpdate);
-
             rtbShareXInfo.AddContextMenu();
             rtbCredits.AddContextMenu();
+
+            uclUpdate.CheckUpdate(TaskHelpers.CheckUpdate);
         }
 
         private void AboutForm_Shown(object sender, EventArgs e)
         {
-            BringToFront();
-            Activate();
+            this.ShowActivate();
 
             cLogo.Start(50);
         }

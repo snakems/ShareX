@@ -23,14 +23,10 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 
 namespace ScreenCaptureLib
 {
@@ -39,7 +35,7 @@ namespace ScreenCaptureLib
         public bool IsWorking { get; protected set; }
         public ScreencastOptions Options { get; set; }
 
-        protected Task task;
+        protected Thread task;
         protected BlockingCollection<Image> imageQueue;
 
         public ImageCache()
@@ -63,7 +59,7 @@ namespace ScreenCaptureLib
             {
                 IsWorking = true;
 
-                task = TaskEx.Run(() =>
+                task = new Thread(() =>
                 {
                     try
                     {
@@ -95,6 +91,8 @@ namespace ScreenCaptureLib
                         IsWorking = false;
                     }
                 });
+
+                task.Start();
             }
         }
 
@@ -105,7 +103,7 @@ namespace ScreenCaptureLib
             if (IsWorking)
             {
                 imageQueue.CompleteAdding();
-                task.Wait();
+                task.Join();
             }
 
             Dispose();

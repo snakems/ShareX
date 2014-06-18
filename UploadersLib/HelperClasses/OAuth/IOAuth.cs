@@ -25,12 +25,8 @@
 
 namespace UploadersLib.HelperClasses
 {
-    public interface IOAuth
+    public interface IOAuth : IOAuthBase
     {
-        OAuthInfo AuthInfo { get; set; }
-
-        string GetAuthorizationURL();
-
-        bool GetAccessToken(string verificationCode);
+        OAuthInfo AuthInfo { get; }
     }
 }

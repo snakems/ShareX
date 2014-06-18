@@ -25,6 +25,7 @@
 
 using HelpersLib;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -255,8 +256,7 @@ namespace HistoryLib
         private void HistoryForm_Shown(object sender, EventArgs e)
         {
             Application.DoEvents();
-            BringToFront();
-            Activate();
+            this.ShowActivate();
             RefreshHistoryItems();
         }
 

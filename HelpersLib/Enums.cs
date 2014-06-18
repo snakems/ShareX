@@ -221,16 +221,6 @@ namespace HelpersLib
         Inside
     }
 
-    public enum ScreenRecordOutput
-    {
-        [Description("FFmpeg")]
-        FFmpeg,
-        [Description("Video Compression Manager (VCM)")]
-        AVI,
-        [Description("Animated GIF")]
-        GIF
-    }
-
     public enum DownloaderFormStatus
     {
         Waiting,
@@ -298,15 +288,9 @@ namespace HelpersLib
         Automatic
     }
 
-    public enum ProxyType
+    public enum SlashType
     {
-        [Description("HTTP proxy")]
-        HTTP,
-        [Description("SOCKS v4 proxy")]
-        SOCKS4,
-        [Description("SOCKS v4a proxy")]
-        SOCKS4a,
-        [Description("SOCKS v5 proxy")]
-        SOCKS5
+        Prefix,
+        Suffix
     }
 }

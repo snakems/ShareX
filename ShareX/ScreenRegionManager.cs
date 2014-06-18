@@ -42,11 +42,11 @@ namespace ShareX
             }
         }
 
-        public void ChangeColor()
+        public void ChangeColor(Color color)
         {
             if (regionForm != null)
             {
-                regionForm.InvokeSafe(() => regionForm.ChangeColor(Color.FromArgb(0, 255, 0)));
+                regionForm.ChangeColor(color);
             }
         }
 

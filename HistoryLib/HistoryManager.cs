@@ -26,7 +26,6 @@
 using HelpersLib;
 using System;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace HistoryLib
 {
@@ -73,13 +72,11 @@ namespace HistoryLib
 
         public static void AddHistoryItemAsync(string historyPath, HistoryItem historyItem)
         {
-            WaitCallback thread = state =>
+            TaskEx.Run(() =>
             {
                 HistoryManager history = new HistoryManager(historyPath);
                 history.AppendHistoryItem(historyItem);
-            };
-
-            ThreadPool.QueueUserWorkItem(thread);
+            });
         }
     }
 }

@@ -39,6 +39,7 @@
             this.cmsTask = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.tcHotkeySettings = new System.Windows.Forms.TabControl();
             this.tpTask = new System.Windows.Forms.TabPage();
+            this.btnDescriptionAutoFill = new System.Windows.Forms.Button();
             this.chkOverrideFTP = new System.Windows.Forms.CheckBox();
             this.cboFTPaccounts = new System.Windows.Forms.ComboBox();
             this.btnAfterCapture = new HelpersLib.MenuButton();
@@ -110,10 +111,10 @@
             this.tpCaptureShape = new System.Windows.Forms.TabPage();
             this.pgShapesCapture = new System.Windows.Forms.PropertyGrid();
             this.tpScreenRecorder = new System.Windows.Forms.TabPage();
+            this.lblScreenRecorderFixedDuration = new System.Windows.Forms.Label();
             this.nudScreenRecordFPS = new System.Windows.Forms.NumericUpDown();
             this.lblScreenRecordFPS = new System.Windows.Forms.Label();
             this.chkRunScreencastCLI = new System.Windows.Forms.CheckBox();
-            this.lblScreenRecorderCLI = new System.Windows.Forms.Label();
             this.btnScreenRecorderOptions = new System.Windows.Forms.Button();
             this.btnEncoderConfig = new System.Windows.Forms.Button();
             this.cboEncoder = new System.Windows.Forms.ComboBox();
@@ -216,7 +217,7 @@
             // cbUseDefaultAfterCaptureSettings
             // 
             this.cbUseDefaultAfterCaptureSettings.AutoSize = true;
-            this.cbUseDefaultAfterCaptureSettings.Location = new System.Drawing.Point(6, 70);
+            this.cbUseDefaultAfterCaptureSettings.Location = new System.Drawing.Point(8, 70);
             this.cbUseDefaultAfterCaptureSettings.Name = "cbUseDefaultAfterCaptureSettings";
             this.cbUseDefaultAfterCaptureSettings.Size = new System.Drawing.Size(193, 17);
             this.cbUseDefaultAfterCaptureSettings.TabIndex = 3;
@@ -227,7 +228,7 @@
             // cbUseDefaultAfterUploadSettings
             // 
             this.cbUseDefaultAfterUploadSettings.AutoSize = true;
-            this.cbUseDefaultAfterUploadSettings.Location = new System.Drawing.Point(6, 126);
+            this.cbUseDefaultAfterUploadSettings.Location = new System.Drawing.Point(8, 126);
             this.cbUseDefaultAfterUploadSettings.Name = "cbUseDefaultAfterUploadSettings";
             this.cbUseDefaultAfterUploadSettings.Size = new System.Drawing.Size(189, 17);
             this.cbUseDefaultAfterUploadSettings.TabIndex = 5;
@@ -238,7 +239,7 @@
             // cbUseDefaultDestinationSettings
             // 
             this.cbUseDefaultDestinationSettings.AutoSize = true;
-            this.cbUseDefaultDestinationSettings.Location = new System.Drawing.Point(6, 182);
+            this.cbUseDefaultDestinationSettings.Location = new System.Drawing.Point(8, 182);
             this.cbUseDefaultDestinationSettings.Name = "cbUseDefaultDestinationSettings";
             this.cbUseDefaultDestinationSettings.Size = new System.Drawing.Size(185, 17);
             this.cbUseDefaultDestinationSettings.TabIndex = 7;
@@ -259,7 +260,7 @@
             // 
             this.tbDescription.Location = new System.Drawing.Point(78, 9);
             this.tbDescription.Name = "tbDescription";
-            this.tbDescription.Size = new System.Drawing.Size(434, 20);
+            this.tbDescription.Size = new System.Drawing.Size(362, 20);
             this.tbDescription.TabIndex = 1;
             this.tbDescription.TextChanged += new System.EventHandler(this.tbDescription_TextChanged);
             // 
@@ -283,11 +284,12 @@
             this.tcHotkeySettings.Location = new System.Drawing.Point(3, 3);
             this.tcHotkeySettings.Name = "tcHotkeySettings";
             this.tcHotkeySettings.SelectedIndex = 0;
-            this.tcHotkeySettings.Size = new System.Drawing.Size(558, 386);
+            this.tcHotkeySettings.Size = new System.Drawing.Size(531, 386);
             this.tcHotkeySettings.TabIndex = 0;
             // 
             // tpTask
             // 
+            this.tpTask.Controls.Add(this.btnDescriptionAutoFill);
             this.tpTask.Controls.Add(this.chkOverrideFTP);
             this.tpTask.Controls.Add(this.cboFTPaccounts);
             this.tpTask.Controls.Add(this.tbDescription);
@@ -302,15 +304,25 @@
             this.tpTask.Location = new System.Drawing.Point(4, 22);
             this.tpTask.Name = "tpTask";
             this.tpTask.Padding = new System.Windows.Forms.Padding(3);
-            this.tpTask.Size = new System.Drawing.Size(550, 360);
+            this.tpTask.Size = new System.Drawing.Size(523, 360);
             this.tpTask.TabIndex = 0;
             this.tpTask.Text = "Task";
             this.tpTask.UseVisualStyleBackColor = true;
             // 
+            // btnDescriptionAutoFill
+            // 
+            this.btnDescriptionAutoFill.Location = new System.Drawing.Point(448, 7);
+            this.btnDescriptionAutoFill.Name = "btnDescriptionAutoFill";
+            this.btnDescriptionAutoFill.Size = new System.Drawing.Size(64, 24);
+            this.btnDescriptionAutoFill.TabIndex = 11;
+            this.btnDescriptionAutoFill.Text = "Auto fill";
+            this.btnDescriptionAutoFill.UseVisualStyleBackColor = true;
+            this.btnDescriptionAutoFill.Click += new System.EventHandler(this.btnDescriptionAutoFill_Click);
+            // 
             // chkOverrideFTP
             // 
             this.chkOverrideFTP.AutoSize = true;
-            this.chkOverrideFTP.Location = new System.Drawing.Point(6, 240);
+            this.chkOverrideFTP.Location = new System.Drawing.Point(8, 240);
             this.chkOverrideFTP.Name = "chkOverrideFTP";
             this.chkOverrideFTP.Size = new System.Drawing.Size(169, 17);
             this.chkOverrideFTP.TabIndex = 9;
@@ -430,7 +442,7 @@
             this.tpGeneral.Location = new System.Drawing.Point(4, 22);
             this.tpGeneral.Name = "tpGeneral";
             this.tpGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tpGeneral.Size = new System.Drawing.Size(550, 360);
+            this.tpGeneral.Size = new System.Drawing.Size(523, 360);
             this.tpGeneral.TabIndex = 7;
             this.tpGeneral.Text = "General";
             this.tpGeneral.UseVisualStyleBackColor = true;
@@ -449,7 +461,7 @@
             this.panelGeneral.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panelGeneral.Location = new System.Drawing.Point(3, 30);
             this.panelGeneral.Name = "panelGeneral";
-            this.panelGeneral.Size = new System.Drawing.Size(544, 327);
+            this.panelGeneral.Size = new System.Drawing.Size(517, 327);
             this.panelGeneral.TabIndex = 1;
             // 
             // chkShowBeforeUploadForm
@@ -546,7 +558,7 @@
             this.chkUseDefaultGeneralSettings.Location = new System.Drawing.Point(3, 3);
             this.chkUseDefaultGeneralSettings.Name = "chkUseDefaultGeneralSettings";
             this.chkUseDefaultGeneralSettings.Padding = new System.Windows.Forms.Padding(5);
-            this.chkUseDefaultGeneralSettings.Size = new System.Drawing.Size(544, 27);
+            this.chkUseDefaultGeneralSettings.Size = new System.Drawing.Size(517, 27);
             this.chkUseDefaultGeneralSettings.TabIndex = 0;
             this.chkUseDefaultGeneralSettings.Text = "Use general settings in main window task settings";
             this.chkUseDefaultGeneralSettings.UseVisualStyleBackColor = true;
@@ -559,7 +571,7 @@
             this.tpImage.Location = new System.Drawing.Point(4, 22);
             this.tpImage.Name = "tpImage";
             this.tpImage.Padding = new System.Windows.Forms.Padding(3);
-            this.tpImage.Size = new System.Drawing.Size(550, 360);
+            this.tpImage.Size = new System.Drawing.Size(523, 360);
             this.tpImage.TabIndex = 1;
             this.tpImage.Text = "Image";
             this.tpImage.UseVisualStyleBackColor = true;
@@ -573,7 +585,7 @@
             this.tcImage.Location = new System.Drawing.Point(3, 30);
             this.tcImage.Name = "tcImage";
             this.tcImage.SelectedIndex = 0;
-            this.tcImage.Size = new System.Drawing.Size(544, 327);
+            this.tcImage.Size = new System.Drawing.Size(517, 327);
             this.tcImage.TabIndex = 1;
             // 
             // tpQuality
@@ -595,7 +607,7 @@
             this.tpQuality.Location = new System.Drawing.Point(4, 22);
             this.tpQuality.Name = "tpQuality";
             this.tpQuality.Padding = new System.Windows.Forms.Padding(3);
-            this.tpQuality.Size = new System.Drawing.Size(536, 301);
+            this.tpQuality.Size = new System.Drawing.Size(509, 301);
             this.tpQuality.TabIndex = 0;
             this.tpQuality.Text = "General";
             this.tpQuality.UseVisualStyleBackColor = true;
@@ -769,7 +781,7 @@
             this.tpEffects.Location = new System.Drawing.Point(4, 22);
             this.tpEffects.Name = "tpEffects";
             this.tpEffects.Padding = new System.Windows.Forms.Padding(3);
-            this.tpEffects.Size = new System.Drawing.Size(536, 301);
+            this.tpEffects.Size = new System.Drawing.Size(509, 301);
             this.tpEffects.TabIndex = 2;
             this.tpEffects.Text = "Effects";
             this.tpEffects.UseVisualStyleBackColor = true;
@@ -841,7 +853,7 @@
             this.tpThumbnail.Location = new System.Drawing.Point(4, 22);
             this.tpThumbnail.Name = "tpThumbnail";
             this.tpThumbnail.Padding = new System.Windows.Forms.Padding(3);
-            this.tpThumbnail.Size = new System.Drawing.Size(536, 301);
+            this.tpThumbnail.Size = new System.Drawing.Size(509, 301);
             this.tpThumbnail.TabIndex = 3;
             this.tpThumbnail.Text = "Thumbnail";
             this.tpThumbnail.UseVisualStyleBackColor = true;
@@ -938,7 +950,7 @@
             this.chkUseDefaultImageSettings.Location = new System.Drawing.Point(3, 3);
             this.chkUseDefaultImageSettings.Name = "chkUseDefaultImageSettings";
             this.chkUseDefaultImageSettings.Padding = new System.Windows.Forms.Padding(5);
-            this.chkUseDefaultImageSettings.Size = new System.Drawing.Size(544, 27);
+            this.chkUseDefaultImageSettings.Size = new System.Drawing.Size(517, 27);
             this.chkUseDefaultImageSettings.TabIndex = 0;
             this.chkUseDefaultImageSettings.Text = "Use image settings in main window task settings";
             this.chkUseDefaultImageSettings.UseVisualStyleBackColor = true;
@@ -951,7 +963,7 @@
             this.tpCapture.Location = new System.Drawing.Point(4, 22);
             this.tpCapture.Name = "tpCapture";
             this.tpCapture.Padding = new System.Windows.Forms.Padding(3);
-            this.tpCapture.Size = new System.Drawing.Size(550, 360);
+            this.tpCapture.Size = new System.Drawing.Size(523, 360);
             this.tpCapture.TabIndex = 2;
             this.tpCapture.Text = "Capture";
             this.tpCapture.UseVisualStyleBackColor = true;
@@ -965,7 +977,7 @@
             this.tcCapture.Location = new System.Drawing.Point(3, 30);
             this.tcCapture.Name = "tcCapture";
             this.tcCapture.SelectedIndex = 0;
-            this.tcCapture.Size = new System.Drawing.Size(544, 327);
+            this.tcCapture.Size = new System.Drawing.Size(517, 327);
             this.tcCapture.TabIndex = 1;
             // 
             // tpCaptureGeneral
@@ -982,7 +994,7 @@
             this.tpCaptureGeneral.Location = new System.Drawing.Point(4, 22);
             this.tpCaptureGeneral.Name = "tpCaptureGeneral";
             this.tpCaptureGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tpCaptureGeneral.Size = new System.Drawing.Size(536, 301);
+            this.tpCaptureGeneral.Size = new System.Drawing.Size(509, 301);
             this.tpCaptureGeneral.TabIndex = 0;
             this.tpCaptureGeneral.Text = "General";
             this.tpCaptureGeneral.UseVisualStyleBackColor = true;
@@ -1107,7 +1119,7 @@
             this.tpCaptureShape.Location = new System.Drawing.Point(4, 22);
             this.tpCaptureShape.Name = "tpCaptureShape";
             this.tpCaptureShape.Padding = new System.Windows.Forms.Padding(3);
-            this.tpCaptureShape.Size = new System.Drawing.Size(536, 301);
+            this.tpCaptureShape.Size = new System.Drawing.Size(509, 301);
             this.tpCaptureShape.TabIndex = 1;
             this.tpCaptureShape.Text = "Shape capture";
             this.tpCaptureShape.UseVisualStyleBackColor = true;
@@ -1118,16 +1130,16 @@
             this.pgShapesCapture.Location = new System.Drawing.Point(3, 3);
             this.pgShapesCapture.Name = "pgShapesCapture";
             this.pgShapesCapture.PropertySort = System.Windows.Forms.PropertySort.NoSort;
-            this.pgShapesCapture.Size = new System.Drawing.Size(530, 295);
+            this.pgShapesCapture.Size = new System.Drawing.Size(503, 295);
             this.pgShapesCapture.TabIndex = 0;
             this.pgShapesCapture.ToolbarVisible = false;
             // 
             // tpScreenRecorder
             // 
+            this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderFixedDuration);
             this.tpScreenRecorder.Controls.Add(this.nudScreenRecordFPS);
             this.tpScreenRecorder.Controls.Add(this.lblScreenRecordFPS);
             this.tpScreenRecorder.Controls.Add(this.chkRunScreencastCLI);
-            this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderCLI);
             this.tpScreenRecorder.Controls.Add(this.btnScreenRecorderOptions);
             this.tpScreenRecorder.Controls.Add(this.btnEncoderConfig);
             this.tpScreenRecorder.Controls.Add(this.cboEncoder);
@@ -1142,14 +1154,23 @@
             this.tpScreenRecorder.Location = new System.Drawing.Point(4, 22);
             this.tpScreenRecorder.Name = "tpScreenRecorder";
             this.tpScreenRecorder.Padding = new System.Windows.Forms.Padding(3);
-            this.tpScreenRecorder.Size = new System.Drawing.Size(536, 301);
+            this.tpScreenRecorder.Size = new System.Drawing.Size(509, 301);
             this.tpScreenRecorder.TabIndex = 2;
             this.tpScreenRecorder.Text = "Screen recorder";
             this.tpScreenRecorder.UseVisualStyleBackColor = true;
             // 
+            // lblScreenRecorderFixedDuration
+            // 
+            this.lblScreenRecorderFixedDuration.AutoSize = true;
+            this.lblScreenRecorderFixedDuration.Location = new System.Drawing.Point(211, 115);
+            this.lblScreenRecorderFixedDuration.Name = "lblScreenRecorderFixedDuration";
+            this.lblScreenRecorderFixedDuration.Size = new System.Drawing.Size(47, 13);
+            this.lblScreenRecorderFixedDuration.TabIndex = 15;
+            this.lblScreenRecorderFixedDuration.Text = "seconds";
+            // 
             // nudScreenRecordFPS
             // 
-            this.nudScreenRecordFPS.Location = new System.Drawing.Point(320, 69);
+            this.nudScreenRecordFPS.Location = new System.Drawing.Point(144, 64);
             this.nudScreenRecordFPS.Maximum = new decimal(new int[] {
             30,
             0,
@@ -1174,7 +1195,7 @@
             // lblScreenRecordFPS
             // 
             this.lblScreenRecordFPS.AutoSize = true;
-            this.lblScreenRecordFPS.Location = new System.Drawing.Point(208, 73);
+            this.lblScreenRecordFPS.Location = new System.Drawing.Point(16, 68);
             this.lblScreenRecordFPS.Name = "lblScreenRecordFPS";
             this.lblScreenRecordFPS.Size = new System.Drawing.Size(100, 13);
             this.lblScreenRecordFPS.TabIndex = 7;
@@ -1183,28 +1204,19 @@
             // chkRunScreencastCLI
             // 
             this.chkRunScreencastCLI.AutoSize = true;
-            this.chkRunScreencastCLI.Location = new System.Drawing.Point(392, 14);
+            this.chkRunScreencastCLI.Location = new System.Drawing.Point(18, 42);
             this.chkRunScreencastCLI.Name = "chkRunScreencastCLI";
-            this.chkRunScreencastCLI.Size = new System.Drawing.Size(117, 17);
+            this.chkRunScreencastCLI.Size = new System.Drawing.Size(120, 17);
             this.chkRunScreencastCLI.TabIndex = 3;
-            this.chkRunScreencastCLI.Text = "Run CLI afterwards";
+            this.chkRunScreencastCLI.Text = "Run CLI afterwards:";
             this.chkRunScreencastCLI.UseVisualStyleBackColor = true;
             this.chkRunScreencastCLI.CheckedChanged += new System.EventHandler(this.chkRunScreencastCLI_CheckedChanged);
             // 
-            // lblScreenRecorderCLI
-            // 
-            this.lblScreenRecorderCLI.AutoSize = true;
-            this.lblScreenRecorderCLI.Location = new System.Drawing.Point(16, 48);
-            this.lblScreenRecorderCLI.Name = "lblScreenRecorderCLI";
-            this.lblScreenRecorderCLI.Size = new System.Drawing.Size(26, 13);
-            this.lblScreenRecorderCLI.TabIndex = 4;
-            this.lblScreenRecorderCLI.Text = "CLI:";
-            // 
             // btnScreenRecorderOptions
             // 
-            this.btnScreenRecorderOptions.Location = new System.Drawing.Point(320, 11);
+            this.btnScreenRecorderOptions.Location = new System.Drawing.Point(402, 15);
             this.btnScreenRecorderOptions.Name = "btnScreenRecorderOptions";
-            this.btnScreenRecorderOptions.Size = new System.Drawing.Size(64, 23);
+            this.btnScreenRecorderOptions.Size = new System.Drawing.Size(70, 23);
             this.btnScreenRecorderOptions.TabIndex = 2;
             this.btnScreenRecorderOptions.Text = "Options...";
             this.btnScreenRecorderOptions.UseVisualStyleBackColor = true;
@@ -1212,11 +1224,11 @@
             // 
             // btnEncoderConfig
             // 
-            this.btnEncoderConfig.Location = new System.Drawing.Point(392, 40);
+            this.btnEncoderConfig.Location = new System.Drawing.Point(402, 39);
             this.btnEncoderConfig.Name = "btnEncoderConfig";
-            this.btnEncoderConfig.Size = new System.Drawing.Size(40, 23);
+            this.btnEncoderConfig.Size = new System.Drawing.Size(70, 23);
             this.btnEncoderConfig.TabIndex = 6;
-            this.btnEncoderConfig.Text = "...";
+            this.btnEncoderConfig.Text = "Profiles...";
             this.btnEncoderConfig.UseVisualStyleBackColor = true;
             this.btnEncoderConfig.Click += new System.EventHandler(this.btnEncoderConfig_Click);
             // 
@@ -1224,9 +1236,9 @@
             // 
             this.cboEncoder.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboEncoder.FormattingEnabled = true;
-            this.cboEncoder.Location = new System.Drawing.Point(64, 41);
+            this.cboEncoder.Location = new System.Drawing.Point(144, 40);
             this.cboEncoder.Name = "cboEncoder";
-            this.cboEncoder.Size = new System.Drawing.Size(320, 21);
+            this.cboEncoder.Size = new System.Drawing.Size(256, 21);
             this.cboEncoder.TabIndex = 5;
             this.cboEncoder.SelectedIndexChanged += new System.EventHandler(this.cboEncoder_SelectedIndexChanged);
             // 
@@ -1238,7 +1250,7 @@
             0,
             0,
             65536});
-            this.nudScreenRecorderDuration.Location = new System.Drawing.Point(320, 123);
+            this.nudScreenRecorderDuration.Location = new System.Drawing.Point(144, 112);
             this.nudScreenRecorderDuration.Maximum = new decimal(new int[] {
             60,
             0,
@@ -1263,7 +1275,7 @@
             // lblScreenRecorderStartDelay
             // 
             this.lblScreenRecorderStartDelay.AutoSize = true;
-            this.lblScreenRecorderStartDelay.Location = new System.Drawing.Point(248, 154);
+            this.lblScreenRecorderStartDelay.Location = new System.Drawing.Point(16, 140);
             this.lblScreenRecorderStartDelay.Name = "lblScreenRecorderStartDelay";
             this.lblScreenRecorderStartDelay.Size = new System.Drawing.Size(60, 13);
             this.lblScreenRecorderStartDelay.TabIndex = 13;
@@ -1277,7 +1289,7 @@
             0,
             0,
             65536});
-            this.nudScreenRecorderStartDelay.Location = new System.Drawing.Point(320, 150);
+            this.nudScreenRecorderStartDelay.Location = new System.Drawing.Point(144, 136);
             this.nudScreenRecorderStartDelay.Maximum = new decimal(new int[] {
             60,
             0,
@@ -1298,16 +1310,16 @@
             // 
             this.cbScreenRecorderOutput.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cbScreenRecorderOutput.FormattingEnabled = true;
-            this.cbScreenRecorderOutput.Location = new System.Drawing.Point(64, 12);
+            this.cbScreenRecorderOutput.Location = new System.Drawing.Point(144, 16);
             this.cbScreenRecorderOutput.Name = "cbScreenRecorderOutput";
-            this.cbScreenRecorderOutput.Size = new System.Drawing.Size(248, 21);
+            this.cbScreenRecorderOutput.Size = new System.Drawing.Size(256, 21);
             this.cbScreenRecorderOutput.TabIndex = 1;
             this.cbScreenRecorderOutput.SelectedIndexChanged += new System.EventHandler(this.cbScreenRecorderOutput_SelectedIndexChanged);
             // 
             // lblScreenRecorderOutput
             // 
             this.lblScreenRecorderOutput.AutoSize = true;
-            this.lblScreenRecorderOutput.Location = new System.Drawing.Point(16, 16);
+            this.lblScreenRecorderOutput.Location = new System.Drawing.Point(16, 20);
             this.lblScreenRecorderOutput.Name = "lblScreenRecorderOutput";
             this.lblScreenRecorderOutput.Size = new System.Drawing.Size(42, 13);
             this.lblScreenRecorderOutput.TabIndex = 0;
@@ -1316,19 +1328,19 @@
             // cbScreenRecorderFixedDuration
             // 
             this.cbScreenRecorderFixedDuration.AutoSize = true;
-            this.cbScreenRecorderFixedDuration.Location = new System.Drawing.Point(164, 125);
+            this.cbScreenRecorderFixedDuration.Location = new System.Drawing.Point(18, 114);
             this.cbScreenRecorderFixedDuration.Name = "cbScreenRecorderFixedDuration";
-            this.cbScreenRecorderFixedDuration.Size = new System.Drawing.Size(144, 17);
+            this.cbScreenRecorderFixedDuration.Size = new System.Drawing.Size(95, 17);
             this.cbScreenRecorderFixedDuration.TabIndex = 11;
-            this.cbScreenRecorderFixedDuration.Text = "Fixed duration (seconds):";
+            this.cbScreenRecorderFixedDuration.Text = "Fixed duration:";
             this.cbScreenRecorderFixedDuration.UseVisualStyleBackColor = true;
             this.cbScreenRecorderFixedDuration.CheckedChanged += new System.EventHandler(this.cbScreenRecorderFixedDuration_CheckedChanged);
             // 
             // nudGIFFPS
             // 
-            this.nudGIFFPS.Location = new System.Drawing.Point(320, 96);
+            this.nudGIFFPS.Location = new System.Drawing.Point(144, 88);
             this.nudGIFFPS.Maximum = new decimal(new int[] {
-            30,
+            15,
             0,
             0,
             0});
@@ -1351,7 +1363,7 @@
             // lblGIFPS
             // 
             this.lblGIFPS.AutoSize = true;
-            this.lblGIFPS.Location = new System.Drawing.Point(258, 100);
+            this.lblGIFPS.Location = new System.Drawing.Point(16, 92);
             this.lblGIFPS.Name = "lblGIFPS";
             this.lblGIFPS.Size = new System.Drawing.Size(50, 13);
             this.lblGIFPS.TabIndex = 9;
@@ -1366,7 +1378,7 @@
             this.chkUseDefaultCaptureSettings.Location = new System.Drawing.Point(3, 3);
             this.chkUseDefaultCaptureSettings.Name = "chkUseDefaultCaptureSettings";
             this.chkUseDefaultCaptureSettings.Padding = new System.Windows.Forms.Padding(5);
-            this.chkUseDefaultCaptureSettings.Size = new System.Drawing.Size(544, 27);
+            this.chkUseDefaultCaptureSettings.Size = new System.Drawing.Size(517, 27);
             this.chkUseDefaultCaptureSettings.TabIndex = 0;
             this.chkUseDefaultCaptureSettings.Text = "Use capture settings in main window task settings";
             this.chkUseDefaultCaptureSettings.UseVisualStyleBackColor = true;
@@ -1379,7 +1391,7 @@
             this.tpActions.Location = new System.Drawing.Point(4, 22);
             this.tpActions.Name = "tpActions";
             this.tpActions.Padding = new System.Windows.Forms.Padding(3);
-            this.tpActions.Size = new System.Drawing.Size(550, 360);
+            this.tpActions.Size = new System.Drawing.Size(523, 360);
             this.tpActions.TabIndex = 3;
             this.tpActions.Text = "Actions";
             this.tpActions.UseVisualStyleBackColor = true;
@@ -1394,7 +1406,7 @@
             this.pActions.Location = new System.Drawing.Point(3, 30);
             this.pActions.Margin = new System.Windows.Forms.Padding(0);
             this.pActions.Name = "pActions";
-            this.pActions.Size = new System.Drawing.Size(544, 327);
+            this.pActions.Size = new System.Drawing.Size(517, 327);
             this.pActions.TabIndex = 1;
             // 
             // btnActionsAdd
@@ -1409,6 +1421,10 @@
             // 
             // lvActions
             // 
+            this.lvActions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lvActions.AutoFillColumn = true;
             this.lvActions.CheckBoxes = true;
             this.lvActions.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
             this.chActionsName,
@@ -1418,7 +1434,7 @@
             this.lvActions.Location = new System.Drawing.Point(8, 40);
             this.lvActions.MultiSelect = false;
             this.lvActions.Name = "lvActions";
-            this.lvActions.Size = new System.Drawing.Size(496, 280);
+            this.lvActions.Size = new System.Drawing.Size(504, 280);
             this.lvActions.TabIndex = 3;
             this.lvActions.UseCompatibleStateImageBehavior = false;
             this.lvActions.View = System.Windows.Forms.View.Details;
@@ -1468,7 +1484,7 @@
             this.chkUseDefaultActions.Location = new System.Drawing.Point(3, 3);
             this.chkUseDefaultActions.Name = "chkUseDefaultActions";
             this.chkUseDefaultActions.Padding = new System.Windows.Forms.Padding(5);
-            this.chkUseDefaultActions.Size = new System.Drawing.Size(544, 27);
+            this.chkUseDefaultActions.Size = new System.Drawing.Size(517, 27);
             this.chkUseDefaultActions.TabIndex = 0;
             this.chkUseDefaultActions.Text = "Use actions in main window task settings";
             this.chkUseDefaultActions.UseVisualStyleBackColor = true;
@@ -1483,7 +1499,7 @@
             this.tpWatchFolders.Location = new System.Drawing.Point(4, 22);
             this.tpWatchFolders.Name = "tpWatchFolders";
             this.tpWatchFolders.Padding = new System.Windows.Forms.Padding(3);
-            this.tpWatchFolders.Size = new System.Drawing.Size(550, 360);
+            this.tpWatchFolders.Size = new System.Drawing.Size(523, 360);
             this.tpWatchFolders.TabIndex = 5;
             this.tpWatchFolders.Text = "Watch folders";
             this.tpWatchFolders.UseVisualStyleBackColor = true;
@@ -1508,7 +1524,7 @@
             this.lvWatchFolderList.FullRowSelect = true;
             this.lvWatchFolderList.Location = new System.Drawing.Point(8, 64);
             this.lvWatchFolderList.Name = "lvWatchFolderList";
-            this.lvWatchFolderList.Size = new System.Drawing.Size(528, 288);
+            this.lvWatchFolderList.Size = new System.Drawing.Size(504, 288);
             this.lvWatchFolderList.TabIndex = 3;
             this.lvWatchFolderList.UseCompatibleStateImageBehavior = false;
             this.lvWatchFolderList.View = System.Windows.Forms.View.Details;
@@ -1556,7 +1572,7 @@
             this.tpUpload.Location = new System.Drawing.Point(4, 22);
             this.tpUpload.Name = "tpUpload";
             this.tpUpload.Padding = new System.Windows.Forms.Padding(3);
-            this.tpUpload.Size = new System.Drawing.Size(550, 360);
+            this.tpUpload.Size = new System.Drawing.Size(523, 360);
             this.tpUpload.TabIndex = 4;
             this.tpUpload.Text = "Upload";
             this.tpUpload.UseVisualStyleBackColor = true;
@@ -1569,7 +1585,7 @@
             this.tcUpload.Location = new System.Drawing.Point(3, 30);
             this.tcUpload.Name = "tcUpload";
             this.tcUpload.SelectedIndex = 0;
-            this.tcUpload.Size = new System.Drawing.Size(544, 327);
+            this.tcUpload.Size = new System.Drawing.Size(517, 327);
             this.tcUpload.TabIndex = 1;
             // 
             // tpUploadNamePattern
@@ -1585,7 +1601,7 @@
             this.tpUploadNamePattern.Location = new System.Drawing.Point(4, 22);
             this.tpUploadNamePattern.Name = "tpUploadNamePattern";
             this.tpUploadNamePattern.Padding = new System.Windows.Forms.Padding(3);
-            this.tpUploadNamePattern.Size = new System.Drawing.Size(536, 301);
+            this.tpUploadNamePattern.Size = new System.Drawing.Size(509, 301);
             this.tpUploadNamePattern.TabIndex = 0;
             this.tpUploadNamePattern.Text = "Name pattern";
             this.tpUploadNamePattern.UseVisualStyleBackColor = true;
@@ -1671,7 +1687,7 @@
             this.tpUploadClipboard.Location = new System.Drawing.Point(4, 22);
             this.tpUploadClipboard.Name = "tpUploadClipboard";
             this.tpUploadClipboard.Padding = new System.Windows.Forms.Padding(3);
-            this.tpUploadClipboard.Size = new System.Drawing.Size(536, 301);
+            this.tpUploadClipboard.Size = new System.Drawing.Size(509, 301);
             this.tpUploadClipboard.TabIndex = 1;
             this.tpUploadClipboard.Text = "Clipboard upload";
             this.tpUploadClipboard.UseVisualStyleBackColor = true;
@@ -1718,7 +1734,7 @@
             this.chkUseDefaultUploadSettings.Location = new System.Drawing.Point(3, 3);
             this.chkUseDefaultUploadSettings.Name = "chkUseDefaultUploadSettings";
             this.chkUseDefaultUploadSettings.Padding = new System.Windows.Forms.Padding(5);
-            this.chkUseDefaultUploadSettings.Size = new System.Drawing.Size(544, 27);
+            this.chkUseDefaultUploadSettings.Size = new System.Drawing.Size(517, 27);
             this.chkUseDefaultUploadSettings.TabIndex = 0;
             this.chkUseDefaultUploadSettings.Text = "Use upload settings in main window task settings";
             this.chkUseDefaultUploadSettings.UseVisualStyleBackColor = true;
@@ -1731,7 +1747,7 @@
             this.tpIndexer.Location = new System.Drawing.Point(4, 22);
             this.tpIndexer.Name = "tpIndexer";
             this.tpIndexer.Padding = new System.Windows.Forms.Padding(3);
-            this.tpIndexer.Size = new System.Drawing.Size(550, 360);
+            this.tpIndexer.Size = new System.Drawing.Size(523, 360);
             this.tpIndexer.TabIndex = 8;
             this.tpIndexer.Text = "Indexer";
             this.tpIndexer.UseVisualStyleBackColor = true;
@@ -1742,7 +1758,7 @@
             this.pgIndexerConfig.Location = new System.Drawing.Point(3, 30);
             this.pgIndexerConfig.Name = "pgIndexerConfig";
             this.pgIndexerConfig.PropertySort = System.Windows.Forms.PropertySort.Categorized;
-            this.pgIndexerConfig.Size = new System.Drawing.Size(544, 327);
+            this.pgIndexerConfig.Size = new System.Drawing.Size(517, 327);
             this.pgIndexerConfig.TabIndex = 1;
             this.pgIndexerConfig.ToolbarVisible = false;
             // 
@@ -1755,7 +1771,7 @@
             this.chkUseDefaultIndexerSettings.Location = new System.Drawing.Point(3, 3);
             this.chkUseDefaultIndexerSettings.Name = "chkUseDefaultIndexerSettings";
             this.chkUseDefaultIndexerSettings.Padding = new System.Windows.Forms.Padding(5);
-            this.chkUseDefaultIndexerSettings.Size = new System.Drawing.Size(544, 27);
+            this.chkUseDefaultIndexerSettings.Size = new System.Drawing.Size(517, 27);
             this.chkUseDefaultIndexerSettings.TabIndex = 0;
             this.chkUseDefaultIndexerSettings.Text = "Use indexer settings in main window task settings";
             this.chkUseDefaultIndexerSettings.UseVisualStyleBackColor = true;
@@ -1768,7 +1784,7 @@
             this.tpAdvanced.Location = new System.Drawing.Point(4, 22);
             this.tpAdvanced.Name = "tpAdvanced";
             this.tpAdvanced.Padding = new System.Windows.Forms.Padding(3);
-            this.tpAdvanced.Size = new System.Drawing.Size(550, 360);
+            this.tpAdvanced.Size = new System.Drawing.Size(523, 360);
             this.tpAdvanced.TabIndex = 6;
             this.tpAdvanced.Text = "Advanced";
             this.tpAdvanced.UseVisualStyleBackColor = true;
@@ -1779,7 +1795,7 @@
             this.pgTaskSettings.Location = new System.Drawing.Point(3, 30);
             this.pgTaskSettings.Name = "pgTaskSettings";
             this.pgTaskSettings.PropertySort = System.Windows.Forms.PropertySort.Categorized;
-            this.pgTaskSettings.Size = new System.Drawing.Size(544, 327);
+            this.pgTaskSettings.Size = new System.Drawing.Size(517, 327);
             this.pgTaskSettings.TabIndex = 1;
             this.pgTaskSettings.ToolbarVisible = false;
             // 
@@ -1792,7 +1808,7 @@
             this.chkUseDefaultAdvancedSettings.Location = new System.Drawing.Point(3, 3);
             this.chkUseDefaultAdvancedSettings.Name = "chkUseDefaultAdvancedSettings";
             this.chkUseDefaultAdvancedSettings.Padding = new System.Windows.Forms.Padding(5);
-            this.chkUseDefaultAdvancedSettings.Size = new System.Drawing.Size(544, 27);
+            this.chkUseDefaultAdvancedSettings.Size = new System.Drawing.Size(517, 27);
             this.chkUseDefaultAdvancedSettings.TabIndex = 0;
             this.chkUseDefaultAdvancedSettings.Text = "Use advanced settings in main window task settings";
             this.chkUseDefaultAdvancedSettings.UseVisualStyleBackColor = true;
@@ -1803,11 +1819,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(564, 392);
+            this.ClientSize = new System.Drawing.Size(537, 392);
             this.Controls.Add(this.tcHotkeySettings);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(580, 430);
             this.Name = "TaskSettingsForm";
             this.Padding = new System.Windows.Forms.Padding(3);
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -2002,12 +2017,13 @@
         private System.Windows.Forms.CheckBox cbThumbnailIfSmaller;
         private System.Windows.Forms.CheckBox cbClipboardUploadAutoIndexFolder;
         private System.Windows.Forms.Button btnScreenRecorderOptions;
-        private System.Windows.Forms.Label lblScreenRecorderCLI;
         private System.Windows.Forms.CheckBox chkRunScreencastCLI;
         private System.Windows.Forms.CheckBox chkClipboardUploadContents;
         private System.Windows.Forms.NumericUpDown nudScreenRecordFPS;
         private System.Windows.Forms.Label lblScreenRecordFPS;
         private System.Windows.Forms.CheckBox chkShowBeforeUploadForm;
+        private System.Windows.Forms.Label lblScreenRecorderFixedDuration;
+        private System.Windows.Forms.Button btnDescriptionAutoFill;
 
 
 

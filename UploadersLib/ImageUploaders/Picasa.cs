@@ -50,7 +50,7 @@ namespace UploadersLib.ImageUploaders
         public string GetAuthorizationURL()
         {
             return string.Format("https://accounts.google.com/o/oauth2/auth?response_type={0}&client_id={1}&redirect_uri={2}&scope={3}",
-                "code", AuthInfo.Client_ID, "urn:ietf:wg:oauth:2.0:oob", Helpers.URLEncode("https://picasaweb.google.com/data"));
+                "code", AuthInfo.Client_ID, "urn:ietf:wg:oauth:2.0:oob", URLHelpers.URLEncode("https://picasaweb.google.com/data"));
         }
 
         public bool GetAccessToken(string code)
@@ -109,6 +109,13 @@ namespace UploadersLib.ImageUploaders
             return false;
         }
 
+        private NameValueCollection GetAuthHeaders()
+        {
+            NameValueCollection headers = new NameValueCollection();
+            headers.Add("Authorization", "Bearer " + AuthInfo.Token.access_token);
+            return headers;
+        }
+
         public bool CheckAuthorization()
         {
             if (OAuth2Info.CheckOAuth(AuthInfo))
@@ -134,10 +141,7 @@ namespace UploadersLib.ImageUploaders
 
             List<PicasaAlbumInfo> albumList = new List<PicasaAlbumInfo>();
 
-            NameValueCollection headers = new NameValueCollection();
-            headers.Add("Authorization", "Bearer " + AuthInfo.Token.access_token);
-
-            string response = SendRequest(HttpMethod.GET, "https://picasaweb.google.com/data/feed/api/user/default", null, ResponseType.Text, headers, null);
+            string response = SendRequest(HttpMethod.GET, "https://picasaweb.google.com/data/feed/api/user/default", headers: GetAuthHeaders());
 
             if (!string.IsNullOrEmpty(response))
             {
@@ -173,11 +177,10 @@ namespace UploadersLib.ImageUploaders
             string url = string.Format("https://picasaweb.google.com/data/feed/api/user/default/albumid/" + AlbumID);
             string contentType = Helpers.GetMimeType(fileName);
 
-            NameValueCollection headers = new NameValueCollection();
-            headers.Add("Authorization", "Bearer " + AuthInfo.Token.access_token);
-            headers.Add("Slug", Helpers.URLEncode(fileName));
+            NameValueCollection headers = GetAuthHeaders();
+            headers.Add("Slug", URLHelpers.URLEncode(fileName));
 
-            ur.Response = SendPostRequestStream(url, stream, contentType, null, headers);
+            ur.Response = SendPostRequestStream(url, stream, contentType, headers: headers);
 
             XDocument xd = XDocument.Parse(ur.Response);
 

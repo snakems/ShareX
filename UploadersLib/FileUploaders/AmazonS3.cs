@@ -32,7 +32,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using System.Web;
 
 namespace UploadersLib.FileUploaders
 {
@@ -84,14 +83,14 @@ namespace UploadersLib.FileUploaders
         // http://codeonaboat.wordpress.com/2011/04/22/uploading-a-file-to-amazon-s3-using-an-asp-net-mvc-application-directly-from-the-users-browser/
         private string CreateSignature(string secretKey, byte[] policyBytes)
         {
-            var encoding = new ASCIIEncoding();
-            var base64Policy = Convert.ToBase64String(policyBytes);
-            var secretKeyBytes = encoding.GetBytes(secretKey);
+            ASCIIEncoding encoding = new ASCIIEncoding();
+            string base64Policy = Convert.ToBase64String(policyBytes);
+            byte[] secretKeyBytes = encoding.GetBytes(secretKey);
 
             byte[] signatureBytes;
-            using (var hmacsha1 = new HMACSHA1(secretKeyBytes))
+            using (HMACSHA1 hmacsha1 = new HMACSHA1(secretKeyBytes))
             {
-                var base64PolicyBytes = encoding.GetBytes(base64Policy);
+                byte[] base64PolicyBytes = encoding.GetBytes(base64Policy);
                 signatureBytes = hmacsha1.ComputeHash(base64PolicyBytes);
             }
 
@@ -100,24 +99,39 @@ namespace UploadersLib.FileUploaders
 
         private string GetObjectKey(string fileName)
         {
-            NameParser parser = new NameParser(NameParserType.FolderPath);
-            string objectPrefix = S3Settings.ObjectPrefix.Trim('/');
-            return Helpers.CombineURL(parser.Parse(objectPrefix), fileName);
+            string objectPrefix = NameParser.Parse(NameParserType.FolderPath, S3Settings.ObjectPrefix.Trim('/'));
+            return URLHelpers.CombineURL(objectPrefix, fileName);
         }
 
         private string GetObjectURL(string objectName)
         {
             objectName = objectName.Trim('/');
-            objectName = Helpers.URLPathEncode(objectName);
+            objectName = URLHelpers.URLPathEncode(objectName);
+
+            string url = string.Empty;
 
             if (S3Settings.UseCustomCNAME)
             {
-                return "http://" + Helpers.CombineURL(S3Settings.Bucket, objectName);
+                if (!string.IsNullOrEmpty(S3Settings.CustomDomain))
+                {
+                    url = URLHelpers.CombineURL(S3Settings.CustomDomain, objectName);
+                }
+                else
+                {
+                    url = URLHelpers.CombineURL(S3Settings.Bucket, objectName);
+                }
             }
             else
             {
-                return Helpers.CombineURL(GetEndpoint(), objectName);
+                url = URLHelpers.CombineURL(GetEndpoint(), objectName);
             }
+
+            if (!URLHelpers.HasPrefix(url))
+            {
+                url = "http://" + url;
+            }
+
+            return url;
         }
 
         public string GetURL(string fileName)
@@ -127,11 +141,11 @@ namespace UploadersLib.FileUploaders
 
         private Dictionary<string, string> GetParameters(string fileName, string objectKey)
         {
-            var policyDocument = GetPolicyDocument(fileName, objectKey);
-            var policyBytes = Encoding.ASCII.GetBytes(policyDocument);
-            var signature = CreateSignature(S3Settings.SecretAccessKey, policyBytes);
+            string policyDocument = GetPolicyDocument(fileName, objectKey);
+            byte[] policyBytes = Encoding.ASCII.GetBytes(policyDocument);
+            string signature = CreateSignature(S3Settings.SecretAccessKey, policyBytes);
 
-            var parameters = new Dictionary<string, string>();
+            Dictionary<string, string> parameters = new Dictionary<string, string>();
             parameters.Add("key", objectKey);
             parameters.Add("acl", "public-read");
             parameters.Add("content-type", Helpers.GetMimeType(fileName));
@@ -149,9 +163,9 @@ namespace UploadersLib.FileUploaders
             if (string.IsNullOrEmpty(S3Settings.Endpoint)) throw new Exception("'Endpoint' must not be emoty.");
             if (string.IsNullOrEmpty(S3Settings.Bucket)) throw new Exception("'Bucket' must not be empty.");
 
-            var objectKey = GetObjectKey(fileName);
+            string objectKey = GetObjectKey(fileName);
 
-            var uploadResult = UploadData(stream, GetEndpoint(), fileName, arguments: GetParameters(fileName, objectKey), responseType: ResponseType.Headers);
+            UploadResult uploadResult = UploadData(stream, GetEndpoint(), fileName, arguments: GetParameters(fileName, objectKey), responseType: ResponseType.Headers);
 
             if (uploadResult.IsSuccess)
             {
@@ -166,10 +180,11 @@ namespace UploadersLib.FileUploaders
     {
         public string AccessKeyID { get; set; }
         public string SecretAccessKey { get; set; }
-        public bool UseReducedRedundancyStorage { get; set; }
-        public bool UseCustomCNAME { get; set; }
-        public string ObjectPrefix { get; set; }
-        public string Bucket { get; set; }
         public string Endpoint { get; set; }
+        public string Bucket { get; set; }
+        public string ObjectPrefix { get; set; }
+        public bool UseCustomCNAME { get; set; }
+        public string CustomDomain { get; set; }
+        public bool UseReducedRedundancyStorage { get; set; }
     }
 }

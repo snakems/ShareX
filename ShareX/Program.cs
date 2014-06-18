@@ -32,7 +32,6 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using UploadersLib;
 
@@ -212,7 +211,7 @@ namespace ShareX
         {
             get
             {
-                string subFolderName = new NameParser(NameParserType.FolderPath).Parse(Settings.SaveImageSubFolderPattern);
+                string subFolderName = NameParser.Parse(NameParserType.FolderPath, Settings.SaveImageSubFolderPattern);
                 return Path.Combine(ScreenshotsParentFolder, subFolderName);
             }
         }
@@ -314,10 +313,16 @@ namespace ShareX
                 DebugHelper.WriteLine("Command line: " + Environment.CommandLine);
                 DebugHelper.WriteLine("Personal path: " + PersonalPath);
 
+                string gitHash = GetGitHash();
+                if (!string.IsNullOrEmpty(gitHash))
+                {
+                    DebugHelper.WriteLine("Git: https://github.com/ShareX/ShareX/tree/" + gitHash);
+                }
+
                 SettingsResetEvent = new ManualResetEvent(false);
                 UploaderSettingsResetEvent = new ManualResetEvent(false);
                 HotkeySettingsResetEvent = new ManualResetEvent(false);
-                ThreadPool.QueueUserWorkItem(state => LoadSettings());
+                TaskEx.Run(() => LoadSettings());
 
                 DebugHelper.WriteLine("MainForm init started");
                 MainForm = new MainForm();
@@ -451,7 +456,7 @@ namespace ShareX
 
         private static void OnError(Exception e)
         {
-            using (ErrorForm errorForm = new ErrorForm(Application.ProductName, e, DebugHelper.Logger, LogsFilePath, Links.URL_ISSUES))
+            using (ErrorForm errorForm = new ErrorForm(e, LogsFilePath, Links.URL_ISSUES))
             {
                 errorForm.ShowDialog();
             }
@@ -520,8 +525,7 @@ namespace ShareX
         {
             if (!uploaderConfigWatcherTimer.IsDuplicateEvent(e.FullPath))
             {
-                SynchronizationContext context = SynchronizationContext.Current ?? new SynchronizationContext();
-                Action onCompleted = () => context.Post(state => ReloadUploadersConfig(e.FullPath), null);
+                Action onCompleted = () => ReloadUploadersConfig(e.FullPath);
                 Helpers.WaitWhileAsync(() => Helpers.IsFileLocked(e.FullPath), 250, 5000, onCompleted, 1000);
                 uploaderConfigWatcherTimer = new WatchFolderDuplicateEventTimer(e.FullPath);
             }
@@ -529,14 +533,30 @@ namespace ShareX
 
         private static void ReloadUploadersConfig(string filePath)
         {
-            UploadersConfig = UploadersLib.UploadersConfig.Load(filePath);
+            UploadersConfig = UploadersConfig.Load(filePath);
         }
 
-        public async static void UploadersConfigSaveAsync()
+        public static void UploadersConfigSaveAsync()
         {
             if (uploaderConfigWatcher != null) uploaderConfigWatcher.EnableRaisingEvents = false;
-            await TaskEx.Run(() => UploadersConfig.Save(Program.UploadersConfigFilePath));
-            if (uploaderConfigWatcher != null) uploaderConfigWatcher.EnableRaisingEvents = true;
+
+            TaskEx.Run(() =>
+            {
+                UploadersConfig.Save(Program.UploadersConfigFilePath);
+            },
+            () =>
+            {
+                if (uploaderConfigWatcher != null) uploaderConfigWatcher.EnableRaisingEvents = true;
+            });
+        }
+
+        public static string GetGitHash()
+        {
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("ShareX.GitHash.txt"))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadLine();
+            }
         }
     }
 }

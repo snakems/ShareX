@@ -44,9 +44,9 @@ namespace ShareX
 
     public enum TaskJob
     {
+        Job,
         DataUpload,
         FileUpload,
-        ImageJob,
         TextUpload,
         ShortenURL
     }
@@ -92,7 +92,11 @@ namespace ShareX
         [Description("Send URL with Email")]
         SendURLWithEmail = 1 << 2,
         [Description("Copy URL to clipboard")]
-        CopyURLToClipboard = 1 << 3
+        CopyURLToClipboard = 1 << 3,
+        [Description("Open URL")]
+        OpenURL = 1 << 4,
+        [Description("Show QR code window")]
+        ShowQRCode = 1 << 5
     }
 
     public enum AfterCaptureFormResult
@@ -144,6 +148,8 @@ namespace ShareX
         RectangleRegion,
         [Description("Capture rectangle region or window")]
         WindowRectangle,
+        [Description("Capture rectangle region (Light)")]
+        RectangleLight,
         [Description("Capture rounded rectangle region")]
         RoundedRectangleRegion,
         [Description("Capture ellipse region")]
@@ -173,7 +179,11 @@ namespace ShareX
         [Description("Index folder")]
         IndexFolder,
         [Description("Image effects")]
-        ImageEffects
+        ImageEffects,
+        [Description("QR code")]
+        QRCode,
+        [Description("Tweet message")]
+        TweetMessage
     }
 
     public enum HotkeyStatus

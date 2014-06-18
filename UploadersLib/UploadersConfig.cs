@@ -39,6 +39,13 @@ namespace UploadersLib
     {
         #region Image uploaders
 
+        // Imgur
+
+        public AccountType ImgurAccountType = AccountType.Anonymous;
+        public ImgurThumbnailType ImgurThumbnailType = ImgurThumbnailType.Large_Thumbnail;
+        public OAuth2Info ImgurOAuth2Info = null;
+        public string ImgurAlbumID = string.Empty;
+
         // ImageShack
 
         public ImageShackOptions ImageShackSettings = new ImageShackOptions();
@@ -51,13 +58,6 @@ namespace UploadersLib
         public string TinyPicPassword = string.Empty;
         public bool TinyPicRememberUserPass = false;
 
-        // Imgur
-
-        public AccountType ImgurAccountType = AccountType.Anonymous;
-        public ImgurThumbnailType ImgurThumbnailType = ImgurThumbnailType.Large_Thumbnail;
-        public OAuth2Info ImgurOAuth2Info = null;
-        public string ImgurAlbumID = string.Empty;
-
         // Flickr
 
         public FlickrAuthInfo FlickrAuthInfo = new FlickrAuthInfo();
@@ -67,16 +67,6 @@ namespace UploadersLib
 
         public OAuthInfo PhotobucketOAuthInfo = null;
         public PhotobucketAccountInfo PhotobucketAccountInfo = null;
-
-        // TwitPic
-
-        public bool TwitPicShowFull = false;
-        public TwitPicThumbnailType TwitPicThumbnailMode = TwitPicThumbnailType.Thumb;
-
-        // YFrog
-
-        public string YFrogUsername = string.Empty;
-        public string YFrogPassword = string.Empty;
 
         // Picasa
 
@@ -116,11 +106,18 @@ namespace UploadersLib
 
         // Dropbox
 
-        public OAuthInfo DropboxOAuthInfo = null;
+        public OAuth2Info DropboxOAuth2Info = null;
         public DropboxAccountInfo DropboxAccountInfo = null;
         public string DropboxUploadPath = "Public/ShareX/%y/%mo";
         public bool DropboxAutoCreateShareableLink = false;
         public DropboxURLType DropboxURLType = DropboxURLType.Default;
+
+        // Copy
+
+        public OAuthInfo CopyOAuthInfo = null;
+        public CopyAccountInfo CopyAccountInfo = null;
+        public string CopyUploadPath = "ShareX/%y/%mo";
+        public CopyURLType CopyURLType = CopyURLType.Shortened;
 
         // Google Drive
 
@@ -212,6 +209,7 @@ namespace UploadersLib
         // bit.ly
 
         public OAuth2Info BitlyOAuth2Info = null;
+        public string BitlyDomain = string.Empty;
 
         // Google URL Shortener
 
@@ -233,7 +231,6 @@ namespace UploadersLib
 
         public List<OAuthInfo> TwitterOAuthInfoList = new List<OAuthInfo>();
         public int TwitterSelectedAccount = 0;
-        public TwitterClientSettings TwitterClientConfig = new TwitterClientSettings();
 
         #endregion Social networking services
 
@@ -285,28 +282,25 @@ namespace UploadersLib
         {
             switch (destination)
             {
-                case ImageDestination.ImageShack:
-                    return ImageShackSettings != null && (ImageShackSettings.AccountType == AccountType.Anonymous || !string.IsNullOrEmpty(ImageShackSettings.Auth_token));
-                case ImageDestination.TinyPic:
-                    return TinyPicAccountType == AccountType.Anonymous || !string.IsNullOrEmpty(TinyPicRegistrationCode);
                 case ImageDestination.Imgur:
                     return ImgurAccountType == AccountType.Anonymous || OAuth2Info.CheckOAuth(ImgurOAuth2Info);
+                case ImageDestination.ImageShack:
+                    return ImageShackSettings != null && !string.IsNullOrEmpty(ImageShackSettings.Auth_token);
+                case ImageDestination.TinyPic:
+                    return TinyPicAccountType == AccountType.Anonymous || !string.IsNullOrEmpty(TinyPicRegistrationCode);
                 case ImageDestination.Flickr:
                     return !string.IsNullOrEmpty(FlickrAuthInfo.Token);
                 case ImageDestination.Photobucket:
                     return PhotobucketAccountInfo != null && OAuthInfo.CheckOAuth(PhotobucketOAuthInfo);
                 case ImageDestination.Picasa:
                     return OAuth2Info.CheckOAuth(PicasaOAuth2Info);
-                case ImageDestination.Twitpic:
-                case ImageDestination.Twitsnaps:
-                    return TwitterOAuthInfoList != null && TwitterOAuthInfoList.IsValidIndex(TwitterSelectedAccount);
-                case ImageDestination.yFrog:
-                    return !string.IsNullOrEmpty(YFrogUsername) && !string.IsNullOrEmpty(YFrogPassword);
+                case ImageDestination.Twitter:
+                    return TwitterOAuthInfoList != null && TwitterOAuthInfoList.IsValidIndex(TwitterSelectedAccount) && OAuthInfo.CheckOAuth(TwitterOAuthInfoList[TwitterSelectedAccount]);
                 case ImageDestination.CustomImageUploader:
                     return CustomUploadersList != null && CustomUploadersList.IsValidIndex(CustomImageUploaderSelected);
-                default:
-                    return true;
             }
+
+            return true;
         }
 
         public bool IsActive(TextDestination destination)
@@ -315,9 +309,9 @@ namespace UploadersLib
             {
                 case TextDestination.CustomTextUploader:
                     return CustomUploadersList != null && CustomUploadersList.IsValidIndex(CustomTextUploaderSelected);
-                default:
-                    return true;
             }
+
+            return true;
         }
 
         public bool IsActive(FileDestination destination)
@@ -325,7 +319,9 @@ namespace UploadersLib
             switch (destination)
             {
                 case FileDestination.Dropbox:
-                    return OAuthInfo.CheckOAuth(DropboxOAuthInfo);
+                    return OAuth2Info.CheckOAuth(DropboxOAuth2Info);
+                case FileDestination.Copy:
+                    return OAuthInfo.CheckOAuth(CopyOAuthInfo);
                 case FileDestination.GoogleDrive:
                     return OAuth2Info.CheckOAuth(GoogleDriveOAuth2Info);
                 case FileDestination.RapidShare:
@@ -355,9 +351,9 @@ namespace UploadersLib
                 case FileDestination.Pushbullet:
                     return PushbulletSettings != null && !string.IsNullOrEmpty(PushbulletSettings.UserAPIKey) && PushbulletSettings.DeviceList != null &&
                         PushbulletSettings.DeviceList.IsValidIndex(PushbulletSettings.SelectedDevice);
-                default:
-                    return true;
             }
+
+            return true;
         }
 
         public bool IsActive(UrlShortenerType destination)
@@ -372,9 +368,9 @@ namespace UploadersLib
                     return !string.IsNullOrEmpty(YourlsAPIURL) && (!string.IsNullOrEmpty(YourlsSignature) || (!string.IsNullOrEmpty(YourlsUsername) && !string.IsNullOrEmpty(YourlsPassword)));
                 case UrlShortenerType.CustomURLShortener:
                     return CustomUploadersList != null && CustomUploadersList.IsValidIndex(CustomURLShortenerSelected);
-                default:
-                    return true;
             }
+
+            return true;
         }
 
         public bool IsActive(SocialNetworkingService destination)
@@ -382,10 +378,10 @@ namespace UploadersLib
             switch (destination)
             {
                 case SocialNetworkingService.Twitter:
-                    return TwitterOAuthInfoList != null && TwitterOAuthInfoList.IsValidIndex(TwitterSelectedAccount);
-                default:
-                    return true;
+                    return TwitterOAuthInfoList != null && TwitterOAuthInfoList.IsValidIndex(TwitterSelectedAccount) && OAuthInfo.CheckOAuth(TwitterOAuthInfoList[TwitterSelectedAccount]);
             }
+
+            return true;
         }
 
         public int GetFTPIndex(EDataType dataType)
@@ -396,9 +392,9 @@ namespace UploadersLib
                     return FTPSelectedImage;
                 case EDataType.Text:
                     return FTPSelectedText;
-                default:
-                    return FTPSelectedFile;
             }
+
+            return FTPSelectedFile;
         }
 
         public int GetLocalhostIndex(EDataType dataType)
@@ -409,9 +405,9 @@ namespace UploadersLib
                     return LocalhostSelectedImages;
                 case EDataType.Text:
                     return LocalhostSelectedText;
-                default:
-                    return LocalhostSelectedFiles;
             }
+
+            return LocalhostSelectedFiles;
         }
 
         #endregion Helper Methods

@@ -28,7 +28,6 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Security.Cryptography;
@@ -74,7 +73,7 @@ namespace UploadersLib.FileUploaders
 
             hash = JToken.Parse(result.Response)["hash"].Value<string>();
 
-            while (true)
+            while (!stopUpload)
             {
                 result.Response = SendRequest(HttpMethod.GET, "https://mediacru.sh/api/" + hash + "/status");
                 JToken jsonResponse = JToken.Parse(result.Response);
@@ -84,7 +83,7 @@ namespace UploadersLib.FileUploaders
                 {
                     case "processing":
                     case "pending":
-                        Thread.Sleep(1000);
+                        Thread.Sleep(500);
                         break;
                     case "done":
                     case "ready":
@@ -102,6 +101,8 @@ namespace UploadersLib.FileUploaders
                         throw new Exception("This file failed to process.");
                 }
             }
+
+            return result;
         }
 
         private string CreateHash(Stream stream)
@@ -120,7 +121,9 @@ namespace UploadersLib.FileUploaders
         {
             JToken response;
             using (StreamReader streamReader = new StreamReader(httpResponse.GetResponseStream()))
+            {
                 response = JToken.Parse(streamReader.ReadToEnd());
+            }
             string hash = response["hash"].Value<string>();
             MediaCrushBlob blob = response[hash].ToObject<MediaCrushBlob>();
 

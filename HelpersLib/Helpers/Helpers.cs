@@ -25,13 +25,13 @@
 
 using Microsoft.Win32;
 using System;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
+using System.Net.NetworkInformation;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -212,44 +212,6 @@ namespace HelpersLib
             return Regex.Match(input, String.Format("(?<={0}>).+?(?=</{0})", tag)).Value;
         }
 
-        public static string CombineURL(string url1, string url2)
-        {
-            bool url1Empty = string.IsNullOrEmpty(url1);
-            bool url2Empty = string.IsNullOrEmpty(url2);
-
-            if (url1Empty && url2Empty)
-            {
-                return string.Empty;
-            }
-
-            if (url1Empty)
-            {
-                return url2;
-            }
-
-            if (url2Empty)
-            {
-                return url1;
-            }
-
-            if (url1.EndsWith("/"))
-            {
-                url1 = url1.Substring(0, url1.Length - 1);
-            }
-
-            if (url2.StartsWith("/"))
-            {
-                url2 = url2.Remove(0, 1);
-            }
-
-            return url1 + "/" + url2;
-        }
-
-        public static string CombineURL(params string[] urls)
-        {
-            return urls.Aggregate(CombineURL);
-        }
-
         public static string GetMimeType(string fileName)
         {
             if (!string.IsNullOrEmpty(fileName))
@@ -351,43 +313,6 @@ namespace HelpersLib
             return null;
         }
 
-        public static string Encode(string text, string unreservedCharacters)
-        {
-            StringBuilder result = new StringBuilder();
-
-            if (!string.IsNullOrEmpty(text))
-            {
-                foreach (char c in text)
-                {
-                    if (unreservedCharacters.Contains(c))
-                    {
-                        result.Append(c);
-                    }
-                    else
-                    {
-                        byte[] bytes = Encoding.UTF8.GetBytes(c.ToString());
-
-                        foreach (byte b in bytes)
-                        {
-                            result.AppendFormat(CultureInfo.InvariantCulture, "%{0:X2}", b);
-                        }
-                    }
-                }
-            }
-
-            return result.ToString();
-        }
-
-        public static string URLEncode(string text)
-        {
-            return Encode(text, URLCharacters);
-        }
-
-        public static string URLPathEncode(string text)
-        {
-            return Encode(text, URLPathCharacters);
-        }
-
         public static void OpenFolder(string folderPath)
         {
             if (!string.IsNullOrEmpty(folderPath))
@@ -471,7 +396,7 @@ namespace HelpersLib
         {
             if (!string.IsNullOrEmpty(url))
             {
-                ThreadPool.QueueUserWorkItem(state =>
+                TaskEx.Run(() =>
                 {
                     try
                     {
@@ -479,65 +404,28 @@ namespace HelpersLib
                     }
                     catch (Exception e)
                     {
-                        DebugHelper.WriteException(e, "LoadBrowserAsync(" + url + ") failed");
+                        DebugHelper.WriteException(e, string.Format("OpenURL({0}) failed", url));
                     }
                 });
             }
         }
 
-        public static bool IsValidURL(string url)
+        public static void OpenFile(string filepath)
         {
-            if (!string.IsNullOrEmpty(url))
+            if (!string.IsNullOrEmpty(filepath) && File.Exists(filepath))
             {
-                url = url.Trim();
-                return !url.StartsWith("file://") && Uri.IsWellFormedUriString(url, UriKind.RelativeOrAbsolute);
+                TaskEx.Run(() =>
+                {
+                    try
+                    {
+                        Process.Start(filepath);
+                    }
+                    catch (Exception e)
+                    {
+                        DebugHelper.WriteException(e, string.Format("OpenFile({0}) failed", filepath));
+                    }
+                });
             }
-
-            return false;
-        }
-
-        public static bool IsValidURLRegex(string url)
-        {
-            if (string.IsNullOrEmpty(url)) return false;
-
-            // https://gist.github.com/729294
-            string pattern =
-                "^" +
-                // protocol identifier
-                "(?:(?:https?|ftp)://)" +
-                // user:pass authentication
-                "(?:\\S+(?::\\S*)?@)?" +
-                "(?:" +
-                // IP address exclusion
-                // private & local networks
-                "(?!10(?:\\.\\d{1,3}){3})" +
-                "(?!127(?:\\.\\d{1,3}){3})" +
-                "(?!169\\.254(?:\\.\\d{1,3}){2})" +
-                "(?!192\\.168(?:\\.\\d{1,3}){2})" +
-                "(?!172\\.(?:1[6-9]|2\\d|3[0-1])(?:\\.\\d{1,3}){2})" +
-                // IP address dotted notation octets
-                // excludes loopback network 0.0.0.0
-                // excludes reserved space >= 224.0.0.0
-                // excludes network & broacast addresses
-                // (first & last IP address of each class)
-                "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])" +
-                "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" +
-                "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))" +
-                "|" +
-                // host name
-                "(?:(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)" +
-                // domain name
-                "(?:\\.(?:[a-z\\u00a1-\\uffff0-9]+-?)*[a-z\\u00a1-\\uffff0-9]+)*" +
-                // TLD identifier
-                "(?:\\.(?:[a-z\\u00a1-\\uffff]{2,}))" +
-                ")" +
-                // port number
-                "(?::\\d{2,5})?" +
-                // resource path
-                "(?:/[^\\s]*)?" +
-                "$";
-
-            return Regex.IsMatch(url.Trim(), pattern, RegexOptions.IgnoreCase);
         }
 
         public static bool IsValidIPAddress(string ip)
@@ -585,14 +473,6 @@ namespace HelpersLib
             return time;
         }
 
-        public static void AsyncJob(Action thread, Action threadCompleted)
-        {
-            BackgroundWorker bw = new BackgroundWorker();
-            bw.DoWork += (sender, e) => thread();
-            bw.RunWorkerCompleted += (sender, e) => threadCompleted();
-            bw.RunWorkerAsync();
-        }
-
         public static object Clone(object obj)
         {
             using (MemoryStream ms = new MemoryStream())
@@ -606,7 +486,7 @@ namespace HelpersLib
 
         public static void PlaySoundAsync(Stream stream)
         {
-            ThreadPool.QueueUserWorkItem(state =>
+            TaskEx.Run(() =>
             {
                 using (stream)
                 using (SoundPlayer soundPlayer = new SoundPlayer(stream))
@@ -700,21 +580,21 @@ namespace HelpersLib
 
         public static void WaitWhileAsync(Func<bool> check, int interval, int timeout, Action onSuccess, int waitStart = 0)
         {
-            BackgroundWorker bw = new BackgroundWorker();
-            bw.DoWork += (sender, e) =>
+            bool result = false;
+
+            TaskEx.Run(() =>
             {
                 if (waitStart > 0)
                 {
                     Thread.Sleep(waitStart);
                 }
 
-                e.Result = WaitWhile(check, interval, timeout);
-            };
-            bw.RunWorkerCompleted += (sender, e) =>
+                result = WaitWhile(check, interval, timeout);
+            },
+            () =>
             {
-                if ((bool)e.Result) onSuccess();
-            };
-            bw.RunWorkerAsync();
+                if (result) onSuccess();
+            }, false);
         }
 
         public static bool IsFileLocked(string path)
@@ -855,17 +735,35 @@ namespace HelpersLib
             }
         }
 
-        public static string GetURLFilename(string url)
+        public static string SendPing(string host)
         {
-            Uri uri = new Uri(url);
+            return SendPing(host, 1);
+        }
 
-            try
+        public static string SendPing(string host, int count)
+        {
+            string[] status = new string[count];
+
+            using (Ping ping = new Ping())
             {
-                return Path.GetFileName(uri.LocalPath);
+                PingReply reply;
+                //byte[] buffer = Encoding.ASCII.GetBytes(new string('a', 32));
+                for (int i = 0; i < count; i++)
+                {
+                    reply = ping.Send(host, 3000);
+                    if (reply.Status == IPStatus.Success)
+                    {
+                        status[i] = reply.RoundtripTime.ToString() + " ms";
+                    }
+                    else
+                    {
+                        status[i] = "Timeout";
+                    }
+                    Thread.Sleep(100);
+                }
             }
-            catch { }
 
-            return null;
+            return string.Join(", ", status);
         }
     }
 }

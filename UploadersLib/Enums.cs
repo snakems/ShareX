@@ -42,12 +42,8 @@ namespace UploadersLib
         Photobucket,
         [Description("picasaweb.google.com")]
         Picasa,
-        [Description("twitpic.com")]
-        Twitpic,
-        [Description("twitsnaps.com")]
-        Twitsnaps,
-        [Description("yfrog.com")]
-        yFrog,
+        [Description("twitter.com")]
+        Twitter,
         [Description("Custom image uploader")]
         CustomImageUploader,
         [Description("File uploader")]
@@ -84,8 +80,12 @@ namespace UploadersLib
     {
         [Description("dropbox.com")]
         Dropbox,
+        [Description("copy.com")]
+        Copy,
         [Description("FTP Server")]
         FTP,
+        [Description("gfycat.com")]
+        Gfycat,
         [Description("mega.co.nz")]
         Mega,
         [Description("s3.amazon.com")]
@@ -175,23 +175,23 @@ namespace UploadersLib
     public enum BrowserProtocol
     {
         [Description("http://")]
-        Http,
+        http,
         [Description("https://")]
-        Https,
+        https,
         [Description("ftp://")]
-        Ftp,
+        ftp,
         [Description("ftps://")]
-        Ftps,
+        ftps,
         [Description("file://")]
-        File
+        file
     }
 
     public enum ServerProtocol
     {
         [Description("ftp://")]
-        Ftp,
+        ftp,
         [Description("ftps://")]
-        Ftps
+        ftps
     }
 
     public enum Privacy
@@ -248,16 +248,22 @@ namespace UploadersLib
         GET
     }
 
-    public enum FtpSecurityProtocol
+    public enum FTPSEncryption
     {
-        None = 0,
-        Tls1Explicit = 1,
-        Tls1OrSsl3Explicit = 2,
-        Ssl3Explicit = 3,
-        Ssl2Explicit = 4,
-        Tls1Implicit = 5,
-        Tls1OrSsl3Implicit = 6,
-        Ssl3Implicit = 7,
-        Ssl2Implicit = 8,
+        /// <summary>
+        /// Connection starts in plain text and encryption is enabled with the AUTH command immediately after the server greeting.
+        /// </summary>
+        Explicit,
+        /// <summary>
+        /// Encryption is used from the start of the connection, port 990
+        /// </summary>
+        Implicit
+    }
+
+    public enum OAuthLoginStatus
+    {
+        LoginRequired,
+        LoginSuccessful,
+        LoginFailed
     }
 }

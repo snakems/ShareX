@@ -25,10 +25,9 @@
 
 using HelpersLib;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 
 namespace ScreenCaptureLib
@@ -48,18 +47,61 @@ namespace ScreenCaptureLib
 
         public FFmpegOptions FFmpeg = new FFmpegOptions();
 
-        public string GetFFmpegArgs()
+        public string GetFFmpegCommands()
+        {
+            string commands;
+
+            if (!string.IsNullOrEmpty(FFmpeg.VideoSource) && FFmpeg.VideoSource.Equals("screen-capture-recorder", StringComparison.InvariantCultureIgnoreCase))
+            {
+                // https://github.com/rdp/screen-capture-recorder-to-video-windows-free
+                string registryPath = "Software\\screen-capture-recorder";
+                RegistryHelpers.CreateRegistry(registryPath, "start_x", CaptureArea.X);
+                RegistryHelpers.CreateRegistry(registryPath, "start_y", CaptureArea.Y);
+                RegistryHelpers.CreateRegistry(registryPath, "capture_width", CaptureArea.Width);
+                RegistryHelpers.CreateRegistry(registryPath, "capture_height", CaptureArea.Height);
+                RegistryHelpers.CreateRegistry(registryPath, "default_max_fps", ScreenRecordFPS);
+                RegistryHelpers.CreateRegistry(registryPath, "capture_mouse_default_1", DrawCursor ? 1 : 0);
+            }
+
+            if (FFmpeg.UseCustomCommands && !string.IsNullOrEmpty(FFmpeg.CustomCommands))
+            {
+                commands = FFmpeg.CustomCommands.
+                    Replace("$fps$", ScreenRecordFPS.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$area_x$", CaptureArea.X.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$area_y$", CaptureArea.Y.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$area_width$", CaptureArea.Width.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$area_height$", CaptureArea.Height.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$cursor$", DrawCursor ? "1" : "0", StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$duration$", Duration.ToString("0.0", CultureInfo.InvariantCulture), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$output$", Path.ChangeExtension(OutputPath, FFmpeg.Extension), StringComparison.InvariantCultureIgnoreCase);
+            }
+            else
+            {
+                commands = GetFFmpegArgs();
+            }
+
+            return commands.Trim();
+        }
+
+        public string GetFFmpegArgs(bool isCustom = false)
         {
             StringBuilder args = new StringBuilder();
 
-            // input FPS
-            args.AppendFormat("-r {0} ", ScreenRecordFPS);
+            // -y for overwrite file
+            args.Append("-y ");
+
+            // default real time buffer size was 3041280 (3M)
+            args.Append("-rtbufsize 100M ");
+
+            string fps = isCustom ? "$fps$" : ScreenRecordFPS.ToString();
 
             if (string.IsNullOrEmpty(FFmpeg.VideoSource) || FFmpeg.VideoSource.Equals(FFmpegHelper.GDIgrab, StringComparison.InvariantCultureIgnoreCase))
             {
                 // http://ffmpeg.org/ffmpeg-devices.html#gdigrab
-                args.AppendFormat("-f gdigrab -framerate {0} -offset_x {1} -offset_y {2} -video_size {3}x{4} -draw_mouse {5} -show_region {6} -i desktop ",
-                    ScreenRecordFPS, CaptureArea.X, CaptureArea.Y, CaptureArea.Width, CaptureArea.Height, DrawCursor ? 1 : 0, 0);
+                args.AppendFormat("-f gdigrab -framerate {0} -offset_x {1} -offset_y {2} -video_size {3}x{4} -draw_mouse {5} -i desktop ",
+                    fps, isCustom ? "$area_x$" : CaptureArea.X.ToString(), isCustom ? "$area_y$" : CaptureArea.Y.ToString(),
+                    isCustom ? "$area_width$" : CaptureArea.Width.ToString(), isCustom ? "$area_height$" : CaptureArea.Height.ToString(),
+                    isCustom ? "$cursor$" : DrawCursor ? "1" : "0");
 
                 if (FFmpeg.IsAudioSourceSelected())
                 {
@@ -68,19 +110,7 @@ namespace ScreenCaptureLib
             }
             else
             {
-                // https://github.com/rdp/screen-capture-recorder-to-video-windows-free configuration section
-                string dshowRegistryPath = "Software\\screen-capture-recorder";
-                RegistryHelpers.CreateRegistry(dshowRegistryPath, "start_x", CaptureArea.X);
-                RegistryHelpers.CreateRegistry(dshowRegistryPath, "start_y", CaptureArea.Y);
-                RegistryHelpers.CreateRegistry(dshowRegistryPath, "capture_width", CaptureArea.Width);
-                RegistryHelpers.CreateRegistry(dshowRegistryPath, "capture_height", CaptureArea.Height);
-                RegistryHelpers.CreateRegistry(dshowRegistryPath, "default_max_fps", ScreenRecordFPS);
-                RegistryHelpers.CreateRegistry(dshowRegistryPath, "capture_mouse_default_1", DrawCursor ? 1 : 0);
-
-                args.Append("-f dshow -i ");
-
-                // dshow audio/video device: https://github.com/rdp/screen-capture-recorder-to-video-windows-free
-                args.AppendFormat("video=\"{0}\"", FFmpeg.VideoSource);
+                args.AppendFormat("-f dshow -framerate {0} -i video=\"{1}\"", fps, FFmpeg.VideoSource);
 
                 if (FFmpeg.IsAudioSourceSelected())
                 {
@@ -100,13 +130,17 @@ namespace ScreenCaptureLib
             args.AppendFormat("-c:v {0} ", FFmpeg.VideoCodec.ToString());
 
             // output FPS
-            args.AppendFormat("-r {0} ", ScreenRecordFPS);
+            args.AppendFormat("-r {0} ", fps);
 
             switch (FFmpeg.VideoCodec)
             {
                 case FFmpegVideoCodec.libx264: // https://trac.ffmpeg.org/wiki/x264EncodingGuide
                     args.AppendFormat("-crf {0} ", FFmpeg.x264_CRF);
                     args.AppendFormat("-preset {0} ", FFmpeg.Preset.ToString());
+                    args.AppendFormat("-tune {0} ", "zerolatency");
+
+                    // -pix_fmt yuv420p required otherwise can't stream in Chrome
+                    args.Append("-pix_fmt yuv420p ");
                     break;
                 case FFmpegVideoCodec.libvpx: // https://trac.ffmpeg.org/wiki/vpxEncodingGuide
                     args.AppendFormat("-crf {0} ", FFmpeg.VPx_CRF);
@@ -116,37 +150,29 @@ namespace ScreenCaptureLib
                     break;
             }
 
-            // -pix_fmt yuv420p required for libx264 otherwise can't stream in Chrome
-            if (FFmpeg.VideoCodec == FFmpegVideoCodec.libx264)
-            {
-                args.Append("-pix_fmt yuv420p -tune zerolatency ");
-            }
-
             if (FFmpeg.IsAudioSourceSelected())
             {
                 switch (FFmpeg.AudioCodec)
                 {
+                    case FFmpegAudioCodec.libvoaacenc: // http://trac.ffmpeg.org/wiki/AACEncodingGuide
+                        args.AppendFormat("-c:a libvo_aacenc -ac 2 -b:a {0}k ", FFmpeg.AAC_bitrate); // -ac 2 required otherwise failing with 7.1
+                        break;
                     case FFmpegAudioCodec.libvorbis: // http://trac.ffmpeg.org/wiki/TheoraVorbisEncodingGuide
                         args.AppendFormat("-c:a {0} -qscale:a {1} ", FFmpegAudioCodec.libvorbis.ToString(), FFmpeg.Vorbis_qscale);
                         break;
                     case FFmpegAudioCodec.libmp3lame: // http://trac.ffmpeg.org/wiki/Encoding%20VBR%20(Variable%20Bit%20Rate)%20mp3%20audio
                         args.AppendFormat("-c:a {0} -qscale:a {1} ", FFmpegAudioCodec.libmp3lame.ToString(), FFmpeg.MP3_qscale);
                         break;
-                    case FFmpegAudioCodec.libvoaacenc: // http://trac.ffmpeg.org/wiki/AACEncodingGuide
-                        args.AppendFormat("-c:a libvo_aacenc -ac 2 -b:a {0}k ", FFmpeg.AAC_bitrate); // -ac 2 required otherwise failing with 7.1
-                        break;
                 }
             }
 
             if (Duration > 0)
             {
-                args.AppendFormat("-t {0} ", Duration);
+                // duration limit
+                args.AppendFormat("-t {0} ", isCustom ? "$duration$" : Duration.ToString("0.0", CultureInfo.InvariantCulture));
             }
 
-            // -y for overwrite file
-            args.Append("-y ");
-
-            args.AppendFormat("\"{0}\"", Path.ChangeExtension(OutputPath, FFmpeg.Extension));
+            args.AppendFormat("\"{0}\"", isCustom ? "$output$" : Path.ChangeExtension(OutputPath, FFmpeg.Extension));
 
             return args.ToString();
         }

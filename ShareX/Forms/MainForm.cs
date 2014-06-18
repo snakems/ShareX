@@ -24,12 +24,11 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
+using HelpersLib.UserControls;
 using HistoryLib;
-using ImageEffectsLib;
 using ScreenCaptureLib;
 using ShareX.Properties;
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -82,6 +81,9 @@ namespace ShareX
             Text = Program.Title;
             Icon = ShareXResources.Icon;
 
+            ((ToolStripDropDownMenu)tsddbWorkflows.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayWorkflows.DropDown).ShowImageMargin =
+                ((ToolStripDropDownMenu)tsmiMonitor.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayMonitor.DropDown).ShowImageMargin = false;
+
             AddMultiEnumItems<AfterCaptureTasks>(x => Program.DefaultTaskSettings.AfterCaptureJob = Program.DefaultTaskSettings.AfterCaptureJob.Swap(x),
                 tsddbAfterCaptureTasks, tsmiTrayAfterCaptureTasks);
             AddMultiEnumItems<AfterUploadTasks>(x => Program.DefaultTaskSettings.AfterUploadJob = Program.DefaultTaskSettings.AfterUploadJob.Swap(x),
@@ -89,11 +91,21 @@ namespace ShareX
             AddEnumItems<ImageDestination>(x => Program.DefaultTaskSettings.ImageDestination = x, tsmiImageUploaders, tsmiTrayImageUploaders);
             tsmiImageFileUploaders = (ToolStripDropDownItem)tsmiImageUploaders.DropDownItems[tsmiImageUploaders.DropDownItems.Count - 1];
             tsmiTrayImageFileUploaders = (ToolStripDropDownItem)tsmiTrayImageUploaders.DropDownItems[tsmiTrayImageUploaders.DropDownItems.Count - 1];
-            AddEnumItems<FileDestination>(x => Program.DefaultTaskSettings.ImageFileDestination = x, tsmiImageFileUploaders, tsmiTrayImageFileUploaders);
+            AddEnumItems<FileDestination>(x =>
+            {
+                Program.DefaultTaskSettings.ImageFileDestination = x;
+                tsmiImageFileUploaders.PerformClick();
+                tsmiTrayImageFileUploaders.PerformClick();
+            }, tsmiImageFileUploaders, tsmiTrayImageFileUploaders);
             AddEnumItems<TextDestination>(x => Program.DefaultTaskSettings.TextDestination = x, tsmiTextUploaders, tsmiTrayTextUploaders);
             tsmiTextFileUploaders = (ToolStripDropDownItem)tsmiTextUploaders.DropDownItems[tsmiTextUploaders.DropDownItems.Count - 1];
             tsmiTrayTextFileUploaders = (ToolStripDropDownItem)tsmiTrayTextUploaders.DropDownItems[tsmiTrayTextUploaders.DropDownItems.Count - 1];
-            AddEnumItems<FileDestination>(x => Program.DefaultTaskSettings.TextFileDestination = x, tsmiTextFileUploaders, tsmiTrayTextFileUploaders);
+            AddEnumItems<FileDestination>(x =>
+            {
+                Program.DefaultTaskSettings.TextFileDestination = x;
+                tsmiTextFileUploaders.PerformClick();
+                tsmiTrayTextFileUploaders.PerformClick();
+            }, tsmiTextFileUploaders, tsmiTrayTextFileUploaders);
             AddEnumItems<FileDestination>(x => Program.DefaultTaskSettings.FileDestination = x, tsmiFileUploaders, tsmiTrayFileUploaders);
             AddEnumItems<UrlShortenerType>(x => Program.DefaultTaskSettings.URLShortenerDestination = x, tsmiURLShorteners, tsmiTrayURLShorteners);
             AddEnumItems<SocialNetworkingService>(x => Program.DefaultTaskSettings.SocialNetworkingServiceDestination = x, tsmiSocialServices, tsmiTraySocialServices);
@@ -109,8 +121,7 @@ namespace ShareX
             TaskManager.ListViewControl = lvUploads;
             uim = new UploadInfoManager(lvUploads);
 
-            ((ToolStripDropDownMenu)tsddbWorkflows.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayWorkflows.DropDown).ShowImageMargin =
-                ((ToolStripDropDownMenu)tsmiMonitor.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayMonitor.DropDown).ShowImageMargin = false;
+            ExportImportControl.UploadRequested += json => UploadManager.UploadText(json);
         }
 
         private void UpdateWorkflowsMenu()
@@ -118,7 +129,7 @@ namespace ShareX
             tsddbWorkflows.DropDownItems.Clear();
             tsmiTrayWorkflows.DropDownItems.Clear();
 
-            foreach (HotkeySettings hotkeySetting in Program.HotkeyManager.Hotkeys)
+            foreach (HotkeySettings hotkeySetting in Program.HotkeysConfig.Hotkeys)
             {
                 if (hotkeySetting.TaskSettings.Job != HotkeyType.None && (!Program.Settings.WorkflowsOnlyShowEdited || !hotkeySetting.TaskSettings.IsUsingDefaultSettings))
                 {
@@ -127,13 +138,30 @@ namespace ShareX
                 }
             }
 
-            tsddbWorkflows.Visible = tsmiTrayWorkflows.Visible = tsddbWorkflows.DropDownItems.Count > 0;
+            if (tsddbWorkflows.DropDownItems.Count > 0)
+            {
+                ToolStripSeparator tss = new ToolStripSeparator();
+                tsddbWorkflows.DropDownItems.Add(tss);
+            }
+
+            ToolStripMenuItem tsmi = new ToolStripMenuItem("You can add workflow from hotkey settings...");
+            tsmi.Click += tsbHotkeySettings_Click;
+            tsddbWorkflows.DropDownItems.Add(tsmi);
+
+            tsmiTrayWorkflows.Visible = tsmiTrayWorkflows.DropDownItems.Count > 0;
         }
 
         private ToolStripMenuItem WorkflowMenuItem(HotkeySettings hotkeySetting)
         {
             ToolStripMenuItem tsmi = new ToolStripMenuItem(hotkeySetting.TaskSettings.Description);
-            if (hotkeySetting.HotkeyInfo.IsValidHotkey) tsmi.ShortcutKeyDisplayString = "  " + hotkeySetting.HotkeyInfo.ToString();
+            if (hotkeySetting.HotkeyInfo.IsValidHotkey)
+            {
+                tsmi.ShortcutKeyDisplayString = "  " + hotkeySetting.HotkeyInfo.ToString();
+            }
+            if (!hotkeySetting.TaskSettings.IsUsingDefaultSettings)
+            {
+                tsmi.Font = new Font(tsmi.Font, FontStyle.Bold);
+            }
             tsmi.Click += (sender, e) => HandleTask(hotkeySetting.TaskSettings);
             return tsmi;
         }
@@ -252,7 +280,7 @@ namespace ShareX
         {
             cmsUploadInfo.SuspendLayout();
 
-            tsmiStopUpload.Visible = tsmiOpen.Visible = tsmiCopy.Visible = tsmiShowErrors.Visible = tsmiShowResponse.Visible =
+            tsmiStopUpload.Visible = tsmiOpen.Visible = tsmiCopy.Visible = tsmiShowErrors.Visible = tsmiShowResponse.Visible = tsmiShowQRCode.Visible =
                 tsmiUploadSelectedFile.Visible = tsmiClearList.Visible = tssUploadInfo1.Visible = false;
             pbPreview.Reset();
             uim.RefreshSelectedItems();
@@ -265,10 +293,7 @@ namespace ShareX
                 }
                 else
                 {
-                    if (uim.SelectedItem.Info.Result.IsError)
-                    {
-                        tsmiShowErrors.Visible = true;
-                    }
+                    tsmiShowErrors.Visible = uim.SelectedItem.Info.Result.IsError;
 
                     // Open
                     tsmiOpen.Visible = true;
@@ -324,10 +349,9 @@ namespace ShareX
                         }
                     }
 
-                    if (uim.SelectedItem.Info.Result.IsError && !string.IsNullOrEmpty(uim.SelectedItem.Info.Result.Response))
-                    {
-                        tsmiShowResponse.Visible = true;
-                    }
+                    tsmiShowResponse.Visible = !string.IsNullOrEmpty(uim.SelectedItem.Info.Result.Response);
+
+                    tsmiShowQRCode.Visible = uim.SelectedItem.IsURLExist;
 
                     tsmiUploadSelectedFile.Visible = uim.SelectedItem.IsFileExist;
                 }
@@ -466,7 +490,7 @@ namespace ShareX
             UpdateChecker updateChecker = TaskHelpers.CheckUpdate();
 
             if (updateChecker.UpdateInfo != null && updateChecker.UpdateInfo.Status == UpdateStatus.UpdateAvailable &&
-                MessageBox.Show("A newer version of ShareX is available.\r\nWould you like to download and install it?", string.Format("{0} v{1} is available", Application.ProductName, updateChecker.UpdateInfo.LatestVersion.ToString()),
+                MessageBox.Show("A newer version of ShareX is available.\r\nWould you like to download and install it?", string.Format("{0} {1} is available", Application.ProductName, updateChecker.UpdateInfo.LatestVersion.ToString()),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
                 using (DownloaderForm updaterForm = new DownloaderForm(updateChecker))
@@ -593,12 +617,15 @@ namespace ShareX
         private void MainForm_Resize(object sender, EventArgs e)
         {
             Refresh();
+
+            if (WindowState == FormWindowState.Normal)
+            {
+                Program.Settings.MainFormSize = Size;
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            Program.Settings.MainFormSize = Size;
-
             if (e.CloseReason == CloseReason.UserClosing && Program.Settings.ShowTray && !forceClose)
             {
                 e.Cancel = true;
@@ -797,6 +824,16 @@ namespace ShareX
         private void tsmiDNSChanger_Click(object sender, EventArgs e)
         {
             TaskHelpers.OpenDNSChanger();
+        }
+
+        private void tsmiQRCode_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenQRCode();
+        }
+
+        private void tsmiTweetMessage_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.TweetMessage();
         }
 
         private void tsbScreenshotsFolder_Click(object sender, EventArgs e)
@@ -1109,6 +1146,11 @@ namespace ShareX
         private void tsmiShowResponse_Click(object sender, EventArgs e)
         {
             uim.ShowResponse();
+        }
+
+        private void tsmiShowQRCode_Click(object sender, EventArgs e)
+        {
+            uim.ShowQRCode();
         }
 
         private void tsmiUploadSelectedFile_Click(object sender, EventArgs e)

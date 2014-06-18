@@ -28,8 +28,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing.Design;
 using System.IO;
-using System.Web;
-using System.Windows.Forms;
 
 namespace UploadersLib
 {
@@ -63,7 +61,7 @@ namespace UploadersLib
         [Category("Localhost"), Description("Don't add file extension to URL"), DefaultValue(false)]
         public bool HttpHomePathNoExtension { get; set; }
 
-        [Category("Localhost"), Description("Choose an appropriate protocol to be accessed by the browser. Use 'file' for Shared Folders. RemoteProtocol will always be 'file' if HTTP Home Path is empty. "), DefaultValue(BrowserProtocol.File)]
+        [Category("Localhost"), Description("Choose an appropriate protocol to be accessed by the browser. Use 'file' for Shared Folders. RemoteProtocol will always be 'file' if HTTP Home Path is empty. "), DefaultValue(BrowserProtocol.file)]
         public BrowserProtocol RemoteProtocol { get; set; }
 
         [Category("Localhost"), Description("file://Host:Port"), Browsable(false)]
@@ -109,13 +107,12 @@ namespace UploadersLib
             HttpHomePath = string.Empty;
             HttpHomePathAutoAddSubFolderPath = true;
             HttpHomePathNoExtension = false;
-            RemoteProtocol = BrowserProtocol.File;
+            RemoteProtocol = BrowserProtocol.file;
         }
 
         public string GetSubFolderPath()
         {
-            NameParser parser = new NameParser(NameParserType.URL);
-            return parser.Parse(SubFolderPath.Replace("%host", LocalhostRoot));
+            return NameParser.Parse(NameParserType.URL, SubFolderPath.Replace("%host", LocalhostRoot));
         }
 
         public string GetHttpHomePath()
@@ -127,10 +124,9 @@ namespace UploadersLib
                 HttpHomePathAutoAddSubFolderPath = false;
             }
 
-            HttpHomePath = FTPHelpers.RemovePrefixes(HttpHomePath);
+            HttpHomePath = URLHelpers.RemovePrefixes(HttpHomePath);
 
-            NameParser parser = new NameParser(NameParserType.URL);
-            return parser.Parse(HttpHomePath.Replace("%host", LocalhostRoot));
+            return NameParser.Parse(NameParserType.URL, HttpHomePath.Replace("%host", LocalhostRoot));
         }
 
         public string GetUriPath(string filename)
@@ -145,10 +141,10 @@ namespace UploadersLib
                 filename = Path.GetFileNameWithoutExtension(filename);
             }
 
-            filename = Helpers.URLEncode(filename);
+            filename = URLHelpers.URLEncode(filename);
 
             string subFolderPath = GetSubFolderPath();
-            subFolderPath = Helpers.URLPathEncode(subFolderPath);
+            subFolderPath = URLHelpers.URLPathEncode(subFolderPath);
 
             string httpHomePath = GetHttpHomePath();
 
@@ -156,12 +152,12 @@ namespace UploadersLib
 
             if (string.IsNullOrEmpty(httpHomePath))
             {
-                RemoteProtocol = BrowserProtocol.File;
+                RemoteProtocol = BrowserProtocol.file;
                 path = LocalUri.Replace("file://", "");
             }
             else
             {
-                path = Helpers.URLPathEncode(httpHomePath);
+                path = URLHelpers.URLPathEncode(httpHomePath);
             }
 
             if (Port != 80)
@@ -171,10 +167,10 @@ namespace UploadersLib
 
             if (HttpHomePathAutoAddSubFolderPath)
             {
-                path = Helpers.CombineURL(path, subFolderPath);
+                path = URLHelpers.CombineURL(path, subFolderPath);
             }
 
-            path = Helpers.CombineURL(path, filename);
+            path = URLHelpers.CombineURL(path, filename);
 
             string remoteProtocol = RemoteProtocol.GetDescription();
 
@@ -204,7 +200,7 @@ namespace UploadersLib
                 return string.Empty;
             }
 
-            return Helpers.CombineURL(localhostAddress, GetSubFolderPath(), fileName);
+            return URLHelpers.CombineURL(localhostAddress, GetSubFolderPath(), fileName);
         }
 
         public override string ToString()

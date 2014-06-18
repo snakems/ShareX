@@ -257,6 +257,7 @@
             // 
             // lvHistory
             // 
+            this.lvHistory.AllowColumnSort = true;
             this.lvHistory.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
@@ -267,7 +268,6 @@
             this.chHost,
             this.chURL});
             this.lvHistory.FullRowSelect = true;
-            this.lvHistory.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.lvHistory.HideSelection = false;
             this.lvHistory.Location = new System.Drawing.Point(8, 288);
             this.lvHistory.Name = "lvHistory";

@@ -27,7 +27,6 @@ using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
 using System.IO;
-using System.Threading;
 using System.Xml.Serialization;
 
 namespace HelpersLib
@@ -66,7 +65,7 @@ namespace HelpersLib
 
         public void SaveAsync(string filePath)
         {
-            ThreadPool.QueueUserWorkItem(state => Save(filePath));
+            TaskEx.Run(() => Save(filePath));
         }
 
         private void SaveAsync()

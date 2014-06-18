@@ -31,13 +31,14 @@ using UploadersLib.HelperClasses;
 
 namespace UploadersLib.URLShorteners
 {
-    public sealed class BitlyURLShortener : URLShortener, IOAuth2Simple
+    public sealed class BitlyURLShortener : URLShortener, IOAuth2Basic
     {
         private const string URLAPI = "https://api-ssl.bitly.com/";
         private const string URLAccessToken = URLAPI + "oauth/access_token";
         private const string URLShorten = URLAPI + "v3/shorten";
 
         public OAuth2Info AuthInfo { get; private set; }
+        public string Domain { get; set; }
 
         public BitlyURLShortener(OAuth2Info oauth)
         {
@@ -86,6 +87,7 @@ namespace UploadersLib.URLShorteners
                 Dictionary<string, string> arguments = new Dictionary<string, string>();
                 arguments.Add("access_token", AuthInfo.Token.access_token);
                 arguments.Add("longUrl", url);
+                if (!string.IsNullOrEmpty(Domain)) arguments.Add("domain", Domain);
 
                 result.Response = SendRequest(HttpMethod.GET, URLShorten, arguments);
 
