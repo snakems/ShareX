@@ -23,43 +23,23 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
 using System;
-using System.Drawing;
+using System.Windows.Forms;
 
-namespace ShareX
+namespace HelpersLib
 {
-    public class ScreenRegionManager : IDisposable
+    public class TablessControl : TabControl
     {
-        private ScreenRegionForm regionForm;
-
-        public void Start(Rectangle captureRectangle)
+        protected override void WndProc(ref Message m)
         {
-            if (captureRectangle != CaptureHelpers.GetScreenBounds())
+            // Hide tabs by trapping the TCM_ADJUSTRECT message
+            if (m.Msg == 0x1328 && !DesignMode)
             {
-                regionForm = new ScreenRegionForm(captureRectangle);
-                regionForm.Show();
+                m.Result = (IntPtr)1;
             }
-        }
-
-        public void ChangeColor(Color color)
-        {
-            if (regionForm != null)
+            else
             {
-                regionForm.ChangeColor(color);
-            }
-        }
-
-        public void Dispose()
-        {
-            if (regionForm != null)
-            {
-                if (regionForm.Visible)
-                {
-                    regionForm.Close();
-                }
-
-                regionForm.Dispose();
+                base.WndProc(ref m);
             }
         }
     }

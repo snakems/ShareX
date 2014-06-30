@@ -56,6 +56,7 @@ namespace ShareX
 
         private ScreenRecorder screenRecorder;
         private Rectangle captureRectangle;
+        private ScreenRegionForm regionForm;
 
         private ScreenRecordForm()
         {
@@ -159,8 +160,8 @@ namespace ShareX
 
             string path = "";
 
-            ScreenRegionManager screenRegionManager = new ScreenRegionManager();
-            screenRegionManager.Start(captureRectangle);
+            float duration = TaskSettings.CaptureSettings.ScreenRecordFixedDuration ? TaskSettings.CaptureSettings.ScreenRecordDuration : 0;
+            regionForm = ScreenRegionForm.Show(captureRectangle, StopRecording, duration);
 
             TaskEx.Run(() =>
             {
@@ -185,7 +186,7 @@ namespace ShareX
                         AVI = TaskSettings.CaptureSettings.AVIOptions,
                         ScreenRecordFPS = TaskSettings.CaptureSettings.ScreenRecordFPS,
                         GIFFPS = TaskSettings.CaptureSettings.GIFFPS,
-                        Duration = TaskSettings.CaptureSettings.ScreenRecordFixedDuration ? TaskSettings.CaptureSettings.ScreenRecordDuration : 0,
+                        Duration = duration,
                         OutputPath = path,
                         CaptureArea = captureRectangle,
                         DrawCursor = TaskSettings.CaptureSettings.ShowCursor
@@ -200,21 +201,21 @@ namespace ShareX
                         Thread.Sleep(delay);
                     }
 
-                    this.InvokeSafe(() =>
-                    {
-                        screenRegionManager.ChangeColor(Color.FromArgb(0, 255, 0));
-                    });
-
                     TrayIcon.Text = "ShareX - Click tray icon to stop recording.";
                     TrayIcon.Icon = Resources.control_record.ToIcon();
+
+                    if (regionForm != null)
+                    {
+                        this.InvokeSafe(() => regionForm.StartTimer());
+                    }
 
                     screenRecorder.StartRecording();
                 }
                 finally
                 {
-                    if (screenRegionManager != null)
+                    if (regionForm != null)
                     {
-                        this.InvokeSafe(() => screenRegionManager.Dispose());
+                        this.InvokeSafe(() => regionForm.Close());
                     }
                 }
 

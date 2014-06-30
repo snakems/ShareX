@@ -26,7 +26,6 @@
 using HelpersLib;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -292,7 +291,7 @@ namespace UploadersLib
 
         private void FTPCreateDirectory()
         {
-            using (InputBox ib = new InputBox { Text = "Create directory", Question = "Please enter the name of the directory which should be created:" })
+            using (InputBox ib = new InputBox("Directory name to create"))
             {
                 ib.ShowDialog();
                 this.ShowActivate();
@@ -560,7 +559,7 @@ namespace UploadersLib
             {
                 FtpListItem file = lvFTPList.SelectedItems[0].Tag as FtpListItem;
                 string url = GetURL(file);
-                Helpers.OpenURL(url);
+                URLHelpers.OpenURL(url);
             }
         }
 

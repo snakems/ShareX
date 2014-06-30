@@ -28,8 +28,6 @@
 using HelpersLib;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
 using System.IO;
 using System.Threading;
 using UploadersLib.HelperClasses;
@@ -88,7 +86,7 @@ namespace UploadersLib.FileUploaders
                     OnProgressChanged(progress);
                 }
 
-                while (!stopUpload)
+                while (!StopUploadRequested)
                 {
                     string statusJson = SendRequest(HttpMethod.GET, "https://upload.gfycat.com/status/" + key);
                     GfycatStatusResponse response = JsonConvert.DeserializeObject<GfycatStatusResponse>(statusJson);

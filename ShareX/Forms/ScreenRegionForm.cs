@@ -24,6 +24,8 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
+using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -31,38 +33,111 @@ namespace ShareX
 {
     public partial class ScreenRegionForm : Form
     {
-        private Color color = Color.Red;
+        public event Action StopRequested;
+
+        public bool IsCountdown { get; set; }
+        public TimeSpan Countdown { get; set; }
+        public Stopwatch Timer { get; private set; }
+
+        private Color borderColor = Color.Red;
+        private Rectangle borderRectangle;
+        private Rectangle borderRectangle0Based;
 
         public ScreenRegionForm(Rectangle regionRectangle)
         {
             InitializeComponent();
 
-            Location = new Point(regionRectangle.X - 1, regionRectangle.Y - 1);
-            Size = new Size(regionRectangle.Width + 2, regionRectangle.Height + 2);
+            borderRectangle = regionRectangle.RectangleOffset(1);
+            borderRectangle0Based = new Rectangle(0, 0, borderRectangle.Width, borderRectangle.Height);
 
-            Rectangle rect = ClientRectangle;
-            Region region = new Region(rect);
-            rect.Inflate(-1, -1);
-            region.Exclude(rect);
+            Location = borderRectangle.Location;
+            Size = new Size(borderRectangle.Width, borderRectangle.Height + pInfo.Height);
+            pInfo.Location = new Point(Width - pInfo.Width, Height - pInfo.Height);
+
+            Region region = new Region(ClientRectangle);
+            region.Exclude(borderRectangle0Based.RectangleOffset(-1));
+            region.Exclude(new Rectangle(0, pInfo.Location.Y, pInfo.Location.X, pInfo.Height));
             Region = region;
+
+            Timer = new Stopwatch();
         }
 
-        public void ChangeColor(Color color)
+        protected void OnStopRequested()
         {
-            this.color = color;
+            if (StopRequested != null)
+            {
+                StopRequested();
+            }
+        }
+
+        public static ScreenRegionForm Show(Rectangle captureRectangle, Action stopRequested, float duration = 0)
+        {
+            if (captureRectangle != CaptureHelpers.GetScreenBounds())
+            {
+                ScreenRegionForm regionForm = new ScreenRegionForm(captureRectangle);
+                regionForm.StopRequested += stopRequested;
+                if (duration > 0)
+                {
+                    regionForm.IsCountdown = true;
+                    regionForm.Countdown = TimeSpan.FromSeconds(duration);
+                }
+                regionForm.UpdateTimer();
+                regionForm.Show();
+                return regionForm;
+            }
+
+            return null;
+        }
+
+        public void StartTimer()
+        {
+            borderColor = Color.FromArgb(0, 255, 0);
             Refresh();
+
+            Timer.Start();
+            timerRefresh.Start();
+        }
+
+        private void UpdateTimer()
+        {
+            if (!IsDisposed)
+            {
+                TimeSpan timer;
+
+                if (IsCountdown)
+                {
+                    timer = Countdown - Timer.Elapsed;
+                    if (timer.Ticks < 0) timer = TimeSpan.Zero;
+                }
+                else
+                {
+                    timer = Timer.Elapsed;
+                }
+
+                lblTimer.Text = timer.ToString("mm\\:ss\\:ff");
+            }
         }
 
         protected override void OnPaint(PaintEventArgs e)
         {
             using (Pen pen1 = new Pen(Color.Black) { DashPattern = new float[] { 5, 5 } })
-            using (Pen pen2 = new Pen(color) { DashPattern = new float[] { 5, 5 }, DashOffset = 5 })
+            using (Pen pen2 = new Pen(borderColor) { DashPattern = new float[] { 5, 5 }, DashOffset = 5 })
             {
-                e.Graphics.DrawRectangleProper(pen1, ClientRectangle);
-                e.Graphics.DrawRectangleProper(pen2, ClientRectangle);
+                e.Graphics.DrawRectangleProper(pen1, borderRectangle0Based);
+                e.Graphics.DrawRectangleProper(pen2, borderRectangle0Based);
             }
 
             base.OnPaint(e);
+        }
+
+        private void timerRefresh_Tick(object sender, EventArgs e)
+        {
+            UpdateTimer();
+        }
+
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            OnStopRequested();
         }
     }
 }

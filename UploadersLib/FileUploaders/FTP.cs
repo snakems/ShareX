@@ -103,24 +103,28 @@ namespace UploadersLib.FileUploaders
             }
         }
 
+        #region FileUploader methods
+
         public override UploadResult Upload(Stream stream, string fileName)
         {
             UploadResult result = new UploadResult();
 
             fileName = Helpers.GetValidURL(fileName);
             string path = Account.GetSubFolderPath(fileName);
+            bool uploadResult;
 
             try
             {
                 IsUploading = true;
-                UploadData(stream, path);
+                uploadResult = UploadData(stream, path);
             }
             finally
             {
+                Dispose();
                 IsUploading = false;
             }
 
-            if (!stopUpload && Errors.Count == 0)
+            if (uploadResult && !StopUploadRequested && !IsError)
             {
                 result.URL = Account.GetUriPath(fileName);
             }
@@ -130,12 +134,14 @@ namespace UploadersLib.FileUploaders
 
         public override void StopUpload()
         {
-            if (IsUploading && !stopUpload)
+            if (IsUploading && !StopUploadRequested)
             {
-                stopUpload = true;
+                StopUploadRequested = true;
                 Disconnect();
             }
         }
+
+        #endregion FileUploader methods
 
         public bool Connect()
         {
@@ -149,7 +155,7 @@ namespace UploadersLib.FileUploaders
 
         public void Disconnect()
         {
-            if (client != null && client.IsConnected)
+            if (client != null)
             {
                 client.Disconnect();
             }
@@ -412,8 +418,14 @@ namespace UploadersLib.FileUploaders
         {
             if (client != null)
             {
-                Disconnect();
-                client.Dispose();
+                try
+                {
+                    client.Dispose();
+                }
+                catch (Exception e)
+                {
+                    DebugHelper.WriteException(e);
+                }
             }
         }
     }

@@ -26,17 +26,12 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 
-namespace HelpersLib.UserControls
+namespace HelpersLib
 {
     public partial class ExportImportControl : UserControl
     {
@@ -57,7 +52,7 @@ namespace HelpersLib.UserControls
             InitializeComponent();
         }
 
-        public string Export(object obj)
+        private string Serialize(object obj)
         {
             if (obj != null)
             {
@@ -95,7 +90,7 @@ namespace HelpersLib.UserControls
             {
                 object obj = ExportRequested();
 
-                string json = Export(obj);
+                string json = Serialize(obj);
 
                 if (!string.IsNullOrEmpty(json) && ClipboardHelpers.CopyText(json))
                 {
@@ -110,11 +105,11 @@ namespace HelpersLib.UserControls
             {
                 object obj = ExportRequested();
 
-                string json = Export(obj);
+                string json = Serialize(obj);
 
                 if (!string.IsNullOrEmpty(json))
                 {
-                    using (SaveFileDialog sfd = new SaveFileDialog() { Filter = "Settings(*.json)|*.json" })
+                    using (SaveFileDialog sfd = new SaveFileDialog() { Filter = "Settings (*.json)|*.json" })
                     {
                         if (sfd.ShowDialog() == DialogResult.OK)
                         {
@@ -131,7 +126,7 @@ namespace HelpersLib.UserControls
             {
                 object obj = ExportRequested();
 
-                string json = Export(obj);
+                string json = Serialize(obj);
 
                 if (!string.IsNullOrEmpty(json))
                 {
@@ -140,7 +135,7 @@ namespace HelpersLib.UserControls
             }
         }
 
-        public object Import(string json)
+        private object Deserialize(string json)
         {
             try
             {
@@ -162,6 +157,19 @@ namespace HelpersLib.UserControls
             return null;
         }
 
+        private void Import(string json)
+        {
+            if (!string.IsNullOrEmpty(json))
+            {
+                object obj = Deserialize(json);
+
+                if (obj != null)
+                {
+                    ImportRequested(obj);
+                }
+            }
+        }
+
         private void tsmiImportClipboard_Click(object sender, EventArgs e)
         {
             if (ImportRequested != null)
@@ -169,16 +177,7 @@ namespace HelpersLib.UserControls
                 if (Clipboard.ContainsText())
                 {
                     string json = Clipboard.GetText();
-
-                    if (!string.IsNullOrEmpty(json))
-                    {
-                        object obj = Import(json);
-
-                        if (obj != null)
-                        {
-                            ImportRequested(obj);
-                        }
-                    }
+                    Import(json);
                 }
             }
         }
@@ -187,22 +186,39 @@ namespace HelpersLib.UserControls
         {
             if (ImportRequested != null)
             {
-                using (OpenFileDialog ofd = new OpenFileDialog() { Filter = "Settings(*.json)|*.json" })
+                using (OpenFileDialog ofd = new OpenFileDialog() { Filter = "Settings (*.txt, *.json)|*.txt;*.json|All files (*.*)|*.*" })
                 {
                     if (ofd.ShowDialog() == DialogResult.OK)
                     {
                         string json = File.ReadAllText(ofd.FileName, Encoding.UTF8);
-
-                        if (!string.IsNullOrEmpty(json))
-                        {
-                            object obj = Import(json);
-
-                            if (obj != null)
-                            {
-                                ImportRequested(obj);
-                            }
-                        }
+                        Import(json);
                     }
+                }
+            }
+        }
+
+        private void tsmiImportURL_Click(object sender, EventArgs e)
+        {
+            if (ImportRequested != null)
+            {
+                string url = InputBox.GetInputText("URL to download settings from");
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    btnImport.Enabled = false;
+
+                    string json = null;
+
+                    TaskEx.Run(() =>
+                    {
+                        json = Helpers.DownloadString(url);
+                    },
+                    () =>
+                    {
+                        Import(json);
+
+                        btnImport.Enabled = true;
+                    });
                 }
             }
         }

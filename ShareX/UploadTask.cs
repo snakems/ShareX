@@ -621,7 +621,18 @@ namespace ShareX
 
                 if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.OpenURL))
                 {
-                    Helpers.OpenURL(Info.Result.ToString());
+                    string result;
+
+                    if (!string.IsNullOrEmpty(Info.TaskSettings.AdvancedSettings.OpenURLFormat))
+                    {
+                        result = new UploadInfoParser().Parse(Info, Info.TaskSettings.AdvancedSettings.OpenURLFormat);
+                    }
+                    else
+                    {
+                        result = Info.Result.ToString();
+                    }
+
+                    URLHelpers.OpenURL(result);
                 }
 
                 if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.ShowQRCode))
@@ -995,20 +1006,32 @@ namespace ShareX
 
         public void DoSocialNetworkingService()
         {
-            switch (Info.TaskSettings.SocialNetworkingServiceDestination)
-            {
-                case SocialNetworkingService.Twitter:
-                    OAuthInfo twitterOAuth = Program.UploadersConfig.TwitterOAuthInfoList.ReturnIfValidIndex(Program.UploadersConfig.TwitterSelectedAccount);
+            string url = Info.Result.ToString();
 
-                    if (twitterOAuth != null)
-                    {
-                        using (TwitterTweetForm twitter = new TwitterTweetForm(twitterOAuth))
+            if (!string.IsNullOrEmpty(url))
+            {
+                switch (Info.TaskSettings.SocialNetworkingServiceDestination)
+                {
+                    case SocialNetworkingService.Twitter:
+                        OAuthInfo twitterOAuth = Program.UploadersConfig.TwitterOAuthInfoList.ReturnIfValidIndex(Program.UploadersConfig.TwitterSelectedAccount);
+
+                        if (twitterOAuth != null)
                         {
-                            twitter.Message = Info.Result.ToString();
-                            twitter.ShowDialog();
+                            using (TwitterTweetForm twitter = new TwitterTweetForm(twitterOAuth))
+                            {
+                                twitter.Message = url;
+                                twitter.ShowDialog();
+                            }
                         }
-                    }
-                    break;
+                        break;
+                    case SocialNetworkingService.Facebook:
+                        URLHelpers.OpenURL("https://www.facebook.com/sharer/sharer.php?u=" + url);
+                        break;
+                    case SocialNetworkingService.GooglePlus:
+                        // The Google+ API currently provides read-only access to public data. So sharing with API not possible yet.
+                        URLHelpers.OpenURL("https://plus.google.com/share?url=" + url);
+                        break;
+                }
             }
         }
 
