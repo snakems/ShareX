@@ -51,26 +51,7 @@ namespace HelpersLib
         public const string URLPathCharacters = URLCharacters + "/"; // 47
         public const string ValidURLCharacters = URLPathCharacters + ":?#[]@!$&'()*+,;= ";
 
-        private static readonly object randomLock = new object();
-        private static readonly Random random = new Random();
-
         public static readonly Version OSVersion = Environment.OSVersion.Version;
-
-        public static int Random(int max)
-        {
-            lock (randomLock)
-            {
-                return random.Next(max + 1);
-            }
-        }
-
-        public static int Random(int min, int max)
-        {
-            lock (randomLock)
-            {
-                return random.Next(min, max + 1);
-            }
-        }
 
         public static string GetFilenameExtension(string filePath)
         {
@@ -146,7 +127,7 @@ namespace HelpersLib
 
         public static char GetRandomChar(string chars)
         {
-            return chars[Random(chars.Length - 1)];
+            return chars[MathHelpers.Random(chars.Length - 1)];
         }
 
         public static string GetRandomString(string chars, int length)
@@ -244,6 +225,11 @@ namespace HelpersLib
             return MimeTypes.DefaultMimeType;
         }
 
+        public static T[] GetEnums<T>()
+        {
+            return (T[])Enum.GetValues(typeof(T));
+        }
+
         public static string[] GetEnumDescriptions<T>()
         {
             return Enum.GetValues(typeof(T)).OfType<Enum>().Select(x => x.GetDescription()).ToArray();
@@ -256,8 +242,7 @@ namespace HelpersLib
 
         public static T GetEnumFromIndex<T>(int i)
         {
-            Array values = Enum.GetValues(typeof(T));
-            return (T)values.GetValue(i);
+            return GetEnums<T>()[i];
         }
 
         public static string[] GetEnumNamesProper<T>()
@@ -296,6 +281,7 @@ namespace HelpersLib
             return sb.ToString();
         }
 
+        // Extension without dot
         public static string GetProperExtension(string filePath)
         {
             if (!string.IsNullOrEmpty(filePath))
@@ -335,14 +321,37 @@ namespace HelpersLib
             }
         }
 
-        public static bool CheckVersion(Version currentVersion, Version latestVersion)
+        /// <summary>
+        /// If version1 newer than version2 = 1
+        /// If version1 equal to version2 = 0
+        /// If version1 older than version2 = -1
+        /// </summary>
+        public static int CompareVersion(string version1, string version2)
         {
-            return NormalizeVersion(latestVersion).CompareTo(NormalizeVersion(currentVersion)) > 0;
+            return NormalizeVersion(version1).CompareTo(NormalizeVersion(version2));
         }
 
-        private static Version NormalizeVersion(Version version)
+        /// <summary>
+        /// If version newer than ApplicationVersion = 1
+        /// If version equal to ApplicationVersion = 0
+        /// If version older than ApplicationVersion = -1
+        /// </summary>
+        public static int CompareApplicationVersion(string version)
         {
-            return new Version(Math.Max(version.Major, 0), Math.Max(version.Minor, 0), Math.Max(version.Build, 0), Math.Max(version.Revision, 0));
+            return CompareVersion(version, Application.ProductVersion);
+        }
+
+        private static Version NormalizeVersion(string version)
+        {
+            return Version.Parse(version).Normalize();
+        }
+
+        /// <summary>
+        /// If latestVersion newer than currentVersion = true
+        /// </summary>
+        public static bool CheckVersion(Version currentVersion, Version latestVersion)
+        {
+            return currentVersion.Normalize() < latestVersion.Normalize();
         }
 
         public static bool IsWindowsXP()

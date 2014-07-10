@@ -122,7 +122,9 @@ namespace UploadersLib
         // Google Drive
 
         public OAuth2Info GoogleDriveOAuth2Info = null;
-        public bool GoogleDriveIsPublic = false;
+        public bool GoogleDriveIsPublic = true;
+        public bool GoogleDriveUseFolder = false;
+        public string GoogleDriveFolderID = string.Empty;
 
         // RapidShare
 
@@ -201,6 +203,15 @@ namespace UploadersLib
             ObjectPrefix = "ShareX/%y/%mo",
             UseReducedRedundancyStorage = true
         };
+
+        // ownCloud
+
+        public string OwnCloudHost = "";
+        public string OwnCloudUsername = "";
+        public string OwnCloudPassword = "";
+        public string OwnCloudPath = "/";
+        public bool OwnCloudCreateShare = true;
+        public bool OwnCloudDirectLink = false;
 
         #endregion File uploaders
 

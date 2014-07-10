@@ -27,6 +27,7 @@ using Newtonsoft.Json;
 using System;
 using System.ComponentModel;
 using System.IO;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 
 namespace HelpersLib
@@ -34,10 +35,31 @@ namespace HelpersLib
     [Serializable]
     public abstract class SettingsBase<T> where T : SettingsBase<T>, new()
     {
-        public static readonly SerializationType SerializationType = SerializationType.Json;
+        private static readonly SerializationType SerializationType = SerializationType.Json;
 
-        [Browsable(false), XmlIgnore, JsonIgnore]
+        [Browsable(false)]
         public string FilePath { get; private set; }
+
+        [Browsable(false)]
+        public string ApplicationVersion { get; set; }
+
+        [Browsable(false)]
+        public bool IsFirstTimeRun
+        {
+            get
+            {
+                return string.IsNullOrEmpty(ApplicationVersion);
+            }
+        }
+
+        [Browsable(false)]
+        public bool IsPreviousVersion
+        {
+            get
+            {
+                return !IsFirstTimeRun && Helpers.CompareApplicationVersion(ApplicationVersion) < 0;
+            }
+        }
 
         public static T Load(string filePath)
         {
@@ -52,10 +74,11 @@ namespace HelpersLib
             return setting;
         }
 
-        public virtual bool Save(string filePath)
+        public bool Save(string filePath)
         {
             FilePath = filePath;
-            return SettingsHelper.Save(this, filePath, SerializationType);
+            ApplicationVersion = Application.ProductVersion;
+            return SettingsHelper.Save(this, FilePath, SerializationType);
         }
 
         private void Save()
@@ -73,7 +96,7 @@ namespace HelpersLib
             SaveAsync(FilePath);
         }
 
-        public virtual void Save(Stream stream)
+        public void Save(Stream stream)
         {
             SettingsHelper.Save(this, stream, SerializationType);
         }

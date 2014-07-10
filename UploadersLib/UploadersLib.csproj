@@ -109,6 +109,7 @@
     <Compile Include="FileUploaders\Jira.cs" />
     <Compile Include="FileUploaders\Hostr.cs" />
     <Compile Include="FileUploaders\Mega.cs" />
+    <Compile Include="FileUploaders\OwnCloud.cs" />
     <Compile Include="FileUploaders\SFTP.cs" />
     <Compile Include="FileUploaders\Minus.cs" />
     <Compile Include="FileUploaders\SharedFolderUploader.cs" />
@@ -280,6 +281,7 @@
     <Compile Include="URLShorteners\CustomURLShortener.cs" />
     <Compile Include="URLShorteners\GoogleURLShortener.cs" />
     <Compile Include="URLShorteners\IsgdURLShortener.cs" />
+    <Compile Include="URLShorteners\NlcmURLShortener.cs" />
     <Compile Include="URLShorteners\TinyURLShortener.cs" />
     <Compile Include="URLShorteners\TurlURLShortener.cs" />
     <Compile Include="FileUploaders\MediaCrushUploader.cs" />
@@ -422,6 +424,7 @@
     <Content Include="Favicons\AmazonS3.ico" />
     <None Include="Favicons\GitHub.ico" />
     <Content Include="Favicons\Hostr.ico" />
+    <Content Include="Favicons\OwnCloud.png" />
     <Content Include="Favicons\Pushbullet.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -90,6 +90,8 @@ namespace UploadersLib
         Mega,
         [Description("s3.amazon.com")]
         AmazonS3,
+        [Description("owncloud.org")]
+        OwnCloud,
         [Description("pushbullet.com")]
         Pushbullet,
         [Description("mediacru.sh")]
@@ -133,6 +135,8 @@ namespace UploadersLib
         TURL,
         [Description("yourls.org")]
         YOURLS,
+        [Description("nl.cm")]
+        NLCM,
         [Description("Custom URL shortener")]
         CustomURLShortener
     }
@@ -140,12 +144,20 @@ namespace UploadersLib
     [Description("Social networking services"), DefaultValue(SocialNetworkingService.Twitter)]
     public enum SocialNetworkingService
     {
-        [Description("twitter.com")]
+        [Description("Twitter")]
         Twitter,
-        [Description("facebook.com")]
+        [Description("Facebook")]
         Facebook,
-        [Description("plus.google.com")]
-        GooglePlus
+        [Description("Google+")]
+        GooglePlus,
+        [Description("VK")]
+        VK,
+        [Description("Reddit")]
+        Reddit,
+        [Description("Pinterest")]
+        Pinterest,
+        [Description("Delicious")]
+        Delicious
     }
 
     public enum HttpMethod

@@ -146,7 +146,17 @@ namespace ShareX
             UploadTask task = new UploadTask(taskSettings);
             task.Info.Job = TaskJob.ShortenURL;
             task.Info.DataType = EDataType.URL;
-            task.Info.FileName = "URL shorten";
+            task.Info.FileName = "Shorten URL (" + taskSettings.URLShortenerDestination.GetDescription() + ")";
+            task.Info.Result.URL = url;
+            return task;
+        }
+
+        public static UploadTask CreateShareURLTask(string url, TaskSettings taskSettings)
+        {
+            UploadTask task = new UploadTask(taskSettings);
+            task.Info.Job = TaskJob.ShareURL;
+            task.Info.DataType = EDataType.URL;
+            task.Info.FileName = "Share URL (" + taskSettings.SocialNetworkingServiceDestination.GetDescription() + ")";
             task.Info.Result.URL = url;
             return task;
         }
@@ -557,8 +567,8 @@ namespace ShareX
         {
             try
             {
-                if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.UseURLShortener) || Info.Job == TaskJob.ShortenURL ||
-                    (Info.TaskSettings.AdvancedSettings.AutoShortenURLLength > 0 && Info.Result.URL.Length > Info.TaskSettings.AdvancedSettings.AutoShortenURLLength))
+                if (Info.Job != TaskJob.ShareURL && (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.UseURLShortener) || Info.Job == TaskJob.ShortenURL ||
+                    (Info.TaskSettings.AdvancedSettings.AutoShortenURLLength > 0 && Info.Result.URL.Length > Info.TaskSettings.AdvancedSettings.AutoShortenURLLength)))
                 {
                     UploadResult result = ShortenURL(Info.Result.URL);
 
@@ -568,9 +578,10 @@ namespace ShareX
                     }
                 }
 
-                if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.ShareURLToSocialNetworkingService))
+                if (Info.Job != TaskJob.ShortenURL && (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.ShareURLToSocialNetworkingService) || Info.Job == TaskJob.ShareURL))
                 {
-                    DoSocialNetworkingService();
+                    ShareURL(Info.Result.ToString());
+                    if (Info.Job == TaskJob.ShareURL) Info.Result.IsURLExpected = false;
                 }
 
                 if (Info.TaskSettings.AfterUploadJob.HasFlag(AfterUploadTasks.SendURLWithEmail))
@@ -804,7 +815,8 @@ namespace ShareX
                 case FileDestination.GoogleDrive:
                     fileUploader = new GoogleDrive(Program.UploadersConfig.GoogleDriveOAuth2Info)
                     {
-                        IsPublic = Program.UploadersConfig.GoogleDriveIsPublic
+                        IsPublic = Program.UploadersConfig.GoogleDriveIsPublic,
+                        FolderID = Program.UploadersConfig.GoogleDriveUseFolder ? Program.UploadersConfig.GoogleDriveFolderID : null
                     };
                     break;
                 case FileDestination.RapidShare:
@@ -929,6 +941,14 @@ namespace ShareX
                 case FileDestination.AmazonS3:
                     fileUploader = new AmazonS3(Program.UploadersConfig.AmazonS3Settings);
                     break;
+                case FileDestination.OwnCloud:
+                    fileUploader = new OwnCloud(Program.UploadersConfig.OwnCloudHost, Program.UploadersConfig.OwnCloudUsername, Program.UploadersConfig.OwnCloudPassword)
+                    {
+                        Path = Program.UploadersConfig.OwnCloudPath,
+                        CreateShare = Program.UploadersConfig.OwnCloudCreateShare,
+                        DirectLink = Program.UploadersConfig.OwnCloudDirectLink
+                    };
+                    break;
                 case FileDestination.Pushbullet:
                     fileUploader = new Pushbullet(Program.UploadersConfig.PushbulletSettings);
                     break;
@@ -970,9 +990,6 @@ namespace ShareX
                 case UrlShortenerType.ISGD:
                     urlShortener = new IsgdURLShortener();
                     break;
-                /*case UrlShortenerType.THREELY:
-                urlShortener = new ThreelyURLShortener(Program.ThreelyKey);
-                break;*/
                 case UrlShortenerType.TINYURL:
                     urlShortener = new TinyURLShortener();
                     break;
@@ -987,6 +1004,9 @@ namespace ShareX
                         Username = Program.UploadersConfig.YourlsUsername,
                         Password = Program.UploadersConfig.YourlsPassword
                     };
+                    break;
+                case UrlShortenerType.NLCM:
+                    urlShortener = new NlcmURLShortener();
                     break;
                 case UrlShortenerType.CustomURLShortener:
                     if (Program.UploadersConfig.CustomUploadersList.IsValidIndex(Program.UploadersConfig.CustomURLShortenerSelected))
@@ -1004,12 +1024,12 @@ namespace ShareX
             return null;
         }
 
-        public void DoSocialNetworkingService()
+        public void ShareURL(string url)
         {
-            string url = Info.Result.ToString();
-
             if (!string.IsNullOrEmpty(url))
             {
+                string encodedUrl = URLHelpers.URLEncode(url);
+
                 switch (Info.TaskSettings.SocialNetworkingServiceDestination)
                 {
                     case SocialNetworkingService.Twitter:
@@ -1017,19 +1037,30 @@ namespace ShareX
 
                         if (twitterOAuth != null)
                         {
-                            using (TwitterTweetForm twitter = new TwitterTweetForm(twitterOAuth))
+                            using (TwitterTweetForm twitter = new TwitterTweetForm(twitterOAuth, " " + url))
                             {
-                                twitter.Message = url;
                                 twitter.ShowDialog();
                             }
                         }
+                        //URLHelpers.OpenURL("https://twitter.com/intent/tweet?text=" + encodedUrl);
                         break;
                     case SocialNetworkingService.Facebook:
-                        URLHelpers.OpenURL("https://www.facebook.com/sharer/sharer.php?u=" + url);
+                        URLHelpers.OpenURL("https://www.facebook.com/sharer/sharer.php?u=" + encodedUrl);
                         break;
                     case SocialNetworkingService.GooglePlus:
-                        // The Google+ API currently provides read-only access to public data. So sharing with API not possible yet.
-                        URLHelpers.OpenURL("https://plus.google.com/share?url=" + url);
+                        URLHelpers.OpenURL("https://plus.google.com/share?url=" + encodedUrl);
+                        break;
+                    case SocialNetworkingService.VK:
+                        URLHelpers.OpenURL("http://vk.com/share.php?url=" + encodedUrl);
+                        break;
+                    case SocialNetworkingService.Reddit:
+                        URLHelpers.OpenURL("http://www.reddit.com/submit?url=" + encodedUrl);
+                        break;
+                    case SocialNetworkingService.Pinterest:
+                        URLHelpers.OpenURL(string.Format("http://pinterest.com/pin/create/button/?url={0}&media={0}", encodedUrl));
+                        break;
+                    case SocialNetworkingService.Delicious:
+                        URLHelpers.OpenURL("https://delicious.com/save?v=5&noui&jump=close&url=" + encodedUrl);
                         break;
                 }
             }

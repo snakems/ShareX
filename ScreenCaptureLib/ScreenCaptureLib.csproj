@@ -54,6 +54,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Enums.cs" />
+    <Compile Include="Forms\RectangleAnnotate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="RectangleAnnotateOptions.cs" />
     <Compile Include="Screencast\AVIOptions.cs" />
     <Compile Include="Screencast\FFmpegOptions.cs" />
     <Compile Include="Screencast\FFmpegHelper.cs" />
@@ -67,12 +71,6 @@
     <Compile Include="Screencast\AviWriter.cs" />
     <Compile Include="Forms\RectangleLight.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\RegionCapturePreview.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\RegionCapturePreview.Designer.cs">
-      <DependentUpon>RegionCapturePreview.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\Surface.cs">
       <SubType>Form</SubType>
@@ -112,7 +110,7 @@
     <Compile Include="RegionHelpers\NodeObject.cs" />
     <Compile Include="RegionHelpers\ResizeManager.cs" />
     <Compile Include="RegionHelpers\ShapeCaptureHelpers.cs" />
-    <Compile Include="RegionHelpers\SurfaceOptions.cs" />
+    <Compile Include="SurfaceOptions.cs" />
     <Compile Include="Screencast\ScreenRecorder.cs" />
     <Compile Include="Screencast\HardDiskCache.cs" />
     <Compile Include="Screencast\AVICache.cs" />
@@ -133,9 +131,6 @@
     <Content Include="Resources\Crosshair.cur" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Forms\RegionCapturePreview.resx">
-      <DependentUpon>RegionCapturePreview.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

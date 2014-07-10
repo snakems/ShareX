@@ -48,7 +48,8 @@ namespace ShareX
         DataUpload,
         FileUpload,
         TextUpload,
-        ShortenURL
+        ShortenURL,
+        ShareURL
     }
 
     [Flags]
@@ -128,16 +129,18 @@ namespace ShareX
     {
         [Description("None")]
         None,
-        [Description("Stop all active uploads")]
-        StopUploads,
-        [Description("Clipboard upload")]
-        ClipboardUpload,
-        [Description("Clipboard upload with content viewer")]
-        ClipboardUploadWithContentViewer,
-        [Description("File upload")]
+        [Description("Upload file")]
         FileUpload,
+        [Description("Upload from clipboard")]
+        ClipboardUpload,
+        [Description("Upload from clipboard with content viewer")]
+        ClipboardUploadWithContentViewer,
+        [Description("Upload from URL")]
+        UploadURL,
         [Description("Drag and drop upload")]
         DragDropUpload,
+        [Description("Stop all active uploads")]
+        StopUploads,
         [Description("Capture entire screen")]
         PrintScreen,
         [Description("Capture active window")]
@@ -146,8 +149,10 @@ namespace ShareX
         ActiveMonitor,
         [Description("Capture rectangle region")]
         RectangleRegion,
-        [Description("Capture rectangle region or window")]
+        [Description("Capture rectangle region (Window)")]
         WindowRectangle,
+        [Description("Capture rectangle region (Annotate)")]
+        RectangleAnnotate,
         [Description("Capture rectangle region (Light)")]
         RectangleLight,
         [Description("Capture rounded rectangle region")]

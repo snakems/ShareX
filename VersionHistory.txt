@@ -1,4 +1,24 @@
-﻿ShareX 9.1.0 - 2014-06-11
+﻿ShareX 9.2.0 - 2014-07-08
+
+* Main window menu changes to simplify UI
+* Automatic show/hide image preview in main window
+* Added support to share URL to Facebook, Google+, VK, Reddit, Pinterest and Delicious via web browser
+* Share URL and Shorten URL context menu items for tasks in main window
+* Google Drive file uploader enhancements (title and folder support)
+* Twitter image upload support
+* ownCloud file uploader support
+* nl.cm URL shortener support
+* bit.ly custom domain support
+* Support to Upload from URL
+* Added Rectangle (Annotate) to capture menu which will alow drawing in rectangle capture
+* Screen recording improvements (timer and stop button under region)
+* Task setting to disable Aero while screen recording
+* Ability to customize URL format when automatically opening the URL
+* Better stop upload mechanism (ability to stop stuck uploads)
+* Added Tweet Message to Tools menu with hotkey support
+* ImageShack image uploader changes (better error handling, removed anonymous support)
+
+ShareX 9.1.0 - 2014-06-11
 
 * ShareX now uses .NET Framework 4.0, which the installer automatically downloads and installs if needed
 * Switched to OAuth 2.0 for Dropbox, which means you need to re-authenticate

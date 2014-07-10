@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -50,7 +51,7 @@ namespace ShareX
 
         public bool ShowMenu = true;
         public ImagePreviewVisibility ImagePreview = ImagePreviewVisibility.Automatic;
-        public int PreviewSplitterDistance = 400;
+        public int PreviewSplitterDistance = 335;
 
         #endregion Main Form
 
@@ -60,7 +61,6 @@ namespace ShareX
 
         public bool ShowTray = true;
         public bool SilentRun = false;
-        public bool AutoCheckUpdate = true;
         public bool TrayIconProgressEnabled = true;
         public bool TaskbarProgressEnabled = true;
         public bool RememberMainFormSize = false;
@@ -122,6 +122,9 @@ namespace ShareX
 
         [Category("Application"), DefaultValue(false), Description("Show only customized tasks in main window workflows.")]
         public bool WorkflowsOnlyShowEdited { get; set; }
+
+        [Category("Application"), DefaultValue(true), Description("Automatically check updates at startup.")]
+        public bool AutoCheckUpdate { get; set; }
 
         [Category("Application / Config"), DefaultValue(false), Description("Automatically detect external changes to UploaderConfig file and load settigns to memory.")]
         public bool DetectUploaderConfigFileChanges { get; set; }

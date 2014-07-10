@@ -36,6 +36,7 @@ namespace UploadersLib.FileUploaders
     {
         public OAuth2Info AuthInfo { get; set; }
         public bool IsPublic { get; set; }
+        public string FolderID { get; set; }
 
         public GoogleDrive(OAuth2Info oauth)
         {
@@ -130,7 +131,40 @@ namespace UploadersLib.FileUploaders
             return true;
         }
 
-        public void SetPermissions(string fileID, GoogleDrivePermissionRole role, GoogleDrivePermissionType type, string value, bool withLink)
+        private void SetMetadata(string fileID, string title, string parentID = null)
+        {
+            string url = string.Format("https://www.googleapis.com/drive/v2/files/{0}", fileID);
+
+            object metadata;
+
+            if (!string.IsNullOrEmpty(parentID))
+            {
+                metadata = new
+                {
+                    title = title,
+                    parents = new[]
+                    {
+                        new
+                        {
+                            id = parentID
+                        }
+                    }
+                };
+            }
+            else
+            {
+                metadata = new
+                {
+                    title = title
+                };
+            }
+
+            string json = JsonConvert.SerializeObject(metadata);
+
+            string response = SendRequestJSON(url, json, GetAuthHeaders(), method: HttpMethod.PUT);
+        }
+
+        private void SetPermissions(string fileID, GoogleDrivePermissionRole role, GoogleDrivePermissionType type, string value, bool withLink)
         {
             string url = string.Format("https://www.googleapis.com/drive/v2/files/{0}/permissions", fileID);
 
@@ -142,30 +176,61 @@ namespace UploadersLib.FileUploaders
                 withLink = withLink.ToString()
             });
 
-            string response = SendPostRequestJSON(url, json, headers: GetAuthHeaders());
+            string response = SendRequestJSON(url, json, GetAuthHeaders());
+        }
+
+        public List<GoogleDriveFile> GetFolders(bool trashed = false, bool writer = true)
+        {
+            if (!CheckAuthorization()) return null;
+
+            string query = "mimeType = 'application/vnd.google-apps.folder'";
+
+            if (!trashed)
+            {
+                query += " and trashed = false";
+            }
+
+            if (writer)
+            {
+                query += " and 'me' in writers";
+            }
+
+            Dictionary<string, string> args = new Dictionary<string, string>();
+            args.Add("q", query);
+
+            string response = SendRequest(HttpMethod.GET, "https://www.googleapis.com/drive/v2/files", args, GetAuthHeaders());
+
+            if (!string.IsNullOrEmpty(response))
+            {
+                GoogleDriveFileList fileList = JsonConvert.DeserializeObject<GoogleDriveFileList>(response);
+
+                if (fileList != null)
+                {
+                    return fileList.items;
+                }
+            }
+
+            return null;
         }
 
         public override UploadResult Upload(Stream stream, string fileName)
         {
-            if (!CheckAuthorization())
-            {
-                return null;
-            }
+            if (!CheckAuthorization()) return null;
 
-            Dictionary<string, string> args = new Dictionary<string, string>();
-            args.Add("title", fileName);
-
-            UploadResult result = UploadData(stream, "https://www.googleapis.com/upload/drive/v2/files", fileName, "file", args, headers: GetAuthHeaders());
+            UploadResult result = UploadData(stream, "https://www.googleapis.com/upload/drive/v2/files", fileName, headers: GetAuthHeaders());
 
             if (!string.IsNullOrEmpty(result.Response))
             {
-                GoogleDriveUpload upload = JsonConvert.DeserializeObject<GoogleDriveUpload>(result.Response);
+                GoogleDriveFile upload = JsonConvert.DeserializeObject<GoogleDriveFile>(result.Response);
 
                 if (upload != null)
                 {
+                    AllowReportProgress = false;
+
+                    SetMetadata(upload.id, fileName, FolderID);
+
                     if (IsPublic)
                     {
-                        AllowReportProgress = false;
                         SetPermissions(upload.id, GoogleDrivePermissionRole.reader, GoogleDrivePermissionType.anyone, "", true);
                     }
 
@@ -176,10 +241,17 @@ namespace UploadersLib.FileUploaders
             return result;
         }
 
-        public class GoogleDriveUpload
+        public class GoogleDriveFile
         {
             public string id { get; set; }
             public string alternateLink { get; set; }
+            public string title { get; set; }
+            public string description { get; set; }
+        }
+
+        public class GoogleDriveFileList
+        {
+            public List<GoogleDriveFile> items { get; set; }
         }
 
         public enum GoogleDrivePermissionRole

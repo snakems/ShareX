@@ -98,6 +98,7 @@ namespace UploadersLib
             uploadersImageList.Images.Add("Bitly", Resources.Bitly);
             uploadersImageList.Images.Add("Yourls", Resources.Yourls);
             uploadersImageList.Images.Add("Twitter", Resources.Twitter);
+            uploadersImageList.Images.Add("ownCloud", Resources.OwnCloud);
 
             tpImageShack.ImageKey = "ImageShack";
             tpTinyPic.ImageKey = "TinyPic";
@@ -130,6 +131,7 @@ namespace UploadersLib
             tpGist.ImageKey = "Gist";
             tpUpaste.ImageKey = "Upaste";
             tpAmazonS3.ImageKey = "AmazonS3";
+            tpOwnCloud.ImageKey = "ownCloud";
 
             ttlvMain.ImageList = uploadersImageList;
             ttlvMain.MainTabControl = tcUploaders;
@@ -296,9 +298,13 @@ namespace UploadersLib
             if (OAuth2Info.CheckOAuth(Config.GoogleDriveOAuth2Info))
             {
                 oauth2GoogleDrive.Status = OAuthLoginStatus.LoginSuccessful;
+                btnGoogleDriveRefreshFolders.Enabled = true;
             }
 
             cbGoogleDriveIsPublic.Checked = Config.GoogleDriveIsPublic;
+            cbGoogleDriveUseFolder.Checked = Config.GoogleDriveUseFolder;
+            txtGoogleDriveFolderID.Enabled = Config.GoogleDriveUseFolder;
+            txtGoogleDriveFolderID.Text = Config.GoogleDriveFolderID;
 
             // Minus
 
@@ -469,6 +475,15 @@ namespace UploadersLib
             txtAmazonS3CustomDomain.Text = Config.AmazonS3Settings.CustomDomain;
             cbAmazonS3UseRRS.Checked = Config.AmazonS3Settings.UseReducedRedundancyStorage;
             UpdateAmazonS3Status();
+
+            // ownCloud
+
+            txtOwnCloudHost.Text = Config.OwnCloudHost;
+            txtOwnCloudUsername.Text = Config.OwnCloudUsername;
+            txtOwnCloudPassword.Text = Config.OwnCloudPassword;
+            txtOwnCloudPath.Text = Config.OwnCloudPath;
+            cbOwnCloudCreateShare.Checked = Config.OwnCloudCreateShare;
+            cbOwnCloudDirectLink.Checked = Config.OwnCloudDirectLink;
 
             #endregion File uploaders
 
@@ -999,6 +1014,35 @@ namespace UploadersLib
         private void cbGoogleDriveIsPublic_CheckedChanged(object sender, EventArgs e)
         {
             Config.GoogleDriveIsPublic = cbGoogleDriveIsPublic.Checked;
+        }
+
+        private void cbGoogleDriveUseFolder_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.GoogleDriveUseFolder = cbGoogleDriveUseFolder.Checked;
+            txtGoogleDriveFolderID.Enabled = Config.GoogleDriveUseFolder;
+        }
+
+        private void txtGoogleDriveFolderID_TextChanged(object sender, EventArgs e)
+        {
+            Config.GoogleDriveFolderID = txtGoogleDriveFolderID.Text;
+        }
+
+        private void btnGoogleDriveRefreshFolders_Click(object sender, EventArgs e)
+        {
+            GoogleDriveRefreshFolders();
+        }
+
+        private void lvGoogleDriveFoldersList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lvGoogleDriveFoldersList.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvGoogleDriveFoldersList.SelectedItems[0];
+                var folder = lvi.Tag as UploadersLib.FileUploaders.GoogleDrive.GoogleDriveFile;
+                if (folder != null)
+                {
+                    txtGoogleDriveFolderID.Text = folder.id;
+                }
+            }
         }
 
         #endregion Google Drive
@@ -1598,6 +1642,40 @@ namespace UploadersLib
 
         #endregion Amazon S3
 
+        #region ownCloud
+
+        private void txtOwnCloudHost_TextChanged(object sender, EventArgs e)
+        {
+            Config.OwnCloudHost = txtOwnCloudHost.Text;
+        }
+
+        private void txtOwnCloudUsername_TextChanged(object sender, EventArgs e)
+        {
+            Config.OwnCloudUsername = txtOwnCloudUsername.Text;
+        }
+
+        private void txtOwnCloudPassword_TextChanged(object sender, EventArgs e)
+        {
+            Config.OwnCloudPassword = txtOwnCloudPassword.Text;
+        }
+
+        private void txtOwnCloudPath_TextChanged(object sender, EventArgs e)
+        {
+            Config.OwnCloudPath = txtOwnCloudPath.Text;
+        }
+
+        private void cbOwnCloudCreateShare_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.OwnCloudCreateShare = cbOwnCloudCreateShare.Checked;
+        }
+
+        private void cbOwnCloudDirectLink_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.OwnCloudDirectLink = cbOwnCloudDirectLink.Checked;
+        }
+
+        #endregion ownCloud
+
         #region Pushbullet
 
         private void txtPushbulletUserKey_TextChanged(object sender, EventArgs e)
@@ -2074,7 +2152,12 @@ namespace UploadersLib
 
         private void btnCustomUploaderHelp_Click(object sender, EventArgs e)
         {
-            URLHelpers.OpenURL("https://docs.google.com/document/d/1TSttAfH-1970JNsu3i9tl6UY0a8KNbUCeGri0Fs-jcU/edit?usp=sharing");
+            URLHelpers.OpenURL("https://github.com/ShareX/ShareX/wiki/Custom-Uploader");
+        }
+
+        private void btnCustomUploaderExamples_Click(object sender, EventArgs e)
+        {
+            URLHelpers.OpenURL("https://github.com/ShareX/ShareX/wiki/Custom-Uploader-examples");
         }
 
         private void btnCustomUploaderShowLastResponse_Click(object sender, EventArgs e)
