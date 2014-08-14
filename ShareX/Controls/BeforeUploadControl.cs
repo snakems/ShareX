@@ -122,12 +122,13 @@ namespace ShareX
         {
             if (InitCompleted != null)
             {
-                string currentDestination = flp.Controls.OfType<RadioButton>().First(x => x.Checked).Text;
-
-                if (!string.IsNullOrEmpty(currentDestination))
+                RadioButton rbDestination = flp.Controls.OfType<RadioButton>().FirstOrDefault(x => x.Checked);
+                string currentDestination = string.Empty;
+                if (rbDestination != null)
                 {
-                    InitCompleted(currentDestination);
+                    currentDestination = rbDestination.Text;
                 }
+                InitCompleted(currentDestination);
             }
         }
 
@@ -135,7 +136,7 @@ namespace ShareX
         {
             Enum destination = (Enum)Enum.ToObject(typeof(T), index);
 
-            if (Program.UploadersConfig.IsActive<T>(index))
+            if (Program.UploadersConfig.IsValid<T>(index))
             {
                 RadioButton rb = new RadioButton() { AutoSize = true };
                 rb.Text = destination.GetDescription();

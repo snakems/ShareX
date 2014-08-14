@@ -79,25 +79,25 @@ namespace ShareX
         [Description("Perform actions")]
         PerformActions = 1 << 10,
         [Description("Upload image to host")]
-        UploadImageToHost = 1 << 11
+        UploadImageToHost = 1 << 11,
+        [Description("Delete file locally")]
+        DeleteFile = 1 << 12
     }
 
     [Flags]
     public enum AfterUploadTasks
     {
         None = 0,
-        [Description("Use URL Shortener")]
+        [Description("Shorten URL")]
         UseURLShortener = 1,
-        [Description("Post URL to social networking service")]
-        ShareURLToSocialNetworkingService = 1 << 1,
-        [Description("Send URL with Email")]
-        SendURLWithEmail = 1 << 2,
+        [Description("Share URL")]
+        ShareURL = 1 << 1,
         [Description("Copy URL to clipboard")]
-        CopyURLToClipboard = 1 << 3,
+        CopyURLToClipboard = 1 << 2,
         [Description("Open URL")]
-        OpenURL = 1 << 4,
+        OpenURL = 1 << 3,
         [Description("Show QR code window")]
-        ShowQRCode = 1 << 5
+        ShowQRCode = 1 << 4
     }
 
     public enum AfterCaptureFormResult
@@ -131,6 +131,8 @@ namespace ShareX
         None,
         [Description("Upload file")]
         FileUpload,
+        [Description("Upload folder")]
+        FolderUpload,
         [Description("Upload from clipboard")]
         ClipboardUpload,
         [Description("Upload from clipboard with content viewer")]

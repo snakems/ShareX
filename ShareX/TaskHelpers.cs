@@ -226,6 +226,32 @@ namespace ShareX
             }
         }
 
+        public static bool ShowAfterCaptureForm(TaskSettings taskSettings, Image img = null)
+        {
+            if (taskSettings.GeneralSettings.ShowAfterCaptureTasksForm)
+            {
+                using (AfterCaptureForm afterCaptureForm = new AfterCaptureForm(img, taskSettings))
+                {
+                    afterCaptureForm.ShowDialog();
+
+                    switch (afterCaptureForm.Result)
+                    {
+                        case AfterCaptureFormResult.Continue:
+                            taskSettings.AfterCaptureJob = afterCaptureForm.AfterCaptureTasks;
+                            break;
+                        case AfterCaptureFormResult.Copy:
+                            taskSettings.AfterCaptureJob = AfterCaptureTasks.CopyImageToClipboard;
+                            break;
+                        case AfterCaptureFormResult.Cancel:
+                            if (img != null) img.Dispose();
+                            return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
         public static void AnnotateImage(string filePath)
         {
             AnnotateImage(null, filePath);
@@ -235,7 +261,7 @@ namespace ShareX
         {
             return ImageHelpers.AnnotateImage(img, imgPath, !Program.IsSandbox, Program.PersonalPath,
                 x => Program.MainForm.InvokeSafe(() => ClipboardHelpers.CopyImage(x)),
-                x => Program.MainForm.InvokeSafe(() => UploadManager.RunImageTask(x)),
+                x => Program.MainForm.InvokeSafe(() => UploadManager.UploadImage(x)),
                 (x, filePath) => Program.MainForm.InvokeSafe(() => ImageHelpers.SaveImage(x, filePath)),
                 (x, filePath) =>
                 {
@@ -310,6 +336,7 @@ namespace ShareX
             using (RectangleRegion surface = new RectangleRegion())
             {
                 surface.AreaManager.WindowCaptureMode = true;
+                surface.AreaManager.IncludeControls = true;
                 surface.Prepare();
                 surface.ShowDialog();
 
@@ -334,18 +361,15 @@ namespace ShareX
 
         public static PointInfo SelectPointColor(SurfaceOptions surfaceOptions = null)
         {
+            if (surfaceOptions == null)
+            {
+                surfaceOptions = new SurfaceOptions();
+            }
+
             using (Image fullscreen = Screenshot.CaptureFullscreen())
             using (RectangleRegion surface = new RectangleRegion(fullscreen))
             {
-                if (surfaceOptions != null)
-                {
-                    surface.Config = new SurfaceOptions
-                    {
-                        MagnifierPixelCount = surfaceOptions.MagnifierPixelCount,
-                        MagnifierPixelSize = surfaceOptions.MagnifierPixelSize
-                    };
-                }
-
+                surface.Config = surfaceOptions;
                 surface.OneClickMode = true;
                 surface.Prepare();
                 surface.ShowDialog();
@@ -381,9 +405,10 @@ namespace ShareX
                     }
                 }
 
+                using (Font font = new Font("Arial", 7, FontStyle.Bold))
                 using (StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
                 {
-                    g.DrawString(percentage.ToString(), new XmlFont("Arial", 7, FontStyle.Bold), Brushes.White, 8, 8, sf);
+                    g.DrawString(percentage.ToString(), font, Brushes.White, 8, 8, sf);
                 }
 
                 g.DrawRectangleProper(Pens.WhiteSmoke, 0, 0, 16, 16);
@@ -395,13 +420,15 @@ namespace ShareX
         public static UpdateChecker CheckUpdate()
         {
             UpdateChecker updateChecker = new GitHubUpdateChecker("ShareX", "ShareX");
+            updateChecker.IsBeta = Program.IsBeta;
             updateChecker.Proxy = ProxyInfo.Current.GetWebProxy();
             updateChecker.CheckUpdate();
 
             // Fallback if GitHub API fails
-            if (updateChecker.UpdateInfo == null || updateChecker.UpdateInfo.Status == UpdateStatus.UpdateCheckFailed)
+            if (updateChecker.Status == UpdateStatus.None || updateChecker.Status == UpdateStatus.UpdateCheckFailed)
             {
                 updateChecker = new XMLUpdateChecker("http://getsharex.com/Update.xml", "ShareX");
+                updateChecker.IsBeta = Program.IsBeta;
                 updateChecker.Proxy = ProxyInfo.Current.GetWebProxy();
                 updateChecker.CheckUpdate();
             }
@@ -441,7 +468,21 @@ namespace ShareX
             DropForm.GetInstance(Program.Settings.DropSize, Program.Settings.DropOffset, Program.Settings.DropAlignment, Program.Settings.DropOpacity, Program.Settings.DropHoverOpacity).ShowActivate();
         }
 
-        public static void DoScreenRecorder(TaskSettings taskSettings = null)
+        public static void DoScreenRecordingFFmpeg()
+        {
+            TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
+            taskSettings.CaptureSettings.ScreenRecordOutput = ScreenRecordOutput.FFmpeg;
+            DoScreenRecording(taskSettings);
+        }
+
+        public static void DoScreenRecordingGIF()
+        {
+            TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
+            taskSettings.CaptureSettings.ScreenRecordOutput = ScreenRecordOutput.GIF;
+            DoScreenRecording(taskSettings);
+        }
+
+        public static void DoScreenRecording(TaskSettings taskSettings = null)
         {
             if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
 
@@ -476,7 +517,7 @@ namespace ShareX
         {
             if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
 
-            new ScreenColorPicker(taskSettings).Show();
+            new ScreenColorPicker().Show();
         }
 
         public static void OpenRuler()
@@ -502,9 +543,12 @@ namespace ShareX
             UploadManager.IndexFolder();
         }
 
-        public static void OpenImageEditor()
+        public static void OpenImageEditor(string filePath = null)
         {
-            string filePath = ImageHelpers.OpenImageFileDialog();
+            if (string.IsNullOrEmpty(filePath))
+            {
+                filePath = ImageHelpers.OpenImageFileDialog();
+            }
 
             if (!string.IsNullOrEmpty(filePath))
             {

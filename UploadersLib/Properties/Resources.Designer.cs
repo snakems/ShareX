@@ -63,6 +63,16 @@ namespace UploadersLib.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon AdFly {
+            get {
+                object obj = ResourceManager.GetObject("AdFly", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon AmazonS3 {
             get {
                 object obj = ResourceManager.GetObject("AmazonS3", resourceCulture);
@@ -293,6 +303,26 @@ namespace UploadersLib.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
+        internal static System.Drawing.Icon MediaCrush {
+            get {
+                object obj = ResourceManager.GetObject("MediaCrush", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon MediaFire {
+            get {
+                object obj = ResourceManager.GetObject("MediaFire", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
         internal static System.Drawing.Icon Mega {
             get {
                 object obj = ResourceManager.GetObject("Mega", resourceCulture);
@@ -306,6 +336,16 @@ namespace UploadersLib.Properties {
         internal static System.Drawing.Icon Minus {
             get {
                 object obj = ResourceManager.GetObject("Minus", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon OneDrive {
+            get {
+                object obj = ResourceManager.GetObject("OneDrive", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }

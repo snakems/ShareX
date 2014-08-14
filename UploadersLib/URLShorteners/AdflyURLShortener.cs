@@ -23,19 +23,36 @@
 
 #endregion License Information (GPL v3)
 
-using System;
-using System.Windows.Forms;
+// Credits: https://github.com/LRNAB
 
-namespace CodeWorks
+using System.Collections.Generic;
+
+namespace UploadersLib.URLShorteners
 {
-    internal static class Program
+    public class AdFlyURLShortener : URLShortener
     {
-        [STAThread]
-        private static void Main()
+        public string APIKEY { get; set; }
+        public string APIUID { get; set; }
+
+        public override UploadResult ShortenURL(string url)
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            UploadResult result = new UploadResult { URL = url };
+
+            Dictionary<string, string> args = new Dictionary<string, string>();
+            args.Add("key", APIKEY);
+            args.Add("uid", APIUID);
+            args.Add("advert_type", "int");
+            args.Add("domain", "adf.ly");
+            args.Add("url", url);
+
+            string response = SendRequest(HttpMethod.GET, "http://api.adf.ly/api.php", args);
+
+            if (!string.IsNullOrEmpty(response) && response != "error")
+            {
+                result.ShortenedURL = response;
+            }
+
+            return result;
         }
     }
 }

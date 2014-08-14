@@ -679,18 +679,25 @@ namespace HelpersLib
             using (Surface surface = new Surface(capture))
             using (ImageEditorForm editor = new ImageEditorForm(surface, true))
             {
+                editor.IsTaskWork = img != null;
                 editor.SetImagePath(imgPath);
                 editor.ClipboardCopyRequested += clipboardCopyRequested;
                 editor.ImageUploadRequested += imageUploadRequested;
                 editor.ImageSaveRequested += imageSaveRequested;
                 editor.ImageSaveAsRequested += imageSaveAsRequested;
 
-                if (editor.ShowDialog() == DialogResult.OK && img != null)
+                DialogResult result = editor.ShowDialog();
+
+                if (result == DialogResult.OK && editor.IsTaskWork)
                 {
                     using (img)
                     {
                         return editor.GetImageForExport();
                     }
+                }
+                else if (result == DialogResult.Abort)
+                {
+                    return null;
                 }
             }
 
@@ -1044,14 +1051,13 @@ namespace HelpersLib
             return null;
         }
 
-        public static void SaveImage(Image img, string filePath)
+        public static ImageFormat GetImageFormat(string filePath)
         {
+            ImageFormat imageFormat = ImageFormat.Png;
             string ext = Helpers.GetProperExtension(filePath);
 
             if (!string.IsNullOrEmpty(ext))
             {
-                ImageFormat imageFormat;
-
                 switch (ext)
                 {
                     default:
@@ -1075,9 +1081,14 @@ namespace HelpersLib
                         imageFormat = ImageFormat.Tiff;
                         break;
                 }
-
-                img.Save(filePath, imageFormat);
             }
+
+            return imageFormat;
+        }
+
+        public static void SaveImage(Image img, string filePath)
+        {
+            img.Save(filePath, GetImageFormat(filePath));
         }
 
         public static string SaveImageFileDialog(Image img, string filePath = "")

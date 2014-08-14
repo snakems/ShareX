@@ -83,6 +83,20 @@ namespace Greenshot
             }
         }
 
+        private bool isTaskWork;
+
+        public bool IsTaskWork
+        {
+            get
+            {
+                return isTaskWork;
+            }
+            set
+            {
+                isTaskWork = btnSaveClose.Visible = btnClose.Visible = btnCancelTasks.Visible = tssTaskButtons.Visible = value;
+            }
+        }
+
         public ImageEditorForm(ISurface iSurface, bool outputMade)
         {
             editorList.Add(this);
@@ -316,6 +330,8 @@ namespace Greenshot
             }
             //updateStatusLabel(string.Format("Image saved to {0}.", fullpath), fileSavedStatusContextMenu);
             SetTitle(Path.GetFileName(fullpath));
+
+            btnSave.Enabled = File.Exists(surface.LastSaveFullPath);
         }
 
         private void surface_DrawingModeChanged(object source, SurfaceDrawingModeEventArgs eventArgs)
@@ -642,7 +658,7 @@ namespace Greenshot
             updateClipboardSurfaceDependencies();
             updateUndoRedoSurfaceDependencies();
 
-            saveToolStripMenuItem.Enabled = File.Exists(surface.LastSaveFullPath);
+            btnSave.Enabled = File.Exists(surface.LastSaveFullPath);
         }
 
         private void ImageEditorFormFormClosing(object sender, FormClosingEventArgs e)
@@ -661,7 +677,7 @@ namespace Greenshot
                         buttons = MessageBoxButtons.YesNo;
                     }
 
-                    DialogResult result = MessageBox.Show("Do you want the save the screenshot?", "Save image?", buttons, MessageBoxIcon.Question);
+                    DialogResult result = MessageBox.Show("Do you want to save the screenshot?", "Save confirmation", buttons, MessageBoxIcon.Question);
 
                     if (result == DialogResult.Cancel)
                     {
@@ -901,21 +917,6 @@ namespace Greenshot
                 ss.ContextMenuStrip.Show(ss, e.X, e.Y);
             }
         }*/
-
-        private void CopyPathMenuItemClick(object sender, EventArgs e)
-        {
-            ClipboardHelper.SetClipboardData(surface.LastSaveFullPath);
-        }
-
-        private void OpenDirectoryMenuItemClick(object sender, EventArgs e)
-        {
-            ProcessStartInfo psi = new ProcessStartInfo("explorer");
-            psi.Arguments = Path.GetDirectoryName(surface.LastSaveFullPath);
-            psi.UseShellExecute = false;
-            Process p = new Process();
-            p.StartInfo = psi;
-            p.Start();
-        }
 
         #endregion status label handling
 
@@ -1349,6 +1350,7 @@ namespace Greenshot
                 using (Image img = surface.GetImageForExport())
                 {
                     ImageSaveRequested(img, surface.LastSaveFullPath);
+                    surface.Modified = false;
                 }
             }
         }
@@ -1360,6 +1362,7 @@ namespace Greenshot
                 using (Image img = surface.GetImageForExport())
                 {
                     string newFilePath = ImageSaveAsRequested(img, surface.LastSaveFullPath);
+                    surface.Modified = false;
                     if (!string.IsNullOrEmpty(newFilePath))
                     {
                         SetImagePath(newFilePath);
@@ -1383,6 +1386,23 @@ namespace Greenshot
             Close();
         }
 
+        private void btnCancelTasks_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Abort;
+            forceClose = true;
+            Close();
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            OnImageSaveRequested();
+        }
+
+        private void btnSaveAs_Click(object sender, EventArgs e)
+        {
+            OnImageSaveAsRequested();
+        }
+
         private void btnClipboardCopy_Click(object sender, EventArgs e)
         {
             OnClipboardCopyRequested();
@@ -1391,21 +1411,6 @@ namespace Greenshot
         private void btnUploadImage_Click(object sender, EventArgs e)
         {
             OnImageUploadRequested();
-        }
-
-        private void btnSaveAs_Click(object sender, EventArgs e)
-        {
-            OnImageSaveAsRequested();
-        }
-
-        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OnImageSaveRequested();
-        }
-
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            OnImageSaveAsRequested();
         }
     }
 }

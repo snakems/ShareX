@@ -42,6 +42,7 @@ namespace UploadersLib
         // Imgur
 
         public AccountType ImgurAccountType = AccountType.Anonymous;
+        public bool ImgurDirectLink = true;
         public ImgurThumbnailType ImgurThumbnailType = ImgurThumbnailType.Large_Thumbnail;
         public OAuth2Info ImgurOAuth2Info = null;
         public string ImgurAlbumID = string.Empty;
@@ -111,6 +112,10 @@ namespace UploadersLib
         public string DropboxUploadPath = "Public/ShareX/%y/%mo";
         public bool DropboxAutoCreateShareableLink = false;
         public DropboxURLType DropboxURLType = DropboxURLType.Default;
+
+        // OneDrive
+
+        public OAuth2Info OneDriveOAuth2Info = null;
 
         // Copy
 
@@ -212,6 +217,18 @@ namespace UploadersLib
         public string OwnCloudPath = "/";
         public bool OwnCloudCreateShare = true;
         public bool OwnCloudDirectLink = false;
+        public bool OwnCloudIgnoreInvalidCert = false;
+
+        // MediaFire
+
+        public string MediaFireUsername = "";
+        public string MediaFirePassword = "";
+        public string MediaFirePath = "";
+        public bool MediaFireUseLongLink = false;
+
+        // MediaCrush
+
+        public bool MediaCrushDirectLink = false;
 
         #endregion File uploaders
 
@@ -234,16 +251,20 @@ namespace UploadersLib
         public string YourlsUsername = string.Empty;
         public string YourlsPassword = string.Empty;
 
+        // adf.ly
+        public string AdFlyAPIKEY = String.Empty;
+        public string AdFlyAPIUID = String.Empty;
+
         #endregion URL shorteners
 
-        #region Social networking services
+        #region URL sharing services
 
         // Twitter
 
         public List<OAuthInfo> TwitterOAuthInfoList = new List<OAuthInfo>();
         public int TwitterSelectedAccount = 0;
 
-        #endregion Social networking services
+        #endregion URL sharing services
 
         #region Custom Uploaders
 
@@ -257,39 +278,41 @@ namespace UploadersLib
 
         #region Helper Methods
 
-        public bool IsActive<T>(int index)
+        public bool IsValid<T>(int index)
         {
             Enum destination = (Enum)Enum.ToObject(typeof(T), index);
 
             if (destination is ImageDestination)
             {
-                return IsActive((ImageDestination)destination);
+                return IsValid((ImageDestination)destination);
             }
 
             if (destination is TextDestination)
             {
-                return IsActive((TextDestination)destination);
+                return IsValid((TextDestination)destination);
             }
 
             if (destination is FileDestination)
             {
-                return IsActive((FileDestination)destination);
+                return IsValid((FileDestination)destination);
             }
 
             if (destination is UrlShortenerType)
             {
-                return IsActive((UrlShortenerType)destination);
+                return IsValid((UrlShortenerType)destination);
             }
 
-            if (destination is SocialNetworkingService)
+            /*
+            if (destination is URLSharingServices)
             {
-                return IsActive((SocialNetworkingService)destination);
+                return IsValid((URLSharingServices)destination);
             }
+            */
 
             return true;
         }
 
-        public bool IsActive(ImageDestination destination)
+        public bool IsValid(ImageDestination destination)
         {
             switch (destination)
             {
@@ -314,7 +337,7 @@ namespace UploadersLib
             return true;
         }
 
-        public bool IsActive(TextDestination destination)
+        public bool IsValid(TextDestination destination)
         {
             switch (destination)
             {
@@ -325,7 +348,7 @@ namespace UploadersLib
             return true;
         }
 
-        public bool IsActive(FileDestination destination)
+        public bool IsValid(FileDestination destination)
         {
             switch (destination)
             {
@@ -362,12 +385,16 @@ namespace UploadersLib
                 case FileDestination.Pushbullet:
                     return PushbulletSettings != null && !string.IsNullOrEmpty(PushbulletSettings.UserAPIKey) && PushbulletSettings.DeviceList != null &&
                         PushbulletSettings.DeviceList.IsValidIndex(PushbulletSettings.SelectedDevice);
+                case FileDestination.OwnCloud:
+                    return !string.IsNullOrEmpty(OwnCloudHost) && !string.IsNullOrEmpty(OwnCloudUsername) && !string.IsNullOrEmpty(OwnCloudPassword);
+                case FileDestination.MediaFire:
+                    return !string.IsNullOrEmpty(MediaFireUsername) && !string.IsNullOrEmpty(MediaFirePassword);
             }
 
             return true;
         }
 
-        public bool IsActive(UrlShortenerType destination)
+        public bool IsValid(UrlShortenerType destination)
         {
             switch (destination)
             {
@@ -377,6 +404,8 @@ namespace UploadersLib
                     return OAuth2Info.CheckOAuth(BitlyOAuth2Info);
                 case UrlShortenerType.YOURLS:
                     return !string.IsNullOrEmpty(YourlsAPIURL) && (!string.IsNullOrEmpty(YourlsSignature) || (!string.IsNullOrEmpty(YourlsUsername) && !string.IsNullOrEmpty(YourlsPassword)));
+                case UrlShortenerType.AdFly:
+                    return !string.IsNullOrEmpty(AdFlyAPIKEY) && !string.IsNullOrEmpty(AdFlyAPIUID);
                 case UrlShortenerType.CustomURLShortener:
                     return CustomUploadersList != null && CustomUploadersList.IsValidIndex(CustomURLShortenerSelected);
             }
@@ -384,11 +413,13 @@ namespace UploadersLib
             return true;
         }
 
-        public bool IsActive(SocialNetworkingService destination)
+        public bool IsValid(URLSharingServices destination)
         {
             switch (destination)
             {
-                case SocialNetworkingService.Twitter:
+                case URLSharingServices.Email:
+                    return !string.IsNullOrEmpty(EmailSmtpServer) && EmailSmtpPort > 0 && !string.IsNullOrEmpty(EmailFrom) && !string.IsNullOrEmpty(EmailPassword);
+                case URLSharingServices.Twitter:
                     return TwitterOAuthInfoList != null && TwitterOAuthInfoList.IsValidIndex(TwitterSelectedAccount) && OAuthInfo.CheckOAuth(TwitterOAuthInfoList[TwitterSelectedAccount]);
             }
 
@@ -403,9 +434,10 @@ namespace UploadersLib
                     return FTPSelectedImage;
                 case EDataType.Text:
                     return FTPSelectedText;
+                default:
+                case EDataType.File:
+                    return FTPSelectedFile;
             }
-
-            return FTPSelectedFile;
         }
 
         public int GetLocalhostIndex(EDataType dataType)
@@ -416,9 +448,10 @@ namespace UploadersLib
                     return LocalhostSelectedImages;
                 case EDataType.Text:
                     return LocalhostSelectedText;
+                default:
+                case EDataType.File:
+                    return LocalhostSelectedFiles;
             }
-
-            return LocalhostSelectedFiles;
         }
 
         #endregion Helper Methods

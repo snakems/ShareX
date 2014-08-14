@@ -24,35 +24,22 @@
 #endregion License Information (GPL v3)
 
 using System;
-using System.Security.Permissions;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace SingleInstanceApplication
+namespace HelpersLib
 {
-    [Serializable]
-    [PermissionSet(SecurityAction.Demand, Name = "FullTrust")]
-    internal class InstanceProxy : MarshalByRefObject
+    public class ExtCodeMenuEntry : CodeMenuEntry
     {
-        public static bool IsFirstInstance { get; internal set; }
+        public ExtCodeMenuEntry(string value, string description) : base(value, description) { }
 
-        public static string[] CommandLineArgs { get; internal set; }
+        public override String ToPrefixString() { return '.' + _value; }
 
-        public void SetCommandLineArgs(bool isFirstInstance, string[] commandLineArgs)
-        {
-            IsFirstInstance = isFirstInstance;
-            CommandLineArgs = commandLineArgs;
-        }
-    }
-
-    public class InstanceCallbackEventArgs : EventArgs
-    {
-        internal InstanceCallbackEventArgs(bool isFirstInstance, string[] commandLineArgs)
-        {
-            IsFirstInstance = isFirstInstance;
-            CommandLineArgs = commandLineArgs;
-        }
-
-        public bool IsFirstInstance { get; private set; }
-
-        public string[] CommandLineArgs { get; private set; }
+        public static readonly ExtCodeMenuEntry bmp = new ExtCodeMenuEntry("bmp", "Bitmap Image File");
+        public static readonly ExtCodeMenuEntry gif = new ExtCodeMenuEntry("gif", "Graphical Interchange Format File");
+        public static readonly ExtCodeMenuEntry jpg = new ExtCodeMenuEntry("jpg", "JPEG Image");
+        public static readonly ExtCodeMenuEntry png = new ExtCodeMenuEntry("png", "Portable Network Graphic");
+        public static readonly ExtCodeMenuEntry tif = new ExtCodeMenuEntry("tif", "Tagged Image File");
     }
 }

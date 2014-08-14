@@ -23,36 +23,27 @@
 
 #endregion License Information (GPL v3)
 
-using System.IO;
+using Microsoft.VisualBasic.ApplicationServices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Windows.Forms;
 
-namespace CodeWorks
+namespace ShareX
 {
-    public class TextInfo
+    internal class ShareXApplicationBase : WindowsFormsApplicationBase
     {
-        public string FilePath { get; set; }
-        public string DefaultText { get; set; }
-        public string NewText { get; set; }
-
-        public bool IsDifferent
+        public ShareXApplicationBase(bool isSingleInstance)
         {
-            get { return !string.IsNullOrEmpty(NewText) && DefaultText != NewText; }
+            IsSingleInstance = isSingleInstance;
+            EnableVisualStyles = true;
         }
 
-        public TextInfo() { }
-
-        public TextInfo(string filePath)
+        public new Form MainForm
         {
-            FilePath = filePath;
-            DefaultText = File.ReadAllText(FilePath, Encoding.UTF8);
-        }
-
-        public void WriteNewText()
-        {
-            if (!string.IsNullOrEmpty(FilePath) && !string.IsNullOrEmpty(NewText) && File.Exists(FilePath))
-            {
-                File.WriteAllText(FilePath, NewText, Encoding.UTF8);
-            }
+            get { return base.MainForm; }
+            set { base.MainForm = value; }
         }
     }
 }

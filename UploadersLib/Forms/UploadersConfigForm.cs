@@ -41,6 +41,8 @@ namespace UploadersLib
     {
         public UploadersConfig Config { get; private set; }
 
+        private ImageList uploadersImageList;
+
         public UploadersConfigForm(UploadersConfig uploadersConfig)
         {
             Config = uploadersConfig;
@@ -65,82 +67,55 @@ namespace UploadersLib
 
         private void FormSettings()
         {
-            ImageList uploadersImageList = new ImageList();
+            uploadersImageList = new ImageList();
             uploadersImageList.ColorDepth = ColorDepth.Depth32Bit;
-            uploadersImageList.Images.Add("ImageShack", Resources.ImageShack);
-            uploadersImageList.Images.Add("TinyPic", Resources.TinyPic);
-            uploadersImageList.Images.Add("Imgur", Resources.Imgur);
-            uploadersImageList.Images.Add("Flickr", Resources.Flickr);
-            uploadersImageList.Images.Add("Photobucket", Resources.Photobucket);
-            uploadersImageList.Images.Add("Picasa", Resources.Picasa);
-            uploadersImageList.Images.Add("Dropbox", Resources.Dropbox);
-            uploadersImageList.Images.Add("Copy", Resources.Copy);
-            uploadersImageList.Images.Add("GoogleDrive", Resources.GoogleDrive);
-            uploadersImageList.Images.Add("Box", Resources.Box);
-            uploadersImageList.Images.Add("Minus", Resources.Minus);
-            uploadersImageList.Images.Add("FTP", Resources.folder_network);
-            uploadersImageList.Images.Add("RapidShare", Resources.RapidShare);
-            uploadersImageList.Images.Add("SendSpace", Resources.SendSpace);
-            uploadersImageList.Images.Add("Gett", Resources.Gett);
-            uploadersImageList.Images.Add("Hostr", Resources.Hostr);
-            uploadersImageList.Images.Add("CustomUploader", Resources.globe_network);
-            uploadersImageList.Images.Add("SharedFolders", Resources.server_network);
-            uploadersImageList.Images.Add("Email", Resources.mail);
-            uploadersImageList.Images.Add("Jira", Resources.jira);
-            uploadersImageList.Images.Add("Mega", Resources.Mega);
-            uploadersImageList.Images.Add("AmazonS3", Resources.AmazonS3);
-            uploadersImageList.Images.Add("Pushbullet", Resources.Pushbullet);
-            uploadersImageList.Images.Add("Pastebin", Resources.Pastebin);
-            uploadersImageList.Images.Add("Pasteee", Resources.page_white_text);
-            uploadersImageList.Images.Add("Gist", Resources.GitHub);
-            uploadersImageList.Images.Add("Upaste", Resources.Upaste);
-            uploadersImageList.Images.Add("Google", Resources.Google);
-            uploadersImageList.Images.Add("Bitly", Resources.Bitly);
-            uploadersImageList.Images.Add("Yourls", Resources.Yourls);
-            uploadersImageList.Images.Add("Twitter", Resources.Twitter);
-            uploadersImageList.Images.Add("ownCloud", Resources.OwnCloud);
 
-            tpImageShack.ImageKey = "ImageShack";
-            tpTinyPic.ImageKey = "TinyPic";
-            tpImgur.ImageKey = "Imgur";
-            tpFlickr.ImageKey = "Flickr";
-            tpPhotobucket.ImageKey = "Photobucket";
-            tpPicasa.ImageKey = "Picasa";
-            tpDropbox.ImageKey = "Dropbox";
-            tpCopy.ImageKey = "Copy";
-            tpGoogleDrive.ImageKey = "GoogleDrive";
-            tpBox.ImageKey = "Box";
-            tpMinus.ImageKey = "Minus";
-            tpFTP.ImageKey = "FTP";
-            tpRapidShare.ImageKey = "RapidShare";
-            tpSendSpace.ImageKey = "SendSpace";
-            tpSharedFolder.ImageKey = "SharedFolders";
-            tpEmail.ImageKey = "Email";
-            tpJira.ImageKey = "Jira";
-            tpGe_tt.ImageKey = "Gett";
-            tpHostr.ImageKey = "Hostr";
-            tpCustomUploaders.ImageKey = "CustomUploader";
-            tpPastebin.ImageKey = "Pastebin";
-            tpPaste_ee.ImageKey = "Pasteee";
-            tpPushbullet.ImageKey = "Pushbullet";
-            tpGoogleURLShortener.ImageKey = "Google";
-            tpBitly.ImageKey = "Bitly";
-            tpYourls.ImageKey = "Yourls";
-            tpTwitter.ImageKey = "Twitter";
-            tpMega.ImageKey = "Mega";
-            tpGist.ImageKey = "Gist";
-            tpUpaste.ImageKey = "Upaste";
-            tpAmazonS3.ImageKey = "AmazonS3";
-            tpOwnCloud.ImageKey = "ownCloud";
+            AddIconToTab(tpAdFly, Resources.AdFly);
+            AddIconToTab(tpAmazonS3, Resources.AmazonS3);
+            AddIconToTab(tpBitly, Resources.Bitly);
+            AddIconToTab(tpBox, Resources.Box);
+            AddIconToTab(tpCopy, Resources.Copy);
+            AddIconToTab(tpCustomUploaders, Resources.globe_network);
+            AddIconToTab(tpDropbox, Resources.Dropbox);
+            AddIconToTab(tpEmail, Resources.mail);
+            AddIconToTab(tpFlickr, Resources.Flickr);
+            AddIconToTab(tpFTP, Resources.folder_network);
+            AddIconToTab(tpGe_tt, Resources.Gett);
+            AddIconToTab(tpGist, Resources.GitHub);
+            AddIconToTab(tpGoogleDrive, Resources.GoogleDrive);
+            AddIconToTab(tpGoogleURLShortener, Resources.Google);
+            AddIconToTab(tpHostr, Resources.Hostr);
+            AddIconToTab(tpImageShack, Resources.ImageShack);
+            AddIconToTab(tpImgur, Resources.Imgur);
+            AddIconToTab(tpJira, Resources.jira);
+            AddIconToTab(tpMediaCrush, Resources.MediaCrush);
+            AddIconToTab(tpMediaFire, Resources.MediaFire);
+            AddIconToTab(tpMega, Resources.Mega);
+            AddIconToTab(tpMinus, Resources.Minus);
+            AddIconToTab(tpOneDrive, Resources.OneDrive);
+            AddIconToTab(tpOwnCloud, Resources.OwnCloud);
+            AddIconToTab(tpPastebin, Resources.Pastebin);
+            AddIconToTab(tpPaste_ee, Resources.page_white_text);
+            AddIconToTab(tpPhotobucket, Resources.Photobucket);
+            AddIconToTab(tpPicasa, Resources.Picasa);
+            AddIconToTab(tpPushbullet, Resources.Pushbullet);
+            AddIconToTab(tpRapidShare, Resources.RapidShare);
+            AddIconToTab(tpSendSpace, Resources.SendSpace);
+            AddIconToTab(tpSharedFolder, Resources.server_network);
+            AddIconToTab(tpTinyPic, Resources.TinyPic);
+            AddIconToTab(tpTwitter, Resources.Twitter);
+            AddIconToTab(tpUpaste, Resources.Upaste);
+            AddIconToTab(tpYourls, Resources.Yourls);
 
             ttlvMain.ImageList = uploadersImageList;
             ttlvMain.MainTabControl = tcUploaders;
             ttlvMain.FocusListView();
 
-            NameParser.CreateCodesMenu(txtDropboxPath, ReplacementVariables.n, ReplacementVariables.t, ReplacementVariables.pn);
-            NameParser.CreateCodesMenu(txtCopyPath, ReplacementVariables.n, ReplacementVariables.t, ReplacementVariables.pn);
-            NameParser.CreateCodesMenu(txtAmazonS3ObjectPrefix, ReplacementVariables.n, ReplacementVariables.t, ReplacementVariables.pn);
-            NameParser.CreateCodesMenu(txtCustomUploaderArgValue, ReplacementVariables.n);
+            CodeMenu.Create<ReplCodeMenuEntry>(txtDropboxPath, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
+            CodeMenu.Create<ReplCodeMenuEntry>(txtCopyPath, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
+            CodeMenu.Create<ReplCodeMenuEntry>(txtAmazonS3ObjectPrefix, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
+            CodeMenu.Create<ReplCodeMenuEntry>(txtMediaFirePath, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
+            CodeMenu.Create<ReplCodeMenuEntry>(txtCustomUploaderArgValue, ReplCodeMenuEntry.n);
 
             txtCustomUploaderLog.AddContextMenu();
 
@@ -170,6 +145,18 @@ namespace UploadersLib
             eiCustomUploaders.ObjectType = typeof(CustomUploaderItem);
         }
 
+        private void AddIconToTab(TabPage tp, Icon icon)
+        {
+            uploadersImageList.Images.Add(tp.Name, icon);
+            tp.ImageKey = tp.Name;
+        }
+
+        private void AddIconToTab(TabPage tp, Bitmap bitmap)
+        {
+            uploadersImageList.Images.Add(tp.Name, bitmap);
+            tp.ImageKey = tp.Name;
+        }
+
         public void LoadSettings(UploadersConfig uploadersConfig)
         {
             #region Image uploaders
@@ -177,6 +164,7 @@ namespace UploadersLib
             // Imgur
 
             atcImgurAccountType.SelectedAccountType = Config.ImgurAccountType;
+            cbImgurDirectLink.Checked = Config.ImgurDirectLink;
             cbImgurThumbnailType.Items.Clear();
             cbImgurThumbnailType.Items.AddRange(Helpers.GetEnumDescriptions<ImgurThumbnailType>());
             cbImgurThumbnailType.SelectedIndex = (int)Config.ImgurThumbnailType;
@@ -484,6 +472,18 @@ namespace UploadersLib
             txtOwnCloudPath.Text = Config.OwnCloudPath;
             cbOwnCloudCreateShare.Checked = Config.OwnCloudCreateShare;
             cbOwnCloudDirectLink.Checked = Config.OwnCloudDirectLink;
+            cbOwnCloudIgnoreInvalidCert.Checked = Config.OwnCloudIgnoreInvalidCert;
+
+            // MediaFire
+
+            txtMediaFireEmail.Text = Config.MediaFireUsername;
+            txtMediaFirePassword.Text = Config.MediaFirePassword;
+            txtMediaFirePath.Text = Config.MediaFirePath;
+            cbMediaFireUseLongLink.Checked = Config.MediaFireUseLongLink;
+
+            // MediaCrush
+
+            cbMediaCrushDirectLink.Checked = Config.MediaCrushDirectLink;
 
             #endregion File uploaders
 
@@ -515,6 +515,11 @@ namespace UploadersLib
             txtYourlsUsername.Text = Config.YourlsUsername;
             txtYourlsPassword.Text = Config.YourlsPassword;
 
+            // adf.ly
+
+            txtAdflyAPIKEY.Text = Config.AdFlyAPIKEY;
+            txtAdflyAPIUID.Text = Config.AdFlyAPIUID;
+
             #endregion URL Shorteners
 
             #region Other Services
@@ -541,6 +546,11 @@ namespace UploadersLib
         private void atcImgurAccountType_AccountTypeChanged(AccountType accountType)
         {
             Config.ImgurAccountType = accountType;
+        }
+
+        private void cbImgurDirectLink_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.ImgurDirectLink = cbImgurDirectLink.Checked;
         }
 
         private void cbImgurThumbnailType_SelectedIndexChanged(object sender, EventArgs e)
@@ -1642,6 +1652,25 @@ namespace UploadersLib
 
         #endregion Amazon S3
 
+        #region OneDrive
+
+        private void oAuth2OneDrive_OpenButtonClicked()
+        {
+            OneDriveAuthOpen();
+        }
+
+        private void oAuth2OneDrive_CompleteButtonClicked(string code)
+        {
+            OneDriveAuthComplete(code);
+        }
+
+        private void oAuth2OneDrive_ClearButtonClicked()
+        {
+            Config.OneDriveOAuth2Info = null;
+        }
+
+        #endregion OneDrive
+
         #region ownCloud
 
         private void txtOwnCloudHost_TextChanged(object sender, EventArgs e)
@@ -1672,6 +1701,11 @@ namespace UploadersLib
         private void cbOwnCloudDirectLink_CheckedChanged(object sender, EventArgs e)
         {
             Config.OwnCloudDirectLink = cbOwnCloudDirectLink.Checked;
+        }
+
+        private void cbOwnCloudIgnoreInvalidCert_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.OwnCloudIgnoreInvalidCert = cbOwnCloudIgnoreInvalidCert.Checked;
         }
 
         #endregion ownCloud
@@ -1765,6 +1799,39 @@ namespace UploadersLib
 
         #endregion Shared folder
 
+        #region MediaFire
+
+        private void txtMediaFireUsername_TextChanged(object sender, EventArgs e)
+        {
+            Config.MediaFireUsername = txtMediaFireEmail.Text;
+        }
+
+        private void txtMediaFirePassword_TextChanged(object sender, EventArgs e)
+        {
+            Config.MediaFirePassword = txtMediaFirePassword.Text;
+        }
+
+        private void txtMediaFirePath_TextChanged(object sender, EventArgs e)
+        {
+            Config.MediaFirePath = txtMediaFirePath.Text;
+        }
+
+        private void cbMediaFireUseLongLink_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.MediaFireUseLongLink = cbMediaFireUseLongLink.Checked;
+        }
+
+        #endregion MediaFire
+
+        #region MediaCrush
+
+        private void cbMediaCrushDirectLink_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.MediaCrushDirectLink = cbMediaCrushDirectLink.Checked;
+        }
+
+        #endregion MediaCrush
+
         #endregion File Uploaders
 
         #region URL Shorteners
@@ -1846,6 +1913,25 @@ namespace UploadersLib
         }
 
         #endregion yourls.org
+
+        #region adf.ly
+
+        private void txtAdflyAPIKEY_TextChanged(object sender, EventArgs e)
+        {
+            Config.AdFlyAPIKEY = txtAdflyAPIKEY.Text;
+        }
+
+        private void txtAdflyAPIUID_TextChanged(object sender, EventArgs e)
+        {
+            Config.AdFlyAPIUID = txtAdflyAPIUID.Text;
+        }
+
+        private void llAdflyLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            URLHelpers.OpenURL("https://adf.ly/publisher/tools#tools-api");
+        }
+
+        #endregion adf.ly
 
         #endregion URL Shorteners
 

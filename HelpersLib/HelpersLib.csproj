@@ -74,6 +74,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClipboardFormat.cs" />
+    <Compile Include="CodeMenu.cs" />
     <Compile Include="ColorMatrixManager.cs" />
     <Compile Include="Colors\CMYK.cs" />
     <Compile Include="Colors\ColorEventHandler.cs" />
@@ -85,6 +86,7 @@
     <Compile Include="DWMManager.cs" />
     <Compile Include="EncoderProgram.cs" />
     <Compile Include="CLI\ExternalCLIManager.cs" />
+    <Compile Include="ExtCodeMenuEntry.cs" />
     <Compile Include="Extensions\NumberExtensions.cs" />
     <Compile Include="FontSafe.cs" />
     <Compile Include="Forms\OutputBox.cs">
@@ -101,6 +103,7 @@
     </Compile>
     <Compile Include="Helpers\URLHelpers.cs" />
     <Compile Include="Helpers\MathHelpers.cs" />
+    <Compile Include="CodeMenuEntry.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="Native\LayeredForm.cs">
@@ -293,8 +296,6 @@
     <Compile Include="Printer\PrintTextHelper.cs" />
     <Compile Include="Helpers\RegistryHelpers.cs" />
     <Compile Include="SettingsHelper.cs" />
-    <Compile Include="SingleInstanceApplication\ApplicationInstanceManager.cs" />
-    <Compile Include="SingleInstanceApplication\InstanceProxy.cs" />
     <Compile Include="DebugHelper.cs" />
     <Compile Include="UpdateChecker\UpdateCheckerLabel.cs">
       <SubType>UserControl</SubType>
@@ -331,7 +332,6 @@
       <DependentUpon>MyPictureBox.cs</DependentUpon>
     </Compile>
     <Compile Include="UpdateChecker\XMLUpdateChecker.cs" />
-    <Compile Include="UpdateChecker\UpdateInfo.cs" />
     <Compile Include="Links.cs" />
     <Compile Include="Vector2.cs" />
     <Compile Include="WindowState.cs" />
@@ -432,6 +432,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ShareX_Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cross.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

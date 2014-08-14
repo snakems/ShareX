@@ -70,6 +70,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\MegaApiClient.1.0.4\lib\MegaApiClient.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
@@ -221,11 +222,13 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ImageTag.cs" />
+    <Compile Include="PointInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Include="ShareXApplicationBase.cs" />
     <Compile Include="TaskHelpers.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -238,6 +241,12 @@
     </Compile>
     <Compile Include="Forms\HotkeySettingsForm.Designer.cs">
       <DependentUpon>HotkeySettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\VideoEncodersForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\VideoEncodersForm.Designer.cs">
+      <DependentUpon>VideoEncodersForm.cs</DependentUpon>
     </Compile>
     <Compile Include="WatchFolder.cs" />
     <Compile Include="WatchFolderManager.cs" />
@@ -312,6 +321,9 @@
     <Compile Include="TaskInfo.cs" />
     <EmbeddedResource Include="Forms\HotkeySettingsForm.resx">
       <DependentUpon>HotkeySettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\VideoEncodersForm.resx">
+      <DependentUpon>VideoEncodersForm.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
@@ -400,7 +412,6 @@
     <None Include="Resources\toolbox.png" />
     <None Include="Resources\application-icon-large.png" />
     <None Include="Resources\upload-cloud.png" />
-    <None Include="Resources\globe-share.png" />
     <None Include="Resources\image-export.png" />
     <None Include="Resources\folder-open-image.png" />
   </ItemGroup>
@@ -444,7 +455,6 @@
     <None Include="Resources\ruler-triangle.png" />
     <None Include="Resources\Test.png" />
     <None Include="Resources\application-network.png" />
-    <None Include="Resources\Greenshot.png" />
     <None Include="..\LICENSE.txt">
       <Link>LICENSE.txt</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -475,6 +485,17 @@
     <None Include="Resources\heart.png" />
     <None Include="Resources\crown.png" />
     <None Include="Resources\layer--pencil.png" />
+    <None Include="Resources\globe-share.png" />
+    <None Include="Resources\google_plus.png" />
+    <None Include="Resources\document-copy.png" />
+    <None Include="Resources\image--pencil.png" />
+    <None Include="Resources\exclamation-button.png" />
+    <None Include="Resources\folder-open-document.png" />
+    <None Include="Resources\eraser.png" />
+    <None Include="Resources\layout-select-sidebar.png" />
+    <None Include="Resources\layout-select-content.png" />
+    <None Include="Resources\bin.png" />
+    <None Include="Resources\film.png" />
     <Content Include="ShareX_Icon.ico" />
     <None Include="Resources\globe--pencil.png" />
     <None Include="Resources\camcorder--pencil.png" />

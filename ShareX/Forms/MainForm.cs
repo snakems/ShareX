@@ -41,7 +41,7 @@ namespace ShareX
 {
     public partial class MainForm : HotkeyForm
     {
-        public bool IsReady { get; private set; }
+        public ManualResetEvent ReadyWaitHandle { get; private set; }
 
         private bool forceClose;
         private UploadInfoManager uim;
@@ -49,6 +49,7 @@ namespace ShareX
 
         public MainForm()
         {
+            ReadyWaitHandle = new ManualResetEvent(false);
             InitControls();
             HandleCreated += MainForm_HandleCreated;
         }
@@ -62,11 +63,11 @@ namespace ShareX
             AutoCheckUpdate();
 #endif
 
-            IsReady = true;
+            ReadyWaitHandle.Set();
 
             DebugHelper.WriteLine("Startup time: {0} ms", Program.StartTimer.ElapsedMilliseconds);
 
-            UseCommandLineArgs(Environment.GetCommandLineArgs());
+            UseCommandLineArgs(Program.Arguments);
         }
 
         private void AfterShownJobs()
@@ -83,6 +84,7 @@ namespace ShareX
 
             ((ToolStripDropDownMenu)tsddbWorkflows.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayWorkflows.DropDown).ShowImageMargin =
                 ((ToolStripDropDownMenu)tsmiMonitor.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayMonitor.DropDown).ShowImageMargin =
+                ((ToolStripDropDownMenu)tsmiOpen.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiCopy.DropDown).ShowImageMargin =
                 ((ToolStripDropDownMenu)tsmiShortenSelectedURL.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiShareSelectedURL.DropDown).ShowImageMargin = false;
 
             AddMultiEnumItems<AfterCaptureTasks>(x => Program.DefaultTaskSettings.AfterCaptureJob = Program.DefaultTaskSettings.AfterCaptureJob.Swap(x),
@@ -109,7 +111,7 @@ namespace ShareX
             }, tsmiTextFileUploaders, tsmiTrayTextFileUploaders);
             AddEnumItems<FileDestination>(x => Program.DefaultTaskSettings.FileDestination = x, tsmiFileUploaders, tsmiTrayFileUploaders);
             AddEnumItems<UrlShortenerType>(x => Program.DefaultTaskSettings.URLShortenerDestination = x, tsmiURLShorteners, tsmiTrayURLShorteners);
-            AddEnumItems<SocialNetworkingService>(x => Program.DefaultTaskSettings.SocialNetworkingServiceDestination = x, tsmiSocialServices, tsmiTraySocialServices);
+            AddEnumItems<URLSharingServices>(x => Program.DefaultTaskSettings.URLSharingServiceDestination = x, tsmiURLSharingServices, tsmiTrayURLSharingServices);
 
             foreach (UrlShortenerType urlShortener in Helpers.GetEnums<UrlShortenerType>())
             {
@@ -118,10 +120,10 @@ namespace ShareX
                 tsmiShortenSelectedURL.DropDownItems.Add(tsmi);
             }
 
-            foreach (SocialNetworkingService socialNetworkingService in Helpers.GetEnums<SocialNetworkingService>())
+            foreach (URLSharingServices urlSharingService in Helpers.GetEnums<URLSharingServices>())
             {
-                ToolStripMenuItem tsmi = new ToolStripMenuItem(socialNetworkingService.GetDescription());
-                tsmi.Click += (sender, e) => uim.ShareURL(socialNetworkingService);
+                ToolStripMenuItem tsmi = new ToolStripMenuItem(urlSharingService.GetDescription());
+                tsmi.Click += (sender, e) => uim.ShareURL(urlSharingService);
                 tsmiShareSelectedURL.DropDownItems.Add(tsmi);
             }
 
@@ -177,7 +179,7 @@ namespace ShareX
             {
                 tsmi.Font = new Font(tsmi.Font, FontStyle.Bold);
             }
-            tsmi.Click += (sender, e) => HandleTask(hotkeySetting.TaskSettings);
+            tsmi.Click += (sender, e) => ExecuteJob(hotkeySetting.TaskSettings);
             return tsmi;
         }
 
@@ -191,7 +193,7 @@ namespace ShareX
                 EnableDisableToolStripMenuItems<FileDestination>(tsmiTextFileUploaders, tsmiTrayTextFileUploaders);
                 EnableDisableToolStripMenuItems<FileDestination>(tsmiFileUploaders, tsmiTrayFileUploaders);
                 EnableDisableToolStripMenuItems<UrlShortenerType>(tsmiURLShorteners, tsmiTrayURLShorteners);
-                EnableDisableToolStripMenuItems<SocialNetworkingService>(tsmiSocialServices, tsmiTraySocialServices);
+                EnableDisableToolStripMenuItems<URLSharingServices>(tsmiURLSharingServices, tsmiTrayURLSharingServices);
             }
         }
 
@@ -286,17 +288,17 @@ namespace ShareX
             {
                 for (int i = 0; i < parent.DropDownItems.Count; i++)
                 {
-                    parent.DropDownItems[i].Enabled = Program.UploadersConfig.IsActive<T>(i);
+                    parent.DropDownItems[i].Enabled = Program.UploadersConfig.IsValid<T>(i);
                 }
             }
         }
 
         private void UpdateControls()
         {
-            cmsUploadInfo.SuspendLayout();
+            cmsTaskInfo.SuspendLayout();
 
-            tsmiStopUpload.Visible = tsmiOpen.Visible = tsmiCopy.Visible = tsmiShowErrors.Visible = tsmiShowResponse.Visible = tsmiShowQRCode.Visible =
-                tsmiUploadSelectedFile.Visible = tsmiShortenSelectedURL.Visible = tsmiShareSelectedURL.Visible = tsmiClearList.Visible = tssUploadInfo1.Visible = false;
+            tsmiStopUpload.Visible = tsmiOpen.Visible = tsmiCopy.Visible = tsmiShowErrors.Visible = tsmiShowResponse.Visible = tsmiShowQRCode.Visible = tsmiUploadSelectedFile.Visible =
+                 tsmiEditSelectedFile.Visible = tsmiDeleteSelectedFile.Visible = tsmiShortenSelectedURL.Visible = tsmiShareSelectedURL.Visible = tsmiClearList.Visible = tssUploadInfo1.Visible = false;
             pbPreview.Reset();
             uim.RefreshSelectedItems();
 
@@ -378,6 +380,8 @@ namespace ShareX
                     }
 
                     tsmiUploadSelectedFile.Visible = uim.SelectedItem.IsFileExist;
+                    tsmiEditSelectedFile.Visible = uim.SelectedItem.IsImageFile;
+                    tsmiDeleteSelectedFile.Visible = uim.SelectedItem.IsFileExist;
                     tsmiShortenSelectedURL.Visible = uim.SelectedItem.IsURLExist;
                     tsmiShareSelectedURL.Visible = uim.SelectedItem.IsURLExist;
                     tsmiShowQRCode.Visible = uim.SelectedItem.IsURLExist;
@@ -399,7 +403,7 @@ namespace ShareX
 
             tsmiClearList.Visible = tssUploadInfo1.Visible = lvUploads.Items.Count > 0;
 
-            cmsUploadInfo.ResumeLayout();
+            cmsTaskInfo.ResumeLayout();
             Refresh();
         }
 
@@ -430,12 +434,26 @@ namespace ShareX
             niTray.Icon = ShareXResources.Icon;
             niTray.Visible = Program.Settings.ShowTray;
 
-            if (Program.Settings.RememberMainFormSize && !Program.Settings.MainFormSize.IsEmpty)
+            bool isPositionChanged = false;
+
+            if (Program.Settings.RememberMainFormPosition && !Program.Settings.MainFormPosition.IsEmpty &&
+                CaptureHelpers.GetScreenBounds().Contains(Program.Settings.MainFormPosition))
             {
                 StartPosition = FormStartPosition.Manual;
+                Location = Program.Settings.MainFormPosition;
+                isPositionChanged = true;
+            }
+
+            if (Program.Settings.RememberMainFormSize && !Program.Settings.MainFormSize.IsEmpty)
+            {
                 Size = Program.Settings.MainFormSize;
-                Screen currentScreen = Screen.FromPoint(Cursor.Position);
-                Location = new Point(currentScreen.Bounds.Width / 2 - Size.Width / 2, currentScreen.Bounds.Height / 2 - Size.Height / 2);
+
+                if (!isPositionChanged)
+                {
+                    StartPosition = FormStartPosition.Manual;
+                    Rectangle activeScreen = CaptureHelpers.GetActiveScreenBounds();
+                    Location = new Point(activeScreen.Width / 2 - Size.Width / 2, activeScreen.Height / 2 - Size.Height / 2);
+                }
             }
 
             switch (Program.Settings.ImagePreview)
@@ -473,8 +491,8 @@ namespace ShareX
             foreach (ToolStripDropDownItem dropDownItem in new ToolStripDropDownItem[]
             {
                 tsddbAfterCaptureTasks, tsddbAfterUploadTasks, tsmiImageUploaders, tsmiImageFileUploaders, tsmiTextUploaders, tsmiTextFileUploaders, tsmiFileUploaders,
-                tsmiURLShorteners, tsmiSocialServices, tsmiTrayAfterCaptureTasks, tsmiTrayAfterUploadTasks, tsmiTrayImageUploaders, tsmiTrayImageFileUploaders,
-                tsmiTrayTextUploaders, tsmiTrayTextFileUploaders, tsmiTrayFileUploaders, tsmiTrayURLShorteners, tsmiTraySocialServices
+                tsmiURLShorteners, tsmiURLSharingServices, tsmiTrayAfterCaptureTasks, tsmiTrayAfterUploadTasks, tsmiTrayImageUploaders, tsmiTrayImageFileUploaders,
+                tsmiTrayTextUploaders, tsmiTrayTextFileUploaders, tsmiTrayFileUploaders, tsmiTrayURLShorteners, tsmiTrayURLSharingServices
             })
             {
                 dropDownItem.DropDown.Closing += (sender, e) => e.Cancel = (e.CloseReason == ToolStripDropDownCloseReason.ItemClicked);
@@ -497,7 +515,7 @@ namespace ShareX
             SetEnumChecked(Program.DefaultTaskSettings.TextFileDestination, tsmiTextFileUploaders, tsmiTrayTextFileUploaders);
             SetEnumChecked(Program.DefaultTaskSettings.FileDestination, tsmiFileUploaders, tsmiTrayFileUploaders);
             SetEnumChecked(Program.DefaultTaskSettings.URLShortenerDestination, tsmiURLShorteners, tsmiTrayURLShorteners);
-            SetEnumChecked(Program.DefaultTaskSettings.SocialNetworkingServiceDestination, tsmiSocialServices, tsmiTraySocialServices);
+            SetEnumChecked(Program.DefaultTaskSettings.URLSharingServiceDestination, tsmiURLSharingServices, tsmiTrayURLSharingServices);
         }
 
         private void UpdateUploaderMenuNames()
@@ -514,7 +532,7 @@ namespace ShareX
 
             tsmiURLShorteners.Text = tsmiTrayURLShorteners.Text = "URL shortener: " + Program.DefaultTaskSettings.URLShortenerDestination.GetDescription();
 
-            tsmiSocialServices.Text = tsmiTraySocialServices.Text = "Social networking service: " + Program.DefaultTaskSettings.SocialNetworkingServiceDestination.GetDescription();
+            tsmiURLSharingServices.Text = tsmiTrayURLSharingServices.Text = "URL sharing service: " + Program.DefaultTaskSettings.URLSharingServiceDestination.GetDescription();
         }
 
         private void AutoCheckUpdate()
@@ -531,8 +549,9 @@ namespace ShareX
         {
             UpdateChecker updateChecker = TaskHelpers.CheckUpdate();
 
-            if (updateChecker.UpdateInfo != null && updateChecker.UpdateInfo.Status == UpdateStatus.UpdateAvailable &&
-                MessageBox.Show("A newer version of ShareX is available.\r\nWould you like to download and install it?", string.Format("{0} {1} is available", Application.ProductName, updateChecker.UpdateInfo.LatestVersion.ToString()),
+            if (updateChecker != null && updateChecker.Status == UpdateStatus.UpdateAvailable &&
+                MessageBox.Show("A newer version of ShareX is available.\r\nWould you like to download and install it?",
+                string.Format("ShareX {0} is available", updateChecker.LatestVersion.ToString()),
                 MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
             {
                 using (DownloaderForm updaterForm = new DownloaderForm(updateChecker))
@@ -555,21 +574,30 @@ namespace ShareX
 
         public void UseCommandLineArgs(string[] args)
         {
-            if (args != null && args.Length > 1)
+            if (args != null)
             {
-                for (int i = 1; i < args.Length; i++)
+                foreach (string arg in args)
                 {
-                    if (args[i].Equals("-clipboardupload", StringComparison.InvariantCultureIgnoreCase))
+                    if (!string.IsNullOrEmpty(arg))
                     {
-                        UploadManager.ClipboardUpload();
-                    }
-                    else if (args[i].Equals("-autocapture", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        TaskHelpers.StartAutoCapture();
-                    }
-                    else if (args[i][0] != '-')
-                    {
-                        UploadManager.UploadFile(args[i]);
+                        DebugHelper.WriteLine("CommandLine: " + arg);
+
+                        if (arg.Length > 1 && arg[0] == '-')
+                        {
+                            string command = arg.Substring(1);
+
+                            foreach (HotkeyType job in Helpers.GetEnums<HotkeyType>())
+                            {
+                                if (command.Equals(job.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                                {
+                                    ExecuteJob(job);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            UploadManager.UploadFile(arg);
+                        }
                     }
                 }
             }
@@ -644,8 +672,19 @@ namespace ShareX
         private void MainForm_Resize(object sender, EventArgs e)
         {
             Refresh();
+        }
 
-            if (WindowState == FormWindowState.Normal)
+        private void MainForm_LocationChanged(object sender, EventArgs e)
+        {
+            if (ReadyWaitHandle.WaitOne(0) && WindowState == FormWindowState.Normal)
+            {
+                Program.Settings.MainFormPosition = Location;
+            }
+        }
+
+        private void MainForm_SizeChanged(object sender, EventArgs e)
+        {
+            if (ReadyWaitHandle.WaitOne(0) && WindowState == FormWindowState.Normal)
             {
                 Program.Settings.MainFormSize = Size;
             }
@@ -690,6 +729,11 @@ namespace ShareX
             UploadManager.UploadFile();
         }
 
+        private void tsmiUploadFolder_Click(object sender, EventArgs e)
+        {
+            UploadManager.UploadFolder();
+        }
+
         private void tsbClipboardUpload_Click(object sender, EventArgs e)
         {
             UploadManager.ClipboardUploadMainWindow();
@@ -705,6 +749,61 @@ namespace ShareX
             TaskHelpers.OpenDropWindow();
         }
 
+        private void tsmiCursorHelper_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenScreenColorPicker();
+        }
+
+        private void tsmiRuler_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenRuler();
+        }
+
+        private void tsmiFTPClient_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenFTPClient();
+        }
+
+        private void tsmiHashCheck_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenHashCheck();
+        }
+
+        private void tsmiIndexFolder_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenIndexFolder();
+        }
+
+        private void tsmiImageEditor_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenImageEditor();
+        }
+
+        private void tsmiImageEffects_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenImageEffects();
+        }
+
+        private void tsmiMonitorTest_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenMonitorTest();
+        }
+
+        private void tsmiDNSChanger_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenDNSChanger();
+        }
+
+        private void tsmiQRCode_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenQRCode();
+        }
+
+        private void tsmiTweetMessage_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.TweetMessage();
+        }
+
         private void tsddbDestinations_DropDownOpened(object sender, EventArgs e)
         {
             UpdateDestinationStates();
@@ -717,7 +816,7 @@ namespace ShareX
 
         private void tsmiTestImageUpload_Click(object sender, EventArgs e)
         {
-            UploadManager.RunImageTask(Resources.Test);
+            UploadManager.UploadImage(Resources.Test);
         }
 
         private void tsmiTestTextUpload_Click(object sender, EventArgs e)
@@ -735,6 +834,11 @@ namespace ShareX
             UploadManager.ShortenURL(Links.URL_WEBSITE);
         }
 
+        private void tsmiTestURLSharing_Click(object sender, EventArgs e)
+        {
+            UploadManager.ShareURL(Links.URL_WEBSITE);
+        }
+
         private void tsmiTestUploaders_Click(object sender, EventArgs e)
         {
             using (UploadTestForm form = new UploadTestForm())
@@ -743,9 +847,14 @@ namespace ShareX
             }
         }
 
-        private void tsmiScreenRecorder_Click(object sender, EventArgs e)
+        private void tsmiScreenRecordingFFmpeg_Click(object sender, EventArgs e)
         {
-            TaskHelpers.DoScreenRecorder();
+            TaskHelpers.DoScreenRecordingFFmpeg();
+        }
+
+        private void tsmiScreenRecordingGIF_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.DoScreenRecordingGIF();
         }
 
         private void tsmiAutoCapture_Click(object sender, EventArgs e)
@@ -808,61 +917,6 @@ namespace ShareX
             Program.UploadersConfigSaveAsync();
         }
 
-        private void tsmiCursorHelper_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenScreenColorPicker();
-        }
-
-        private void tsmiRuler_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenRuler();
-        }
-
-        private void tsmiFTPClient_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenFTPClient();
-        }
-
-        private void tsmiHashCheck_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenHashCheck();
-        }
-
-        private void tsmiIndexFolder_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenIndexFolder();
-        }
-
-        private void tsmiImageEditor_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenImageEditor();
-        }
-
-        private void tsmiImageEffects_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenImageEffects();
-        }
-
-        private void tsmiMonitorTest_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenMonitorTest();
-        }
-
-        private void tsmiDNSChanger_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenDNSChanger();
-        }
-
-        private void tsmiQRCode_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.OpenQRCode();
-        }
-
-        private void tsmiTweetMessage_Click(object sender, EventArgs e)
-        {
-            TaskHelpers.TweetMessage();
-        }
-
         private void tsbScreenshotsFolder_Click(object sender, EventArgs e)
         {
             if (Directory.Exists(Program.ScreenshotsFolder))
@@ -919,7 +973,7 @@ namespace ShareX
             if (e.Button == MouseButtons.Right)
             {
                 UpdateControls();
-                cmsUploadInfo.Show(lblDragAndDropTip, e.X + 1, e.Y + 1);
+                cmsTaskInfo.Show(lblDragAndDropTip, e.X + 1, e.Y + 1);
             }
         }
 
@@ -933,7 +987,7 @@ namespace ShareX
             if (e.Button == MouseButtons.Right)
             {
                 UpdateControls();
-                cmsUploadInfo.Show(lvUploads, e.X + 1, e.Y + 1);
+                cmsTaskInfo.Show(lvUploads, e.X + 1, e.Y + 1);
             }
         }
 
@@ -982,21 +1036,21 @@ namespace ShareX
 
         #region Tray events
 
-        private void niTray_MouseUp(object sender, MouseEventArgs e)
-        {
-            switch (e.Button)
-            {
-                case MouseButtons.Middle:
-                    CaptureScreenshot(CaptureType.Rectangle, null, false);
-                    break;
-            }
-        }
-
         private void niTray_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
                 this.ShowActivate();
+            }
+        }
+
+        private void niTray_MouseUp(object sender, MouseEventArgs e)
+        {
+            switch (e.Button)
+            {
+                case MouseButtons.Middle:
+                    ExecuteJob(Program.Settings.TrayMiddleClickAction);
+                    break;
             }
         }
 
@@ -1023,6 +1077,11 @@ namespace ShareX
         #endregion Tray events
 
         #region UploadInfoMenu events
+
+        private void tsmiShowErrors_Click(object sender, EventArgs e)
+        {
+            uim.ShowErrors();
+        }
 
         private void tsmiStopUpload_Click(object sender, EventArgs e)
         {
@@ -1165,14 +1224,23 @@ namespace ShareX
             uim.CopyFolder();
         }
 
-        private void tsmiShowErrors_Click(object sender, EventArgs e)
+        private void tsmiUploadSelectedFile_Click(object sender, EventArgs e)
         {
-            uim.ShowErrors();
+            uim.Upload();
         }
 
-        private void tsmiShowResponse_Click(object sender, EventArgs e)
+        private void tsmiDeleteSelectedFile_Click(object sender, EventArgs e)
         {
-            uim.ShowResponse();
+            if (MessageBox.Show("Do you really want to delete this file?", "ShareX - File delete confirmation", MessageBoxButtons.YesNo) == DialogResult.Yes)
+            {
+                uim.DeleteFile();
+                RemoveSelectedItems();
+            }
+        }
+
+        private void tsmiEditSelectedFile_Click(object sender, EventArgs e)
+        {
+            uim.EditImage();
         }
 
         private void tsmiShowQRCode_Click(object sender, EventArgs e)
@@ -1180,9 +1248,9 @@ namespace ShareX
             uim.ShowQRCode();
         }
 
-        private void tsmiUploadSelectedFile_Click(object sender, EventArgs e)
+        private void tsmiShowResponse_Click(object sender, EventArgs e)
         {
-            uim.Upload();
+            uim.ShowResponse();
         }
 
         private void tsmiClearList_Click(object sender, EventArgs e)
@@ -1255,19 +1323,33 @@ namespace ShareX
         {
             DebugHelper.WriteLine("Hotkey triggered: " + hotkeySetting);
 
-            if (hotkeySetting.TaskSettings.Job == HotkeyType.None) return;
-
-            HandleTask(hotkeySetting.TaskSettings);
+            if (hotkeySetting.TaskSettings.Job != HotkeyType.None)
+            {
+                ExecuteJob(hotkeySetting.TaskSettings);
+            }
         }
 
-        private void HandleTask(TaskSettings taskSettings)
+        private void ExecuteJob(HotkeyType job)
+        {
+            ExecuteJob(Program.DefaultTaskSettings, job);
+        }
+
+        private void ExecuteJob(TaskSettings taskSettings)
+        {
+            ExecuteJob(taskSettings, taskSettings.Job);
+        }
+
+        private void ExecuteJob(TaskSettings taskSettings, HotkeyType job)
         {
             TaskSettings safeTaskSettings = TaskSettings.GetSafeTaskSettings(taskSettings);
 
-            switch (safeTaskSettings.Job)
+            switch (job)
             {
                 case HotkeyType.FileUpload:
                     UploadManager.UploadFile(safeTaskSettings);
+                    break;
+                case HotkeyType.FolderUpload:
+                    UploadManager.UploadFolder(safeTaskSettings);
                     break;
                 case HotkeyType.ClipboardUpload:
                     UploadManager.ClipboardUpload(safeTaskSettings);
@@ -1327,7 +1409,7 @@ namespace ShareX
                     CaptureScreenshot(CaptureType.LastRegion, safeTaskSettings, false);
                     break;
                 case HotkeyType.ScreenRecorder:
-                    TaskHelpers.DoScreenRecorder(safeTaskSettings);
+                    TaskHelpers.DoScreenRecording(safeTaskSettings);
                     break;
                 case HotkeyType.AutoCapture:
                     TaskHelpers.OpenAutoCapture();
@@ -1461,28 +1543,10 @@ namespace ShareX
                     taskSettings.AfterCaptureJob = taskSettings.AfterCaptureJob.Remove(AfterCaptureTasks.AddImageEffects);
                 }
 
-                if (taskSettings.GeneralSettings.ShowAfterCaptureTasksForm)
+                if (TaskHelpers.ShowAfterCaptureForm(taskSettings, img))
                 {
-                    using (AfterCaptureForm afterCaptureForm = new AfterCaptureForm(img, taskSettings))
-                    {
-                        afterCaptureForm.ShowDialog();
-
-                        switch (afterCaptureForm.Result)
-                        {
-                            case AfterCaptureFormResult.Continue:
-                                taskSettings.AfterCaptureJob = afterCaptureForm.AfterCaptureTasks;
-                                break;
-                            case AfterCaptureFormResult.Copy:
-                                taskSettings.AfterCaptureJob = AfterCaptureTasks.CopyImageToClipboard;
-                                break;
-                            case AfterCaptureFormResult.Cancel:
-                                if (img != null) img.Dispose();
-                                return;
-                        }
-                    }
+                    UploadManager.RunImageTask(img, taskSettings);
                 }
-
-                UploadManager.RunImageTask(img, taskSettings);
             }
         }
 

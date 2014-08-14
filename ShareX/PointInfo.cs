@@ -1,4 +1,4 @@
-#region License Information (GPL v3)
+﻿#region License Information (GPL v3)
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
@@ -22,3 +22,18 @@
 */
 
 #endregion License Information (GPL v3)
+
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+
+namespace ShareX
+{
+    public class PointInfo
+    {
+        public Point Position { get; set; }
+        public Color Color { get; set; }
+    }
+}
