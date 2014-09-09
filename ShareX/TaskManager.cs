@@ -115,7 +115,7 @@ namespace ShareX
 
         private static void UpdateDragAndDropTip()
         {
-            Program.MainForm.lblDragAndDropTip.Visible = Tasks.Count == 0;
+            Program.MainForm.pBackground.Visible = Tasks.Count == 0;
         }
 
         private static ListViewItem FindListViewItem(UploadTask task)
@@ -296,7 +296,7 @@ namespace ShareX
                                     HistoryManager.AddHistoryItemAsync(Program.HistoryFilePath, info.GetHistoryItem());
                                 }
 
-                                if (!info.TaskSettings.AdvancedSettings.DisableNotifications)
+                                if (!info.TaskSettings.AdvancedSettings.DisableNotifications && info.Job != TaskJob.ShareURL)
                                 {
                                     if (task.Info.TaskSettings.GeneralSettings.PlaySoundAfterUpload)
                                     {

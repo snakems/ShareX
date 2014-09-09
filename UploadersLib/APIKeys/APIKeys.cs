@@ -52,6 +52,10 @@ namespace UploadersLib
         public static string SendSpaceKey = "";
         public static string Ge_ttKey = "";
         public static string JiraConsumerKey = "";
+        public static string MediaFireAppId = "";
+        public static string MediaFireApiKey = "";
+        public static string OneDriveClientID = "";
+        public static string OneDriveClientSecret = "";
 
         // Text Uploaders
         public static string PastebinKey = "";

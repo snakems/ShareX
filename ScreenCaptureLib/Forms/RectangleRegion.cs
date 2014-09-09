@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -108,18 +109,18 @@ namespace ScreenCaptureLib
                 }
                 else
                 {
-                    if (Config.MagnifierPixelCount < 35) Config.MagnifierPixelCount += 2;
+                    if (Config.MagnifierPixelCount < 41) Config.MagnifierPixelCount += 2;
                 }
             }
             else if (e.Delta < 0)
             {
                 if (ModifierKeys.HasFlag(Keys.Control))
                 {
-                    if (Config.MagnifierPixelSize > 1) Config.MagnifierPixelSize--;
+                    if (Config.MagnifierPixelSize > 2) Config.MagnifierPixelSize--;
                 }
                 else
                 {
-                    if (Config.MagnifierPixelCount > 1) Config.MagnifierPixelCount -= 2;
+                    if (Config.MagnifierPixelCount > 2) Config.MagnifierPixelCount -= 2;
                 }
             }
         }
@@ -135,10 +136,15 @@ namespace ScreenCaptureLib
 
                 if (AreaManager.WindowCaptureMode)
                 {
-                    WindowsListAdvanced wla = new WindowsListAdvanced();
-                    wla.IgnoreWindows.Add(Handle);
-                    wla.IncludeChildWindows = AreaManager.IncludeControls;
-                    AreaManager.Windows = wla.GetWindowsRectangleList();
+                    IntPtr handle = Handle;
+
+                    TaskEx.Run(() =>
+                    {
+                        WindowsListAdvanced wla = new WindowsListAdvanced();
+                        wla.IgnoreHandle = handle;
+                        wla.IncludeChildWindows = AreaManager.IncludeControls;
+                        AreaManager.Windows = wla.GetWindowsRectangleList();
+                    });
                 }
             }
         }
@@ -151,8 +157,6 @@ namespace ScreenCaptureLib
 
         protected override void Draw(Graphics g)
         {
-            borderDotPen2.DashOffset = (float)timer.Elapsed.TotalSeconds * 10;
-
             List<Rectangle> areas = AreaManager.GetValidAreas;
 
             if (areas.Count > 0 || !AreaManager.CurrentHoverArea.IsEmpty)
@@ -189,15 +193,15 @@ namespace ScreenCaptureLib
                     {
                         AddShapePath(hoverDrawPath, AreaManager.CurrentHoverArea.SizeOffset(-1));
 
+                        g.DrawPath(borderPen, hoverDrawPath);
                         g.DrawPath(borderDotPen, hoverDrawPath);
-                        g.DrawPath(borderDotPen2, hoverDrawPath);
                     }
                 }
 
                 if (AreaManager.IsCurrentAreaValid)
                 {
+                    g.DrawRectangleProper(borderPen, AreaManager.CurrentArea);
                     g.DrawRectangleProper(borderDotPen, AreaManager.CurrentArea);
-                    g.DrawRectangleProper(borderDotPen2, AreaManager.CurrentArea);
                     DrawObjects(g);
 
                     if (RulerMode)
@@ -256,7 +260,7 @@ namespace ScreenCaptureLib
 
         private void DrawCrosshair(Graphics g)
         {
-            int offset = 10;
+            int offset = 5;
             Point mousePos = InputManager.MousePosition0Based;
             Point left = new Point(mousePos.X - offset, mousePos.Y), left2 = new Point(0, mousePos.Y);
             Point right = new Point(mousePos.X + offset, mousePos.Y), right2 = new Point(ScreenRectangle0Based.Width - 1, mousePos.Y);
@@ -265,26 +269,26 @@ namespace ScreenCaptureLib
 
             if (left.X - left2.X > 10)
             {
+                g.DrawLine(borderPen, left, left2);
                 g.DrawLine(borderDotPen, left, left2);
-                g.DrawLine(borderDotPen2, left, left2);
             }
 
             if (right2.X - right.X > 10)
             {
+                g.DrawLine(borderPen, right, right2);
                 g.DrawLine(borderDotPen, right, right2);
-                g.DrawLine(borderDotPen2, right, right2);
             }
 
             if (top.Y - top2.Y > 10)
             {
+                g.DrawLine(borderPen, top, top2);
                 g.DrawLine(borderDotPen, top, top2);
-                g.DrawLine(borderDotPen2, top, top2);
             }
 
             if (bottom2.Y - bottom.Y > 10)
             {
+                g.DrawLine(borderPen, bottom, bottom2);
                 g.DrawLine(borderDotPen, bottom, bottom2);
-                g.DrawLine(borderDotPen2, bottom, bottom2);
             }
         }
 
@@ -314,7 +318,14 @@ namespace ScreenCaptureLib
                     y = mousePos.Y - offsetY - magnifier.Height;
                 }
 
-                g.DrawImage(magnifier, x, y, magnifier.Width, magnifier.Height);
+                g.SetHighQuality();
+
+                using (TextureBrush brush = new TextureBrush(magnifier))
+                {
+                    brush.TranslateTransform(x, y);
+                    g.FillEllipse(brush, x, y, magnifier.Width, magnifier.Height);
+                    g.DrawEllipse(Pens.Black, x, y, magnifier.Width, magnifier.Height);
+                }
             }
         }
 
@@ -324,7 +335,7 @@ namespace ScreenCaptureLib
             verticalPixelCount = (verticalPixelCount | 1).Between(1, 101);
             pixelSize = pixelSize.Between(1, 1000);
 
-            if (horizontalPixelCount * pixelSize > 1000 || verticalPixelCount * pixelSize > 1000)
+            if (horizontalPixelCount * pixelSize > ScreenRectangle0Based.Width || verticalPixelCount * pixelSize > ScreenRectangle0Based.Height)
             {
                 horizontalPixelCount = verticalPixelCount = 15;
                 pixelSize = 10;
@@ -332,19 +343,19 @@ namespace ScreenCaptureLib
 
             int width = horizontalPixelCount * pixelSize;
             int height = verticalPixelCount * pixelSize;
-            Bitmap bmp = new Bitmap(width + 1, height + 1);
+            Bitmap bmp = new Bitmap(width - 1, height - 1);
 
             using (Graphics g = Graphics.FromImage(bmp))
             {
                 g.InterpolationMode = InterpolationMode.NearestNeighbor;
                 g.PixelOffsetMode = PixelOffsetMode.Half;
 
-                g.DrawImage(img, new Rectangle(Point.Empty, new Size(width, height)),
-                    new Rectangle(position.X - horizontalPixelCount / 2, position.Y - verticalPixelCount / 2, horizontalPixelCount, verticalPixelCount), GraphicsUnit.Pixel);
+                g.DrawImage(img, new Rectangle(0, 0, width, height), new Rectangle(position.X - horizontalPixelCount / 2, position.Y - verticalPixelCount / 2,
+                    horizontalPixelCount, verticalPixelCount), GraphicsUnit.Pixel);
 
                 g.PixelOffsetMode = PixelOffsetMode.None;
 
-                using (SolidBrush crosshairBrush = new SolidBrush(Color.FromArgb(100, Color.Red)))
+                using (SolidBrush crosshairBrush = new SolidBrush(Color.FromArgb(125, Color.LightBlue)))
                 {
                     g.FillRectangle(crosshairBrush, new Rectangle(0, (height - pixelSize) / 2, (width - pixelSize) / 2, pixelSize)); // Left
                     g.FillRectangle(crosshairBrush, new Rectangle((width + pixelSize) / 2, (height - pixelSize) / 2, (width - pixelSize) / 2, pixelSize)); // Right
@@ -356,17 +367,17 @@ namespace ScreenCaptureLib
                 {
                     for (int x = 1; x < horizontalPixelCount; x++)
                     {
-                        g.DrawLine(pen, new Point(x * pixelSize, 0), new Point(x * pixelSize, height));
+                        g.DrawLine(pen, new Point(x * pixelSize - 1, 0), new Point(x * pixelSize - 1, height - 1));
                     }
 
                     for (int y = 1; y < verticalPixelCount; y++)
                     {
-                        g.DrawLine(pen, new Point(0, y * pixelSize), new Point(width, y * pixelSize));
+                        g.DrawLine(pen, new Point(0, y * pixelSize - 1), new Point(width - 1, y * pixelSize - 1));
                     }
                 }
 
-                g.DrawRectangle(Pens.Black, 0, 0, width, height);
-                g.DrawRectangle(Pens.Black, (width - pixelSize) / 2, (height - pixelSize) / 2, pixelSize, pixelSize);
+                g.DrawRectangle(Pens.Black, (width - pixelSize) / 2 - 1, (height - pixelSize) / 2 - 1, pixelSize, pixelSize);
+                g.DrawRectangle(Pens.White, (width - pixelSize) / 2, (height - pixelSize) / 2, pixelSize - 2, pixelSize - 2);
             }
 
             return bmp;

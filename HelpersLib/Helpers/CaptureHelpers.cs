@@ -84,9 +84,24 @@ namespace HelpersLib
             return Screen.FromPoint(GetCursorPosition()).Bounds;
         }
 
+        public static Rectangle GetPrimaryScreenBounds()
+        {
+            return Screen.PrimaryScreen.Bounds;
+        }
+
         public static Rectangle GetScreenBounds0Based()
         {
             return ScreenToClient(GetScreenBounds());
+        }
+
+        public static Rectangle GetActiveScreenBounds0Based()
+        {
+            return ScreenToClient(GetActiveScreenBounds());
+        }
+
+        public static Rectangle GetPrimaryScreenBounds0Based()
+        {
+            return ScreenToClient(GetPrimaryScreenBounds());
         }
 
         public static Point ScreenToClient(Point p)
@@ -296,8 +311,8 @@ namespace HelpersLib
 
         public static Rectangle EvenRectangleSize(Rectangle rect)
         {
-            rect.Width += rect.Width & 1;
-            rect.Height += rect.Height & 1;
+            rect.Width -= rect.Width & 1;
+            rect.Height -= rect.Height & 1;
             return rect;
         }
     }

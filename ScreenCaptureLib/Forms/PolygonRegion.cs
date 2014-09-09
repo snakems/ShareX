@@ -113,9 +113,6 @@ namespace ScreenCaptureLib
         {
             g.SmoothingMode = SmoothingMode.HighQuality;
 
-            borderDotPen.DashOffset = (float)timer.Elapsed.TotalSeconds * 10;
-            borderDotPen2.DashOffset = 5 + (float)timer.Elapsed.TotalSeconds * 10;
-
             regionFillPath = new GraphicsPath();
 
             for (int i = 0; i < nodes.Count - 1; i++)
@@ -139,8 +136,8 @@ namespace ScreenCaptureLib
 
             if (nodes.Count > 1)
             {
+                g.DrawPath(borderPen, regionFillPath);
                 g.DrawPath(borderDotPen, regionFillPath);
-                g.DrawPath(borderDotPen2, regionFillPath);
             }
 
             base.Draw(g);
@@ -148,7 +145,7 @@ namespace ScreenCaptureLib
 
         private void CreateNode()
         {
-            NodeObject newNode = new NodeObject();
+            NodeObject newNode = new NodeObject() { Shape = NodeShape.Diamond };
             ActivateNode(newNode);
             nodes.Add(newNode);
             DrawableObjects.Add(newNode);

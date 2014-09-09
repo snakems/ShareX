@@ -40,6 +40,7 @@ namespace ShareX
     public class TaskSettings
     {
         private string description = string.Empty;
+
         public string Description
         {
             get
@@ -67,7 +68,7 @@ namespace ShareX
         public FileDestination TextFileDestination = FileDestination.Dropbox;
         public FileDestination FileDestination = FileDestination.Dropbox;
         public UrlShortenerType URLShortenerDestination = UrlShortenerType.BITLY;
-        public SocialNetworkingService SocialNetworkingServiceDestination = SocialNetworkingService.Twitter;
+        public URLSharingServices URLSharingServiceDestination = URLSharingServices.Twitter;
 
         public bool OverrideFTP = false;
         public int FTPIndex = 0;
@@ -135,30 +136,27 @@ namespace ShareX
 
         public static TaskSettings GetDefaultTaskSettings()
         {
-            TaskSettings taskSettings = new TaskSettings();
-            taskSettings.SetDefaultSettings();
-            taskSettings.TaskSettingsReference = Program.DefaultTaskSettings;
-            return taskSettings;
+            return GetSafeTaskSettings(Program.DefaultTaskSettings);
         }
 
         public static TaskSettings GetSafeTaskSettings(TaskSettings taskSettings)
         {
-            TaskSettings taskSettingsCopy;
+            TaskSettings safeTaskSettings;
 
-            if (taskSettings.IsUsingDefaultSettings && Program.DefaultTaskSettings != null)
+            if (taskSettings.IsUsingDefaultSettings)
             {
-                taskSettingsCopy = Program.DefaultTaskSettings.Copy();
-                taskSettingsCopy.Description = taskSettings.Description;
-                taskSettingsCopy.Job = taskSettings.Job;
+                safeTaskSettings = Program.DefaultTaskSettings.Copy();
+                safeTaskSettings.Description = taskSettings.Description;
+                safeTaskSettings.Job = taskSettings.Job;
             }
             else
             {
-                taskSettingsCopy = taskSettings.Copy();
-                taskSettingsCopy.SetDefaultSettings();
+                safeTaskSettings = taskSettings.Copy();
+                safeTaskSettings.SetDefaultSettings();
             }
 
-            taskSettingsCopy.TaskSettingsReference = taskSettings;
-            return taskSettingsCopy;
+            safeTaskSettings.TaskSettingsReference = taskSettings;
+            return safeTaskSettings;
         }
 
         private void SetDefaultSettings()
@@ -185,7 +183,7 @@ namespace ShareX
                     TextFileDestination = defaultTaskSettings.TextFileDestination;
                     FileDestination = defaultTaskSettings.FileDestination;
                     URLShortenerDestination = defaultTaskSettings.URLShortenerDestination;
-                    SocialNetworkingServiceDestination = defaultTaskSettings.SocialNetworkingServiceDestination;
+                    URLSharingServiceDestination = defaultTaskSettings.URLSharingServiceDestination;
                 }
 
                 if (UseDefaultGeneralSettings)
@@ -353,11 +351,14 @@ namespace ShareX
 
     public class TaskSettingsAdvanced
     {
-        [Category("General"), DefaultValue(false), Description("Allow after capture tasks for image files by treating them as images when files are handled during file upload, clipboard upload, drag & drop, watch folder and other tasks.")]
+        [Category("General"), DefaultValue(false), Description("Allow after capture tasks for image files by treating them as images when files are handled during file upload, clipboard file upload, drag & drop, watch folder and other tasks.")]
         public bool ProcessImagesDuringFileUpload { get; set; }
 
         [Category("General"), DefaultValue(true), Description("Use after capture tasks for clipboard image upload.")]
         public bool ProcessImagesDuringClipboardUpload { get; set; }
+
+        [Category("General"), DefaultValue(false), Description("If task contains upload job then this setting will clear clipboard when task start.")]
+        public bool AutoClearClipboard { get; set; }
 
         [Category("Image"), DefaultValue(256), Description("Preferred thumbnail width. 0 means aspect ratio will be used to adjust width according to height")]
         public int ThumbnailPreferredWidth { get; set; }

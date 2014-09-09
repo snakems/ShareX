@@ -24,14 +24,16 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using SingleInstanceApplication;
+using Microsoft.VisualBasic.ApplicationServices;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using UploadersLib;
 
@@ -61,7 +63,7 @@ namespace ShareX
         {
             get
             {
-                if (!string.IsNullOrEmpty(CustomPersonalPath))
+                if (!string.IsNullOrEmpty(CustomPersonalPath) && Directory.Exists(CustomPersonalPath))
                 {
                     return CustomPersonalPath;
                 }
@@ -213,6 +215,8 @@ namespace ShareX
 
         #endregion Paths
 
+        public const bool IsBeta = false;
+
         public static string Title
         {
             get
@@ -221,11 +225,12 @@ namespace ShareX
                 string title = string.Format("ShareX {0}.{1}", version.Major, version.Minor);
                 if (version.Build > 0) title += "." + version.Build;
                 if (IsPortable) title += " Portable";
+                if (IsBeta) title += " Beta";
                 return title;
             }
         }
 
-        public static bool IsMultiInstance { get; private set; }
+        public static string[] Arguments { get; private set; }
         public static bool IsPortable { get; private set; }
         public static bool IsSilentRun { get; private set; }
         public static bool IsSandbox { get; private set; }
@@ -244,34 +249,42 @@ namespace ShareX
         public static HotkeyManager HotkeyManager { get; set; }
         public static WatchFolderManager WatchFolderManager { get; set; }
 
+        private static ShareXApplicationBase applicationBase;
+
         [STAThread]
         private static void Main(string[] args)
         {
             Application.ThreadException += Application_ThreadException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            StartTimer = Stopwatch.StartNew();
+            StartTimer = Stopwatch.StartNew(); // For be able to show startup time
 
-            IsMultiInstance = CLIHelper.CheckArgs(args, "multi", "m");
+            Arguments = args;
 
-            if (IsMultiInstance || ApplicationInstanceManager.CreateSingleInstance(SingleInstanceCallback))
-            {
-                Run(args);
-            }
+            if (CheckAdminTasks()) return; // If ShareX opened just for be able to execute task as Admin
+
+            bool forceMultiInstance = CLIHelper.CheckArgs(Arguments, "multi", "m");
+
+            Application.SetCompatibleTextRenderingDefault(false);
+            applicationBase = new ShareXApplicationBase(!forceMultiInstance);
+            applicationBase.Startup += StartupHandler;
+            applicationBase.StartupNextInstance += StartupNextInstanceHandler;
+            applicationBase.Shutdown += ShutdownHandler;
+            applicationBase.Run(Arguments);
         }
 
-        private static void Run(string[] args)
+        private static void StartupHandler(object sender, StartupEventArgs e)
         {
             string appGuid = ((GuidAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value.ToString();
 
             using (Mutex mutex = new Mutex(false, appGuid)) // Required for installer
             {
-                IsSilentRun = CLIHelper.CheckArgs(args, "silent", "s");
-                IsSandbox = CLIHelper.CheckArgs(args, "sandbox");
+                IsSilentRun = CLIHelper.CheckArgs(Arguments, "silent", "s");
+                IsSandbox = CLIHelper.CheckArgs(Arguments, "sandbox");
 
                 if (!IsSandbox)
                 {
-                    IsPortable = CLIHelper.CheckArgs(args, "portable", "p");
+                    IsPortable = CLIHelper.CheckArgs(Arguments, "portable", "p");
 
                     if (IsPortable)
                     {
@@ -287,9 +300,6 @@ namespace ShareX
                         Directory.CreateDirectory(PersonalPath);
                     }
                 }
-
-                Application.EnableVisualStyles();
-                Application.SetCompatibleTextRenderingDefault(false);
 
                 DebugHelper.WriteLine("{0} started", Title);
                 DebugHelper.WriteLine("Operating system: " + Environment.OSVersion.VersionString);
@@ -309,22 +319,73 @@ namespace ShareX
 
                 DebugHelper.WriteLine("MainForm init started");
                 MainForm = new MainForm();
+                applicationBase.MainForm = MainForm;
                 DebugHelper.WriteLine("MainForm init finished");
 
                 if (Settings == null)
                 {
                     SettingsResetEvent.WaitOne();
                 }
-
-                Application.Run(MainForm);
-
-                if (WatchFolderManager != null) WatchFolderManager.Dispose();
-                SaveSettings();
-                BackupSettings();
-
-                DebugHelper.WriteLine("ShareX closing");
-                DebugHelper.Logger.SaveLog(LogsFilePath);
             }
+        }
+
+        private static void StartupNextInstanceHandler(object sender, StartupNextInstanceEventArgs e)
+        {
+            e.BringToForeground = false;
+
+            string[] args = e.CommandLine.ToArray();
+
+            if (MainForm.ReadyWaitHandle.WaitOne(0))
+            {
+                DoStartupNextInstance(args);
+            }
+            else
+            {
+                TaskEx.Run(() => WaitFormLoad(args));
+            }
+        }
+
+        private static void WaitFormLoad(string[] args)
+        {
+            try
+            {
+                if (MainForm.ReadyWaitHandle.WaitOne(5000))
+                {
+                    MainForm.InvokeSafe(() => DoStartupNextInstance(args));
+                }
+            }
+            catch { }
+        }
+
+        private static void DoStartupNextInstance(string[] args)
+        {
+            if (args == null || args.Length == 0)
+            {
+                if (MainForm.niTray != null && MainForm.niTray.Visible)
+                {
+                    // Workaround for Windows startup tray icon bug
+                    MainForm.niTray.Visible = false;
+                    MainForm.niTray.Visible = true;
+                }
+
+                MainForm.ShowActivate();
+            }
+            else if (MainForm.Visible)
+            {
+                MainForm.ShowActivate();
+            }
+
+            MainForm.UseCommandLineArgs(args);
+        }
+
+        private static void ShutdownHandler(object sender, EventArgs e)
+        {
+            if (WatchFolderManager != null) WatchFolderManager.Dispose();
+            SaveSettings();
+            BackupSettings();
+
+            DebugHelper.WriteLine("ShareX closing");
+            DebugHelper.Logger.SaveLog(LogsFilePath);
         }
 
         public static void LoadSettings()
@@ -432,7 +493,7 @@ namespace ShareX
             OnError(e.Exception);
         }
 
-        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
         {
             OnError((Exception)e.ExceptionObject);
         }
@@ -443,49 +504,6 @@ namespace ShareX
             {
                 errorForm.ShowDialog();
             }
-        }
-
-        private static void SingleInstanceCallback(object sender, InstanceCallbackEventArgs args)
-        {
-            if (WaitFormLoad(5000))
-            {
-                Action d = () =>
-                {
-                    if (args.CommandLineArgs == null || args.CommandLineArgs.Length <= 1)
-                    {
-                        if (MainForm.niTray != null && MainForm.niTray.Visible)
-                        {
-                            // Workaround for Windows startup tray icon bug
-                            MainForm.niTray.Visible = false;
-                            MainForm.niTray.Visible = true;
-                        }
-
-                        MainForm.ShowActivate();
-                    }
-                    else if (MainForm.Visible)
-                    {
-                        MainForm.ShowActivate();
-                    }
-
-                    MainForm.UseCommandLineArgs(args.CommandLineArgs);
-                };
-
-                MainForm.InvokeSafe(d);
-            }
-        }
-
-        private static bool WaitFormLoad(int wait)
-        {
-            Stopwatch timer = Stopwatch.StartNew();
-
-            while (timer.ElapsedMilliseconds < wait)
-            {
-                if (MainForm != null && MainForm.IsReady) return true;
-
-                Thread.Sleep(10);
-            }
-
-            return false;
         }
 
         public static void ConfigureUploadersConfigWatcher()
@@ -540,6 +558,19 @@ namespace ShareX
             {
                 return reader.ReadLine();
             }
+        }
+
+        private static bool CheckAdminTasks()
+        {
+            if (CLIHelper.CheckArgs(Arguments, "dnschanger"))
+            {
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new DNSChangerForm());
+                return true;
+            }
+
+            return false;
         }
     }
 }

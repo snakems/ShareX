@@ -112,8 +112,30 @@ namespace ShareX
                         Program.Settings.FileUploadDefaultDirectory = Path.GetDirectoryName(ofd.FileName);
                     }
 
-                    if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
-                    UploadFile(ofd.FileNames, taskSettings);
+                    UploadFile(ofd.FileNames);
+                }
+            }
+        }
+
+        public static void UploadFolder(TaskSettings taskSettings = null)
+        {
+            using (FolderSelectDialog folderDialog = new FolderSelectDialog())
+            {
+                folderDialog.Title = "ShareX - Folder upload";
+
+                if (!string.IsNullOrEmpty(Program.Settings.FileUploadDefaultDirectory) && Directory.Exists(Program.Settings.FileUploadDefaultDirectory))
+                {
+                    folderDialog.InitialDirectory = Program.Settings.FileUploadDefaultDirectory;
+                }
+                else
+                {
+                    folderDialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+                }
+
+                if (folderDialog.ShowDialog() && !string.IsNullOrEmpty(folderDialog.FileName))
+                {
+                    Program.Settings.FileUploadDefaultDirectory = folderDialog.FileName;
+                    UploadFile(folderDialog.FileName);
                 }
             }
         }
@@ -296,13 +318,13 @@ namespace ShareX
             }
         }
 
-        public static void RunImageTask(Image img, AfterCaptureTasks imageJob = AfterCaptureTasks.UploadImageToHost)
+        public static void UploadImage(Image img)
         {
-            if (imageJob != AfterCaptureTasks.None)
+            if (img != null)
             {
                 TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
                 taskSettings.UseDefaultAfterCaptureJob = false;
-                taskSettings.AfterCaptureJob = imageJob;
+                taskSettings.AfterCaptureJob = AfterCaptureTasks.UploadImageToHost;
 
                 RunImageTask(img, taskSettings);
             }
@@ -313,6 +335,8 @@ namespace ShareX
             if (img != null)
             {
                 TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
+                taskSettings.UseDefaultAfterCaptureJob = false;
+                taskSettings.AfterCaptureJob = AfterCaptureTasks.UploadImageToHost;
                 taskSettings.UseDefaultDestinations = false;
                 taskSettings.ImageDestination = imageDestination;
 
@@ -376,12 +400,12 @@ namespace ShareX
             }
         }
 
-        public static void ShareURL(string url, SocialNetworkingService socialNetworkingService)
+        public static void ShareURL(string url, URLSharingServices urlSharingService)
         {
             if (!string.IsNullOrEmpty(url))
             {
                 TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
-                taskSettings.SocialNetworkingServiceDestination = socialNetworkingService;
+                taskSettings.URLSharingServiceDestination = urlSharingService;
 
                 UploadTask task = UploadTask.CreateShareURLTask(url, taskSettings);
                 TaskManager.Start(task);

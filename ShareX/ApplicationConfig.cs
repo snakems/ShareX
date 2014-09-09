@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -63,6 +62,8 @@ namespace ShareX
         public bool SilentRun = false;
         public bool TrayIconProgressEnabled = true;
         public bool TaskbarProgressEnabled = true;
+        public bool RememberMainFormPosition = false;
+        public Point MainFormPosition = Point.Empty;
         public bool RememberMainFormSize = false;
         public Size MainFormSize = Size.Empty;
 
@@ -125,6 +126,9 @@ namespace ShareX
 
         [Category("Application"), DefaultValue(true), Description("Automatically check updates at startup.")]
         public bool AutoCheckUpdate { get; set; }
+
+        [Category("Application"), DefaultValue(HotkeyType.RectangleRegion), Description("You can set which action to happen when you middle click tray icon."), TypeConverter(typeof(EnumDescriptionConverter))]
+        public HotkeyType TrayMiddleClickAction { get; set; }
 
         [Category("Application / Config"), DefaultValue(false), Description("Automatically detect external changes to UploaderConfig file and load settigns to memory.")]
         public bool DetectUploaderConfigFileChanges { get; set; }

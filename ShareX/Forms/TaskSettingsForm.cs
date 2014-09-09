@@ -87,7 +87,7 @@ namespace ShareX
             AddEnumItems<FileDestination>(x => TaskSettings.TextFileDestination = x, tsmiTextFileUploaders);
             AddEnumItems<FileDestination>(x => TaskSettings.FileDestination = x, tsmiFileUploaders);
             AddEnumItems<UrlShortenerType>(x => TaskSettings.URLShortenerDestination = x, tsmiURLShorteners);
-            AddEnumItems<SocialNetworkingService>(x => TaskSettings.SocialNetworkingServiceDestination = x, tsmiSocialServices);
+            AddEnumItems<URLSharingServices>(x => TaskSettings.URLSharingServiceDestination = x, tsmiURLSharingServices);
 
             SetEnumCheckedContextMenu(TaskSettings.Job, cmsTask);
             SetMultiEnumCheckedContextMenu(TaskSettings.AfterCaptureJob, cmsAfterCapture);
@@ -98,7 +98,7 @@ namespace ShareX
             SetEnumChecked(TaskSettings.TextFileDestination, tsmiTextFileUploaders);
             SetEnumChecked(TaskSettings.FileDestination, tsmiFileUploaders);
             SetEnumChecked(TaskSettings.URLShortenerDestination, tsmiURLShorteners);
-            SetEnumChecked(TaskSettings.SocialNetworkingServiceDestination, tsmiSocialServices);
+            SetEnumChecked(TaskSettings.URLSharingServiceDestination, tsmiURLSharingServices);
 
             // FTP
             if (Program.UploadersConfig != null && Program.UploadersConfig.FTPAccountList.Count > 1)
@@ -199,8 +199,8 @@ namespace ShareX
             // Upload / Name pattern
             txtNameFormatPattern.Text = TaskSettings.UploadSettings.NameFormatPattern;
             txtNameFormatPatternActiveWindow.Text = TaskSettings.UploadSettings.NameFormatPatternActiveWindow;
-            NameParser.CreateCodesMenu(txtNameFormatPattern, ReplacementVariables.n);
-            NameParser.CreateCodesMenu(txtNameFormatPatternActiveWindow, ReplacementVariables.n);
+            CodeMenu.Create<ReplCodeMenuEntry>(txtNameFormatPattern, ReplCodeMenuEntry.n);
+            CodeMenu.Create<ReplCodeMenuEntry>(txtNameFormatPatternActiveWindow, ReplCodeMenuEntry.n);
             cbFileUploadUseNamePattern.Checked = TaskSettings.UploadSettings.FileUploadUseNamePattern;
 
             // Upload / Clipboard upload
@@ -264,7 +264,7 @@ namespace ShareX
                 EnableDisableToolStripMenuItems<FileDestination>(tsmiTextFileUploaders);
                 EnableDisableToolStripMenuItems<FileDestination>(tsmiFileUploaders);
                 EnableDisableToolStripMenuItems<UrlShortenerType>(tsmiURLShorteners);
-                EnableDisableToolStripMenuItems<SocialNetworkingService>(tsmiSocialServices);
+                EnableDisableToolStripMenuItems<URLSharingServices>(tsmiURLSharingServices);
                 chkOverrideFTP.Visible = cboFTPaccounts.Visible = Program.UploadersConfig.FTPAccountList.Count > 1;
             }
         }
@@ -403,7 +403,7 @@ namespace ShareX
             {
                 for (int i = 0; i < parent.DropDownItems.Count; i++)
                 {
-                    parent.DropDownItems[i].Enabled = Program.UploadersConfig.IsActive<T>(i);
+                    parent.DropDownItems[i].Enabled = Program.UploadersConfig.IsValid<T>(i);
                 }
             }
         }
@@ -430,7 +430,7 @@ namespace ShareX
 
             tsmiURLShorteners.Text = "URL shortener: " + TaskSettings.URLShortenerDestination.GetDescription();
 
-            tsmiSocialServices.Text = "Social networking service: " + TaskSettings.SocialNetworkingServiceDestination.GetDescription();
+            tsmiURLSharingServices.Text = "URL sharing service: " + TaskSettings.URLSharingServiceDestination.GetDescription();
         }
 
         private void tbDescription_TextChanged(object sender, EventArgs e)
@@ -724,9 +724,8 @@ namespace ShareX
 
         private void btnEncoderConfig_Click(object sender, EventArgs e)
         {
-            using (ApplicationSettingsForm form = new ApplicationSettingsForm())
+            using (VideoEncodersForm form = new VideoEncodersForm() { Icon = this.Icon })
             {
-                form.SelectProfilesTab();
                 form.ShowDialog();
                 UpdateVideoEncoders();
             }
@@ -780,7 +779,7 @@ namespace ShareX
 
         private void btnActionsAdd_Click(object sender, EventArgs e)
         {
-            using (ExternalProgramForm form = new ExternalProgramForm())
+            using (ActionsForm form = new ActionsForm())
             {
                 if (form.ShowDialog() == DialogResult.OK)
                 {
@@ -799,6 +798,7 @@ namespace ShareX
             lvi.Checked = fileAction.IsActive;
             lvi.SubItems.Add(fileAction.Path ?? "");
             lvi.SubItems.Add(fileAction.Args ?? "");
+            lvi.SubItems.Add(fileAction.Extensions ?? "");
             lvActions.Items.Add(lvi);
         }
 
@@ -809,15 +809,25 @@ namespace ShareX
                 ListViewItem lvi = lvActions.SelectedItems[0];
                 ExternalProgram fileAction = lvi.Tag as ExternalProgram;
 
-                using (ExternalProgramForm form = new ExternalProgramForm(fileAction))
+                using (ActionsForm form = new ActionsForm(fileAction))
                 {
                     if (form.ShowDialog() == DialogResult.OK)
                     {
                         lvi.Text = fileAction.Name ?? "";
                         lvi.SubItems[1].Text = fileAction.Path ?? "";
                         lvi.SubItems[2].Text = fileAction.Args ?? "";
+                        lvi.SubItems[3].Text = fileAction.Extensions ?? "";
                     }
                 }
+            }
+        }
+
+        private void btnActionsDuplicate_Click(object sender, EventArgs e)
+        {
+            foreach (ExternalProgram fileAction in lvActions.SelectedItems.Cast<ListViewItem>().Select(x => ((ExternalProgram)x.Tag).Copy()))
+            {
+                TaskSettings.ExternalPrograms.Add(fileAction);
+                AddFileAction(fileAction);
             }
         }
 

@@ -214,7 +214,7 @@ namespace ScreenCaptureLib
 
                 try
                 {
-                    Options.DrawingPenColor = DialogColor.GetColor(Options.DrawingPenColor);
+                    Options.DrawingPenColor = ColorPickerForm.GetColor(Options.DrawingPenColor);
                 }
                 finally
                 {
@@ -344,7 +344,9 @@ namespace ScreenCaptureLib
                 }
             }
 
+            g.CompositingMode = CompositingMode.SourceCopy;
             g.DrawImage(backgroundImage, ScreenRectangle0Based);
+            g.CompositingMode = CompositingMode.SourceOver;
 
             if (isDrawingMode)
             {
@@ -388,20 +390,18 @@ namespace ScreenCaptureLib
             Size textSize = g.MeasureString(tipText, tipFont).ToSize();
             int rectWidth = textSize.Width + padding * 2;
             int rectHeight = textSize.Height + padding * 2;
-            Rectangle textRectangle = new Rectangle(ScreenRectangle0Based.Width / 2 - rectWidth / 2, offset, rectWidth, rectHeight);
+            Rectangle primaryScreenBounds = CaptureHelpers.GetPrimaryScreenBounds0Based();
+            Rectangle textRectangle = new Rectangle(primaryScreenBounds.X + (primaryScreenBounds.Width / 2) - (rectWidth / 2), primaryScreenBounds.Y + offset, rectWidth, rectHeight);
 
-            if (textRectangle.RectangleOffset(10).Contains(CurrentMousePosition0Based))
+            if (textRectangle.Offset(10).Contains(CurrentMousePosition0Based))
             {
-                textRectangle.Y = ScreenRectangle0Based.Height - rectHeight - offset;
+                textRectangle.Y = primaryScreenBounds.Height - rectHeight - offset;
             }
 
-            using (GraphicsPath backgroundPath = new GraphicsPath())
             using (Brush brush = new SolidBrush(Color.FromArgb(175, Color.White)))
             using (Pen pen = new Pen(Color.FromArgb(175, Color.Black)))
             {
-                backgroundPath.AddRoundedRectangle(textRectangle, 5);
-                g.FillPath(brush, backgroundPath);
-                g.DrawPath(pen, backgroundPath);
+                g.DrawRoundedRectangle(brush, pen, textRectangle, 5);
             }
 
             using (StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })

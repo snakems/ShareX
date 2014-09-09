@@ -135,24 +135,31 @@ namespace UploadersLib
 
                 if (OAuth2Info.CheckOAuth(Config.ImgurOAuth2Info))
                 {
-                    List<ImgurAlbumData> albums = new Imgur_v3(Config.ImgurOAuth2Info).GetAlbums();
-
-                    if (albums != null && albums.Count > 0)
-                    {
-                        foreach (ImgurAlbumData album in albums)
-                        {
-                            ListViewItem lvi = new ListViewItem(album.id);
-                            lvi.SubItems.Add(album.title ?? "");
-                            lvi.SubItems.Add(album.description ?? "");
-                            lvi.Tag = album;
-                            lvImgurAlbumList.Items.Add(lvi);
-                        }
-                    }
+                    Config.ImgurAlbumList = new Imgur_v3(Config.ImgurOAuth2Info).GetAlbums();
+                    ImgurFillAlbumList();
+                    lvImgurAlbumList.Focus();
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.ToString(), "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ImgurFillAlbumList()
+        {
+            if (Config.ImgurAlbumList != null)
+            {
+                foreach (ImgurAlbumData album in Config.ImgurAlbumList)
+                {
+                    ListViewItem lvi = new ListViewItem(album.id ?? "");
+                    lvi.SubItems.Add(album.title ?? "");
+                    lvi.SubItems.Add(album.description ?? "");
+                    lvi.Selected = Config.ImgurSelectedAlbum != null && !string.IsNullOrEmpty(Config.ImgurSelectedAlbum.id) &&
+                        album.id.Equals(Config.ImgurSelectedAlbum.id, StringComparison.InvariantCultureIgnoreCase);
+                    lvi.Tag = album;
+                    lvImgurAlbumList.Items.Add(lvi);
+                }
             }
         }
 
@@ -881,6 +888,63 @@ namespace UploadersLib
         }
 
         #endregion Box
+
+        #region OneDrive
+
+        public void OneDriveAuthOpen()
+        {
+            try
+            {
+                OAuth2Info oauth = new OAuth2Info(APIKeys.OneDriveClientID, APIKeys.OneDriveClientSecret);
+                string url = new OneDrive(oauth).GetAuthorizationURL();
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    Config.OneDriveOAuth2Info = oauth;
+                    URLHelpers.OpenURL(url);
+                    DebugHelper.WriteLine("OneDriveAuthOpen - Authorization URL is opened: " + url);
+                }
+                else
+                {
+                    DebugHelper.WriteLine("OneDriveAuthOpen - Authorization URL is empty.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), "ShareX - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void OneDriveAuthComplete(string code)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(code) && Config.OneDriveOAuth2Info != null)
+                {
+                    OneDrive onedrive = new OneDrive(Config.OneDriveOAuth2Info);
+
+                    if (onedrive.GetAccessToken(code))
+                    {
+                        Config.OneDriveOAuth2Info = onedrive.AuthInfo;
+                        oAuth2OneDrive.Status = OAuthLoginStatus.LoginSuccessful;
+                        MessageBox.Show("OneDrive login successful.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        Config.OneDriveOAuth2Info = null;
+                        oAuth2OneDrive.Status = OAuthLoginStatus.LoginFailed;
+                        MessageBox.Show("OneDrive login failed.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                DebugHelper.WriteException(ex);
+                MessageBox.Show(ex.ToString(), "ShareX - Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        #endregion OneDrive
 
         #region Minus
 
