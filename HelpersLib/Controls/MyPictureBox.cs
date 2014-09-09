@@ -135,7 +135,15 @@ namespace HelpersLib
             }
         }
 
-        private readonly object ImageLoadLock = new object();
+        public bool IsValidImage
+        {
+            get
+            {
+                return !isImageLoading && Image != null && Image != pbMain.InitialImage && Image != pbMain.ErrorImage;
+            }
+        }
+
+        private readonly object imageLoadLock = new object();
 
         private bool isImageLoading;
 
@@ -144,6 +152,7 @@ namespace HelpersLib
             InitializeComponent();
             Text = string.Empty;
             pbMain.InitialImage = Resources.Loading;
+            pbMain.ErrorImage = Resources.cross;
             pbMain.LoadProgressChanged += pbMain_LoadProgressChanged;
             pbMain.LoadCompleted += pbMain_LoadCompleted;
             pbMain.Resize += pbMain_Resize;
@@ -176,30 +185,30 @@ namespace HelpersLib
 
         public void LoadImage(Image img)
         {
-            lock (ImageLoadLock)
+            lock (imageLoadLock)
             {
                 if (!isImageLoading)
                 {
-                    isImageLoading = true;
                     Reset();
+                    isImageLoading = true;
                     Image = (Image)img.Clone();
-                    AutoSetSizeMode();
                     isImageLoading = false;
+                    AutoSetSizeMode();
                 }
             }
         }
 
         public void LoadImageFromFile(string filePath)
         {
-            lock (ImageLoadLock)
+            lock (imageLoadLock)
             {
                 if (!isImageLoading)
                 {
-                    isImageLoading = true;
                     Reset();
+                    isImageLoading = true;
                     Image = ImageHelpers.LoadImage(filePath);
-                    AutoSetSizeMode();
                     isImageLoading = false;
+                    AutoSetSizeMode();
                 }
             }
         }
@@ -222,12 +231,12 @@ namespace HelpersLib
 
         private void LoadImageAsync(string path)
         {
-            lock (ImageLoadLock)
+            lock (imageLoadLock)
             {
                 if (!isImageLoading)
                 {
-                    isImageLoading = true;
                     Reset();
+                    isImageLoading = true;
                     Text = "Loading image...";
                     lblStatus.Visible = true;
                     pbMain.LoadAsync(path);
@@ -237,12 +246,22 @@ namespace HelpersLib
 
         public void Reset()
         {
-            if (!isImageLoading)
+            if (!isImageLoading && Image != null)
             {
-                if (Image != null)
+                Image temp = null;
+
+                try
                 {
-                    Image.Dispose();
+                    temp = Image;
                     Image = null;
+                }
+                finally
+                {
+                    // If error happened in previous image load then PictureBox set image as error image and if we dispose it then error happens
+                    if (temp != null && temp != pbMain.ErrorImage && temp != pbMain.InitialImage)
+                    {
+                        temp.Dispose();
+                    }
                 }
             }
 
@@ -255,8 +274,8 @@ namespace HelpersLib
         private void pbMain_LoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
             lblStatus.Visible = false;
-            AutoSetSizeMode();
             isImageLoading = false;
+            if (e.Error == null) AutoSetSizeMode();
         }
 
         private void pbMain_LoadProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -269,7 +288,7 @@ namespace HelpersLib
 
         private void AutoSetSizeMode()
         {
-            if (Image != null)
+            if (IsValidImage)
             {
                 if (Image.Width > pbMain.ClientSize.Width || Image.Height > pbMain.ClientSize.Height)
                 {
@@ -289,7 +308,7 @@ namespace HelpersLib
 
         private void MyPictureBox_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && FullscreenOnClick && !isImageLoading && Image != null)
+            if (FullscreenOnClick && e.Button == MouseButtons.Left && IsValidImage)
             {
                 ImageViewer.ShowImage(Image);
             }
@@ -297,7 +316,7 @@ namespace HelpersLib
 
         private void MyPictureBox_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Right && EnableRightClickMenu && !isImageLoading && Image != null)
+            if (EnableRightClickMenu && e.Button == MouseButtons.Right && IsValidImage)
             {
                 cmsMenu.Show(pbMain, e.X + 1, e.Y + 1);
             }
@@ -305,7 +324,7 @@ namespace HelpersLib
 
         private void tsmiCopyImage_Click(object sender, EventArgs e)
         {
-            if (!isImageLoading && Image != null)
+            if (IsValidImage)
             {
                 ClipboardHelpers.CopyImage(Image);
             }

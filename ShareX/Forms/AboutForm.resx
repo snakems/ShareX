@@ -120,13 +120,15 @@
   <data name="rtbCredits.Text" xml:space="preserve">
     <value>Contributors:
 
-Logo and icon: https://github.com/mopquill - http://mpql.net
-Jira, Gist and Mega support: https://github.com/gpailler
+Mega, Gist and Jira support: https://github.com/gpailler
 Web site: https://github.com/dmxt
-MediaCrush support: https://github.com/SirCmpwn - http://drewdevault.com
-Amazon S3 and DreamObjects support: https://github.com/alanedwardes - http://alanedwardes.com
-Gfycat support: https://github.com/Dinnerbone - http://dinnerbone.com
+MediaCrush support: https://github.com/SirCmpwn
+Amazon S3 and DreamObjects support: https://github.com/alanedwardes
+Gfycat support: https://github.com/Dinnerbone
 Copy support: https://github.com/KamilKZ
+AdFly support: https://github.com/LRNAB
+MediaFire support: https://github.com/michalx2
+Pushbullet support: https://github.com/BallisticLingonberries
 
 External libraries:
 

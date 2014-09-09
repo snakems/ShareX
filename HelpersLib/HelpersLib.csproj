@@ -57,12 +57,13 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing.Design" />
+    <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq">
@@ -73,15 +74,33 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionsCodeMenuEntry.cs" />
     <Compile Include="ClipboardFormat.cs" />
+    <Compile Include="CodeMenu.cs" />
     <Compile Include="ColorMatrixManager.cs" />
     <Compile Include="Colors\CMYK.cs" />
     <Compile Include="Colors\ColorEventHandler.cs" />
+    <Compile Include="Colors\GradientInfo.cs" />
+    <Compile Include="Colors\GradientPickerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Colors\GradientPickerForm.Designer.cs">
+      <DependentUpon>GradientPickerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Colors\GradientStop.cs" />
     <Compile Include="Colors\HSB.cs" />
     <Compile Include="Colors\MyColor.cs" />
     <Compile Include="Colors\RGBA.cs" />
     <Compile Include="ConvolutionMatrix.cs" />
     <Compile Include="ConvolutionMatrixManager.cs" />
+    <Compile Include="DNS\AdapterInfo.cs" />
+    <Compile Include="DNS\DNSChangerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DNS\DNSChangerForm.Designer.cs">
+      <DependentUpon>DNSChangerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DNS\DNSInfo.cs" />
     <Compile Include="DWMManager.cs" />
     <Compile Include="EncoderProgram.cs" />
     <Compile Include="CLI\ExternalCLIManager.cs" />
@@ -101,6 +120,7 @@
     </Compile>
     <Compile Include="Helpers\URLHelpers.cs" />
     <Compile Include="Helpers\MathHelpers.cs" />
+    <Compile Include="CodeMenuEntry.cs" />
     <Compile Include="ListViewColumnSorter.cs" />
     <Compile Include="MimeTypes.cs" />
     <Compile Include="Native\LayeredForm.cs">
@@ -142,6 +162,7 @@
     <Compile Include="TextBoxTraceListener.cs" />
     <Compile Include="UITypeEditors\EnumDescriptionConverter.cs" />
     <Compile Include="UITypeEditors\DirectoryNameEditor.cs" />
+    <Compile Include="UITypeEditors\GradientEditor.cs" />
     <Compile Include="UITypeEditors\MyColorConverter.cs" />
     <Compile Include="UITypeEditors\MyColorEditor.cs" />
     <Compile Include="UITypeEditors\ImageFileNameEditor.cs" />
@@ -192,11 +213,11 @@
     <Compile Include="Colors\ColorUserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Colors\DialogColor.cs">
+    <Compile Include="Colors\ColorPickerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Colors\DialogColor.Designer.cs">
-      <DependentUpon>DialogColor.cs</DependentUpon>
+    <Compile Include="Colors\ColorPickerForm.Designer.cs">
+      <DependentUpon>ColorPickerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions\EnumExtensions.cs" />
     <Compile Include="Extensions\GraphicsExtensions.cs" />
@@ -293,8 +314,6 @@
     <Compile Include="Printer\PrintTextHelper.cs" />
     <Compile Include="Helpers\RegistryHelpers.cs" />
     <Compile Include="SettingsHelper.cs" />
-    <Compile Include="SingleInstanceApplication\ApplicationInstanceManager.cs" />
-    <Compile Include="SingleInstanceApplication\InstanceProxy.cs" />
     <Compile Include="DebugHelper.cs" />
     <Compile Include="UpdateChecker\UpdateCheckerLabel.cs">
       <SubType>UserControl</SubType>
@@ -331,14 +350,19 @@
       <DependentUpon>MyPictureBox.cs</DependentUpon>
     </Compile>
     <Compile Include="UpdateChecker\XMLUpdateChecker.cs" />
-    <Compile Include="UpdateChecker\UpdateInfo.cs" />
     <Compile Include="Links.cs" />
     <Compile Include="Vector2.cs" />
     <Compile Include="WindowState.cs" />
     <Compile Include="XmlColor.cs" />
     <Compile Include="XmlFont.cs" />
-    <EmbeddedResource Include="Colors\DialogColor.resx">
-      <DependentUpon>DialogColor.cs</DependentUpon>
+    <EmbeddedResource Include="Colors\ColorPickerForm.resx">
+      <DependentUpon>ColorPickerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Colors\GradientPickerForm.resx">
+      <DependentUpon>GradientPickerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DNS\DNSChangerForm.resx">
+      <DependentUpon>DNSChangerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\DebugForm.resx">
       <DependentUpon>DebugForm.cs</DependentUpon>
@@ -432,6 +456,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\ShareX_Logo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\cross.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

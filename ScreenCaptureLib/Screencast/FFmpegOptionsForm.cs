@@ -121,9 +121,10 @@ namespace ScreenCaptureLib
             () =>
             {
                 cboVideoSource.Items.Clear();
-                cboVideoSource.Items.Add(FFmpegHelper.GDIgrab);
+                cboVideoSource.Items.Add(FFmpegHelper.SourceNone);
+                cboVideoSource.Items.Add(FFmpegHelper.SourceGDIGrab);
                 cboAudioSource.Items.Clear();
-                cboAudioSource.Items.Add("None");
+                cboAudioSource.Items.Add(FFmpegHelper.SourceNone);
                 if (devices != null)
                 {
                     cboVideoSource.Items.AddRange(devices.VideoDevices.ToArray());
@@ -345,13 +346,16 @@ namespace ScreenCaptureLib
             Options.FFmpeg.UseCustomCommands = cbCustomCommands.Checked;
             txtCommandLinePreview.ReadOnly = !Options.FFmpeg.UseCustomCommands;
 
-            if (Options.FFmpeg.UseCustomCommands)
+            if (settingsLoaded)
             {
-                txtCommandLinePreview.Text = Options.GetFFmpegArgs(true);
-            }
-            else
-            {
-                txtCommandLinePreview.Text = Options.GetFFmpegArgs();
+                if (Options.FFmpeg.UseCustomCommands)
+                {
+                    txtCommandLinePreview.Text = Options.GetFFmpegArgs(true);
+                }
+                else
+                {
+                    txtCommandLinePreview.Text = Options.GetFFmpegArgs();
+                }
             }
         }
 

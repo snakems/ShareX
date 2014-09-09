@@ -60,7 +60,15 @@ namespace ShareX
             set
             {
                 filePath = value;
-                FileName = Path.GetFileName(filePath);
+
+                if (string.IsNullOrEmpty(filePath))
+                {
+                    FileName = string.Empty;
+                }
+                else
+                {
+                    FileName = Path.GetFileName(filePath);
+                }
             }
         }
 
@@ -108,7 +116,7 @@ namespace ShareX
                         case EDataType.URL:
                             if (Job == TaskJob.ShareURL)
                             {
-                                return TaskSettings.SocialNetworkingServiceDestination.GetDescription();
+                                return TaskSettings.URLSharingServiceDestination.GetDescription();
                             }
 
                             return TaskSettings.URLShortenerDestination.GetDescription();

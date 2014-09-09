@@ -29,9 +29,6 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Web;
 
 namespace UploadersLib.FileUploaders
 {
@@ -43,6 +40,7 @@ namespace UploadersLib.FileUploaders
         public string Path { get; set; }
         public bool CreateShare { get; set; }
         public bool DirectLink { get; set; }
+        public bool IgnoreInvalidCert { get; set; }
 
         public OwnCloud(string host, string username, string password)
         {
@@ -70,26 +68,44 @@ namespace UploadersLib.FileUploaders
 
             string path = URLHelpers.CombineURL(Path, fileName);
             string url = URLHelpers.CombineURL(Host, "remote.php/webdav", path);
+            url = URLHelpers.FixPrefix(url);
             NameValueCollection headers = CreateAuthenticationHeader(Username, Password);
 
-            string response = SendRequestStream(url, stream, Helpers.GetMimeType(fileName), headers, method: HttpMethod.PUT);
+            SSLBypassHelper sslBypassHelper = null;
 
-            UploadResult result = new UploadResult(response);
-
-            if (!IsError)
+            try
             {
-                if (CreateShare)
+                if (IgnoreInvalidCert)
                 {
-                    AllowReportProgress = false;
-                    result.URL = ShareFile(path);
+                    sslBypassHelper = new SSLBypassHelper();
                 }
-                else
+
+                string response = SendRequestStream(url, stream, Helpers.GetMimeType(fileName), headers, method: HttpMethod.PUT);
+
+                UploadResult result = new UploadResult(response);
+
+                if (!IsError)
                 {
-                    result.IsURLExpected = false;
+                    if (CreateShare)
+                    {
+                        AllowReportProgress = false;
+                        result.URL = ShareFile(path);
+                    }
+                    else
+                    {
+                        result.IsURLExpected = false;
+                    }
+                }
+
+                return result;
+            }
+            finally
+            {
+                if (sslBypassHelper != null)
+                {
+                    sslBypassHelper.Dispose();
                 }
             }
-
-            return result;
         }
 
         // http://doc.owncloud.org/server/7.0/developer_manual/core/ocs-share-api.html#create-a-new-share

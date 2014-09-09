@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
+using Microsoft.VisualBasic.FileIO;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -282,14 +283,24 @@ namespace ShareX
             if (IsItemSelected && SelectedItem.IsFileExist) UploadManager.UploadFile(SelectedItem.Info.FilePath);
         }
 
+        public void EditImage()
+        {
+            if (IsItemSelected && SelectedItem.IsImageFile) TaskHelpers.OpenImageEditor(SelectedItem.Info.FilePath);
+        }
+
+        public void DeleteFile()
+        {
+            if (IsItemSelected && SelectedItem.IsFileExist) FileSystem.DeleteFile(SelectedItem.Info.FilePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
+        }
+
         public void ShortenURL(UrlShortenerType urlShortener)
         {
             if (IsItemSelected && SelectedItem.IsURLExist) UploadManager.ShortenURL(SelectedItem.Info.Result.ToString(), urlShortener);
         }
 
-        public void ShareURL(SocialNetworkingService socialNetworkingService)
+        public void ShareURL(URLSharingServices urlSharingService)
         {
-            if (IsItemSelected && SelectedItem.IsURLExist) UploadManager.ShareURL(SelectedItem.Info.Result.ToString(), socialNetworkingService);
+            if (IsItemSelected && SelectedItem.IsURLExist) UploadManager.ShareURL(SelectedItem.Info.Result.ToString(), urlSharingService);
         }
 
         public void ShowQRCode()

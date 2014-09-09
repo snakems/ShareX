@@ -52,7 +52,7 @@ namespace HelpersLib
             {
                 Color color = (Color)value;
 
-                using (DialogColor form = new DialogColor(color))
+                using (ColorPickerForm form = new ColorPickerForm(color))
                 {
                     if (svc.ShowDialog(form) == DialogResult.OK)
                     {
@@ -84,10 +84,10 @@ namespace HelpersLib
 
             using (SolidBrush brush = new SolidBrush(color))
             {
-                e.Graphics.FillRectangle(brush, e.Bounds);
+                g.FillRectangle(brush, e.Bounds);
             }
 
-            e.Graphics.DrawRectangleProper(Pens.Black, e.Bounds);
+            g.DrawRectangleProper(Pens.Black, e.Bounds);
         }
     }
 }
