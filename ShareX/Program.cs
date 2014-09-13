@@ -24,16 +24,14 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using Microsoft.VisualBasic.ApplicationServices;
+using SingleInstanceApplication;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using UploadersLib;
 
@@ -41,6 +39,41 @@ namespace ShareX
 {
     internal static class Program
     {
+        public static bool IsBeta = false;
+
+        public static string Title
+        {
+            get
+            {
+                Version version = Version.Parse(Application.ProductVersion);
+                string title = string.Format("ShareX {0}.{1}", version.Major, version.Minor);
+                if (version.Build > 0) title += "." + version.Build;
+                if (IsPortable) title += " Portable";
+                if (IsBeta) title += " Beta";
+                return title;
+            }
+        }
+
+        public static string[] Arguments { get; private set; }
+        public static bool IsMultiInstance { get; private set; }
+        public static bool IsPortable { get; private set; }
+        public static bool IsSilentRun { get; private set; }
+        public static bool IsSandbox { get; private set; }
+
+        public static ApplicationConfig Settings { get; private set; }
+        public static TaskSettings DefaultTaskSettings { get; private set; }
+        public static UploadersConfig UploadersConfig { get; private set; }
+        public static HotkeysConfig HotkeysConfig { get; private set; }
+
+        public static ManualResetEvent SettingsResetEvent { get; private set; }
+        public static ManualResetEvent UploaderSettingsResetEvent { get; private set; }
+        public static ManualResetEvent HotkeySettingsResetEvent { get; private set; }
+
+        public static MainForm MainForm { get; private set; }
+        public static Stopwatch StartTimer { get; private set; }
+        public static HotkeyManager HotkeyManager { get; set; }
+        public static WatchFolderManager WatchFolderManager { get; set; }
+
         #region Paths
 
         public static readonly string StartupPath = Application.StartupPath;
@@ -215,42 +248,6 @@ namespace ShareX
 
         #endregion Paths
 
-        public const bool IsBeta = false;
-
-        public static string Title
-        {
-            get
-            {
-                Version version = Version.Parse(Application.ProductVersion);
-                string title = string.Format("ShareX {0}.{1}", version.Major, version.Minor);
-                if (version.Build > 0) title += "." + version.Build;
-                if (IsPortable) title += " Portable";
-                if (IsBeta) title += " Beta";
-                return title;
-            }
-        }
-
-        public static string[] Arguments { get; private set; }
-        public static bool IsPortable { get; private set; }
-        public static bool IsSilentRun { get; private set; }
-        public static bool IsSandbox { get; private set; }
-
-        public static ApplicationConfig Settings { get; private set; }
-        public static TaskSettings DefaultTaskSettings { get; private set; }
-        public static UploadersConfig UploadersConfig { get; private set; }
-        public static HotkeysConfig HotkeysConfig { get; private set; }
-
-        public static ManualResetEvent SettingsResetEvent { get; private set; }
-        public static ManualResetEvent UploaderSettingsResetEvent { get; private set; }
-        public static ManualResetEvent HotkeySettingsResetEvent { get; private set; }
-
-        public static MainForm MainForm { get; private set; }
-        public static Stopwatch StartTimer { get; private set; }
-        public static HotkeyManager HotkeyManager { get; set; }
-        public static WatchFolderManager WatchFolderManager { get; set; }
-
-        private static ShareXApplicationBase applicationBase;
-
         [STAThread]
         private static void Main(string[] args)
         {
@@ -263,129 +260,120 @@ namespace ShareX
 
             if (CheckAdminTasks()) return; // If ShareX opened just for be able to execute task as Admin
 
-            bool forceMultiInstance = CLIHelper.CheckArgs(Arguments, "multi", "m");
+            IsMultiInstance = CLIHelper.CheckArgs(Arguments, "multi", "m");
 
+            if (IsMultiInstance || ApplicationInstanceManager.CreateSingleInstance(SingleInstanceCallback, Arguments))
+            {
+                using (Mutex mutex = new Mutex(false, "82E6AC09-0FEF-4390-AD9F-0DD3F5561EFC")) // Required for installer
+                {
+                    Run();
+                }
+            }
+        }
+
+        private static void Run()
+        {
+            IsSilentRun = CLIHelper.CheckArgs(Arguments, "silent", "s");
+            IsSandbox = CLIHelper.CheckArgs(Arguments, "sandbox");
+
+            if (!IsSandbox)
+            {
+                IsPortable = CLIHelper.CheckArgs(Arguments, "portable", "p");
+
+                if (IsPortable)
+                {
+                    CustomPersonalPath = PortablePersonalPath;
+                }
+                else
+                {
+                    CheckPersonalPathConfig();
+                }
+
+                if (!string.IsNullOrEmpty(PersonalPath) && !Directory.Exists(PersonalPath))
+                {
+                    Directory.CreateDirectory(PersonalPath);
+                }
+            }
+
+            Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            applicationBase = new ShareXApplicationBase(!forceMultiInstance);
-            applicationBase.Startup += StartupHandler;
-            applicationBase.StartupNextInstance += StartupNextInstanceHandler;
-            applicationBase.Shutdown += ShutdownHandler;
-            applicationBase.Run(Arguments);
-        }
 
-        private static void StartupHandler(object sender, StartupEventArgs e)
-        {
-            string appGuid = ((GuidAttribute)Assembly.GetExecutingAssembly().GetCustomAttributes(typeof(GuidAttribute), false).GetValue(0)).Value.ToString();
+            DebugHelper.WriteLine("{0} started", Title);
+            DebugHelper.WriteLine("Operating system: " + Environment.OSVersion.VersionString);
+            DebugHelper.WriteLine("Command line: " + Environment.CommandLine);
+            DebugHelper.WriteLine("Personal path: " + PersonalPath);
 
-            using (Mutex mutex = new Mutex(false, appGuid)) // Required for installer
+            string gitHash = GetGitHash();
+            if (!string.IsNullOrEmpty(gitHash))
             {
-                IsSilentRun = CLIHelper.CheckArgs(Arguments, "silent", "s");
-                IsSandbox = CLIHelper.CheckArgs(Arguments, "sandbox");
-
-                if (!IsSandbox)
-                {
-                    IsPortable = CLIHelper.CheckArgs(Arguments, "portable", "p");
-
-                    if (IsPortable)
-                    {
-                        CustomPersonalPath = PortablePersonalPath;
-                    }
-                    else
-                    {
-                        CheckPersonalPathConfig();
-                    }
-
-                    if (!string.IsNullOrEmpty(PersonalPath) && !Directory.Exists(PersonalPath))
-                    {
-                        Directory.CreateDirectory(PersonalPath);
-                    }
-                }
-
-                DebugHelper.WriteLine("{0} started", Title);
-                DebugHelper.WriteLine("Operating system: " + Environment.OSVersion.VersionString);
-                DebugHelper.WriteLine("Command line: " + Environment.CommandLine);
-                DebugHelper.WriteLine("Personal path: " + PersonalPath);
-
-                string gitHash = GetGitHash();
-                if (!string.IsNullOrEmpty(gitHash))
-                {
-                    DebugHelper.WriteLine("Git: https://github.com/ShareX/ShareX/tree/" + gitHash);
-                }
-
-                SettingsResetEvent = new ManualResetEvent(false);
-                UploaderSettingsResetEvent = new ManualResetEvent(false);
-                HotkeySettingsResetEvent = new ManualResetEvent(false);
-                TaskEx.Run(() => LoadSettings());
-
-                DebugHelper.WriteLine("MainForm init started");
-                MainForm = new MainForm();
-                applicationBase.MainForm = MainForm;
-                DebugHelper.WriteLine("MainForm init finished");
-
-                if (Settings == null)
-                {
-                    SettingsResetEvent.WaitOne();
-                }
-            }
-        }
-
-        private static void StartupNextInstanceHandler(object sender, StartupNextInstanceEventArgs e)
-        {
-            e.BringToForeground = false;
-
-            string[] args = e.CommandLine.ToArray();
-
-            if (MainForm.ReadyWaitHandle.WaitOne(0))
-            {
-                DoStartupNextInstance(args);
-            }
-            else
-            {
-                TaskEx.Run(() => WaitFormLoad(args));
-            }
-        }
-
-        private static void WaitFormLoad(string[] args)
-        {
-            try
-            {
-                if (MainForm.ReadyWaitHandle.WaitOne(5000))
-                {
-                    MainForm.InvokeSafe(() => DoStartupNextInstance(args));
-                }
-            }
-            catch { }
-        }
-
-        private static void DoStartupNextInstance(string[] args)
-        {
-            if (args == null || args.Length == 0)
-            {
-                if (MainForm.niTray != null && MainForm.niTray.Visible)
-                {
-                    // Workaround for Windows startup tray icon bug
-                    MainForm.niTray.Visible = false;
-                    MainForm.niTray.Visible = true;
-                }
-
-                MainForm.ShowActivate();
-            }
-            else if (MainForm.Visible)
-            {
-                MainForm.ShowActivate();
+                DebugHelper.WriteLine("Git: https://github.com/ShareX/ShareX/tree/" + gitHash);
             }
 
-            MainForm.UseCommandLineArgs(args);
-        }
+            SettingsResetEvent = new ManualResetEvent(false);
+            UploaderSettingsResetEvent = new ManualResetEvent(false);
+            HotkeySettingsResetEvent = new ManualResetEvent(false);
+            TaskEx.Run(() => LoadSettings());
 
-        private static void ShutdownHandler(object sender, EventArgs e)
-        {
+            DebugHelper.WriteLine("MainForm init started");
+            MainForm = new MainForm();
+            DebugHelper.WriteLine("MainForm init finished");
+
+            if (Settings == null)
+            {
+                SettingsResetEvent.WaitOne();
+            }
+
+            Application.Run(MainForm);
+
             if (WatchFolderManager != null) WatchFolderManager.Dispose();
             SaveSettings();
             BackupSettings();
 
             DebugHelper.WriteLine("ShareX closing");
             DebugHelper.Logger.SaveLog(LogsFilePath);
+        }
+
+        private static void SingleInstanceCallback(object sender, InstanceCallbackEventArgs args)
+        {
+            if (WaitFormLoad(5000))
+            {
+                Action d = () =>
+                {
+                    if (args.CommandLineArgs == null || args.CommandLineArgs.Length < 1)
+                    {
+                        if (MainForm.niTray != null && MainForm.niTray.Visible)
+                        {
+                            // Workaround for Windows startup tray icon bug
+                            MainForm.niTray.Visible = false;
+                            MainForm.niTray.Visible = true;
+                        }
+
+                        MainForm.ShowActivate();
+                    }
+                    else if (MainForm.Visible)
+                    {
+                        MainForm.ShowActivate();
+                    }
+
+                    MainForm.UseCommandLineArgs(args.CommandLineArgs);
+                };
+
+                MainForm.InvokeSafe(d);
+            }
+        }
+
+        private static bool WaitFormLoad(int wait)
+        {
+            Stopwatch timer = Stopwatch.StartNew();
+
+            while (timer.ElapsedMilliseconds < wait)
+            {
+                if (MainForm != null && MainForm.IsReady) return true;
+
+                Thread.Sleep(10);
+            }
+
+            return false;
         }
 
         public static void LoadSettings()
@@ -493,7 +481,7 @@ namespace ShareX
             OnError(e.Exception);
         }
 
-        private static void CurrentDomain_UnhandledException(object sender, System.UnhandledExceptionEventArgs e)
+        private static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             OnError((Exception)e.ExceptionObject);
         }

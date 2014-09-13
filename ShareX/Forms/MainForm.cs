@@ -31,7 +31,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -41,7 +40,7 @@ namespace ShareX
 {
     public partial class MainForm : HotkeyForm
     {
-        public ManualResetEvent ReadyWaitHandle { get; private set; }
+        public bool IsReady { get; private set; }
 
         private bool forceClose;
         private UploadInfoManager uim;
@@ -49,7 +48,6 @@ namespace ShareX
 
         public MainForm()
         {
-            ReadyWaitHandle = new ManualResetEvent(false);
             InitControls();
             HandleCreated += MainForm_HandleCreated;
         }
@@ -63,7 +61,7 @@ namespace ShareX
             AutoCheckUpdate();
 #endif
 
-            ReadyWaitHandle.Set();
+            IsReady = true;
 
             DebugHelper.WriteLine("Startup time: {0} ms", Program.StartTimer.ElapsedMilliseconds);
 
@@ -135,7 +133,7 @@ namespace ShareX
             il.Images.Add(Resources.navigation_000_button);
             lvUploads.SmallImageList = il;
 
-            pbLogo.LoadImage(ShareXResources.Logo);
+            pbLogo.LoadImage(ColorMatrixManager.Alpha(0.3f).Apply(ShareXResources.Logo));
 
             TaskManager.ListViewControl = lvUploads;
             uim = new UploadInfoManager(lvUploads);
@@ -678,7 +676,7 @@ namespace ShareX
 
         private void MainForm_LocationChanged(object sender, EventArgs e)
         {
-            if (ReadyWaitHandle.WaitOne(0) && WindowState == FormWindowState.Normal)
+            if (IsReady && WindowState == FormWindowState.Normal)
             {
                 Program.Settings.MainFormPosition = Location;
             }
@@ -686,7 +684,7 @@ namespace ShareX
 
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
-            if (ReadyWaitHandle.WaitOne(0) && WindowState == FormWindowState.Normal)
+            if (IsReady && WindowState == FormWindowState.Normal)
             {
                 Program.Settings.MainFormSize = Size;
             }
@@ -1533,7 +1531,7 @@ namespace ShareX
             {
                 if (taskSettings.GeneralSettings.PlaySoundAfterCapture)
                 {
-                    Helpers.PlaySoundAsync(Resources.CameraSound);
+                    Helpers.PlaySoundAsync(Resources.CaptureSound);
                 }
 
                 if (taskSettings.ImageSettings.ImageEffectOnlyRegionCapture && !IsRegionCapture(captureType))

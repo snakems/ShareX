@@ -136,14 +136,17 @@ namespace ShareX
 
         public static TaskSettings GetDefaultTaskSettings()
         {
-            return GetSafeTaskSettings(Program.DefaultTaskSettings);
+            TaskSettings taskSettings = new TaskSettings();
+            taskSettings.SetDefaultSettings();
+            taskSettings.TaskSettingsReference = Program.DefaultTaskSettings;
+            return taskSettings;
         }
 
         public static TaskSettings GetSafeTaskSettings(TaskSettings taskSettings)
         {
             TaskSettings safeTaskSettings;
 
-            if (taskSettings.IsUsingDefaultSettings)
+            if (taskSettings.IsUsingDefaultSettings && Program.DefaultTaskSettings != null)
             {
                 safeTaskSettings = Program.DefaultTaskSettings.Copy();
                 safeTaskSettings.Description = taskSettings.Description;
@@ -436,9 +439,6 @@ namespace ShareX
 
         [Category("Name pattern"), DefaultValue(50), Description("Maximum name pattern title (%t) length for file name.")]
         public int NamePatternMaxTitleLength { get; set; }
-
-        [Category("Screen recorder"), DefaultValue(false), Description("Use active window region instead of showing region selection window for screen recorder.")]
-        public bool ScreenRecorderUseActiveWindow { get; set; }
 
         public TaskSettingsAdvanced()
         {
