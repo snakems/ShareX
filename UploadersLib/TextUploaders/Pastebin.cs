@@ -31,9 +31,6 @@ namespace UploadersLib.TextUploaders
 {
     public sealed class Pastebin : TextUploader
     {
-        private const string APIURL = "http://pastebin.com/api/api_post.php";
-        private const string APILoginURL = "http://pastebin.com/api/api_login.php";
-
         private string APIKey;
 
         public PastebinSettings Settings { get; private set; }
@@ -60,17 +57,17 @@ namespace UploadersLib.TextUploaders
                 loginArgs.Add("api_user_name", Settings.Username);
                 loginArgs.Add("api_user_password", Settings.Password);
 
-                string loginResponse = SendRequest(HttpMethod.POST, APILoginURL, loginArgs);
+                string loginResponse = SendRequest(HttpMethod.POST, "http://pastebin.com/api/api_login.php", loginArgs);
 
                 if (!string.IsNullOrEmpty(loginResponse) && !loginResponse.StartsWith("Bad API request"))
                 {
                     Settings.UserKey = loginResponse;
                     return true;
                 }
-
-                Errors.Add("Pastebin login failed.");
             }
 
+            Settings.UserKey = null;
+            Errors.Add("Pastebin login failed.");
             return false;
         }
 
@@ -89,15 +86,15 @@ namespace UploadersLib.TextUploaders
                 // Optional args
                 args.Add("api_paste_name", Settings.Title); // this will be the name / title of your paste
                 args.Add("api_paste_format", Settings.TextFormat); // this will be the syntax highlighting value
-                args.Add("api_paste_private", Settings.Privacy); // this makes a paste public or private, public = 0, private = 1
-                args.Add("api_paste_expire_date", Settings.ExpireTime); // this sets the expiration date of your paste
+                args.Add("api_paste_private", GetPrivacy(Settings.Exposure)); // this makes a paste public or private, public = 0, private = 1
+                args.Add("api_paste_expire_date", GetExpiration(Settings.Expiration)); // this sets the expiration date of your paste
 
                 if (!string.IsNullOrEmpty(Settings.UserKey))
                 {
                     args.Add("api_user_key", Settings.UserKey); // this paramater is part of the login system
                 }
 
-                ur.Response = SendRequest(HttpMethod.POST, APIURL, args);
+                ur.Response = SendRequest(HttpMethod.POST, "http://pastebin.com/api/api_post.php", args);
 
                 if (!string.IsNullOrEmpty(ur.Response) && !ur.Response.StartsWith("Bad API request") && ur.Response.IsValidUrl())
                 {
@@ -111,36 +108,87 @@ namespace UploadersLib.TextUploaders
 
             return ur;
         }
+
+        private string GetPrivacy(PastebinPrivacy privacy)
+        {
+            switch (privacy)
+            {
+                case PastebinPrivacy.Public:
+                    return "0";
+                default:
+                case PastebinPrivacy.Unlisted:
+                    return "1";
+                case PastebinPrivacy.Private:
+                    return "2";
+            }
+        }
+
+        private string GetExpiration(PastebinExpiration expiration)
+        {
+            switch (expiration)
+            {
+                default:
+                case PastebinExpiration.N:
+                    return "N";
+                case PastebinExpiration.M10:
+                    return "10M";
+                case PastebinExpiration.H1:
+                    return "1H";
+                case PastebinExpiration.D1:
+                    return "1D";
+                case PastebinExpiration.W1:
+                    return "1W";
+                case PastebinExpiration.W2:
+                    return "2W";
+                case PastebinExpiration.M1:
+                    return "1M";
+            }
+        }
+    }
+
+    public enum PastebinPrivacy
+    {
+        [Description("Public")]
+        Public,
+        [Description("Unlisted")]
+        Unlisted,
+        [Description("Private (Only you can see)")]
+        Private
+    }
+
+    public enum PastebinExpiration
+    {
+        [Description("Never")]
+        N,
+        [Description("10 minutes")]
+        M10,
+        [Description("1 hour")]
+        H1,
+        [Description("1 day")]
+        D1,
+        [Description("1 week")]
+        W1,
+        [Description("2 weeks")]
+        W2,
+        [Description("1 month")]
+        M1
     }
 
     public class PastebinSettings
     {
-        [Description("This is the username of the user you want to login")]
         public string Username { get; set; }
-
-        [PasswordPropertyText(true), Description("This is the password of the user you want to login")]
         public string Password { get; set; }
-
-        [Description("This makes a paste public or private\r\n0 = Public, 1 = Unlisted, 2 = Private (only allowed in combination with api_user_key, as you have to be logged into your account to access the paste)"),
-        DefaultValue("1")]
-        public string Privacy { get; set; }
-
-        [Description("This sets the expiration date of your paste\r\nN = Never, 10M = 10 Minutes, 1H = 1 Hour, 1D = 1 Day, 1W = 1 Week, 2W = 2 Weeks, 1M = 1 Month"), DefaultValue("N")]
-        public string ExpireTime { get; set; }
-
-        [Description("This will be the name / title of your paste")]
+        public PastebinPrivacy Exposure { get; set; }
+        public PastebinExpiration Expiration { get; set; }
         public string Title { get; set; }
-
-        [Description("This will be the syntax highlighting value\r\nExample: c = C, java = Java, objc = Objective C, cpp = c++, csharp = C#, php = PHP, vb = VisualBasic, python = Python, perl = Perl, ruby = Ruby, javascript = JavaScript, vbnet = VB.NET")]
         public string TextFormat { get; set; }
-
-        [Browsable(false)]
         public string UserKey { get; set; }
 
         public PastebinSettings()
         {
-            ExpireTime = "N";
-            Privacy = "1";
+            Exposure = PastebinPrivacy.Unlisted;
+            Expiration = PastebinExpiration.N;
+            TextFormat = "text";
         }
     }
 }

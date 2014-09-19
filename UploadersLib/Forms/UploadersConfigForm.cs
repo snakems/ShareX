@@ -34,6 +34,7 @@ using UploadersLib.FileUploaders;
 using UploadersLib.HelperClasses;
 using UploadersLib.ImageUploaders;
 using UploadersLib.Properties;
+using UploadersLib.TextUploaders;
 
 namespace UploadersLib
 {
@@ -79,6 +80,7 @@ namespace UploadersLib
             AddIconToTab(tpBitly, Resources.Bitly);
             AddIconToTab(tpBox, Resources.Box);
             AddIconToTab(tpCopy, Resources.Copy);
+            AddIconToTab(tpChevereto, Resources.Chevereto);
             AddIconToTab(tpCustomUploaders, Resources.globe_network);
             AddIconToTab(tpDropbox, Resources.Dropbox);
             AddIconToTab(tpEmail, Resources.mail);
@@ -229,13 +231,27 @@ namespace UploadersLib
 
             txtPicasaAlbumID.Text = Config.PicasaAlbumID;
 
+            // Chevereto
+
+            txtCheveretoAPIKey.Text = Config.CheveretoAPIKey;
+            txtCheveretoWebsite.Text = Config.CheveretoWebsite;
+            cbCheveretoDirectURL.Checked = Config.CheveretoDirectURL;
+
             #endregion Image uploaders
 
             #region Text uploaders
 
             // Pastebin
 
-            pgPastebinSettings.SelectedObject = Config.PastebinSettings;
+            txtPastebinUsername.Text = Config.PastebinSettings.Username;
+            txtPastebinPassword.Text = Config.PastebinSettings.Password;
+            UpdatePastebinStatus();
+            cbPastebinPrivacy.Items.AddRange(Helpers.GetEnumDescriptions<PastebinPrivacy>());
+            cbPastebinPrivacy.SelectedIndex = (int)Config.PastebinSettings.Exposure;
+            cbPastebinExpiration.Items.AddRange(Helpers.GetEnumDescriptions<PastebinExpiration>());
+            cbPastebinExpiration.SelectedIndex = (int)Config.PastebinSettings.Expiration;
+            txtPastebinSyntax.Text = Config.PastebinSettings.TextFormat;
+            txtPastebinTitle.Text = Config.PastebinSettings.Title;
 
             // Paste.ee
 
@@ -846,15 +862,69 @@ namespace UploadersLib
 
         #endregion Picasa
 
+        #region Chevereto
+
+        private void txtCheveretoAPIKey_TextChanged(object sender, EventArgs e)
+        {
+            Config.CheveretoAPIKey = txtCheveretoAPIKey.Text;
+        }
+
+        private void txtCheveretoWebsite_TextChanged(object sender, EventArgs e)
+        {
+            Config.CheveretoWebsite = txtCheveretoWebsite.Text;
+        }
+
+        private void cbCheveretoDirectURL_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.CheveretoDirectURL = cbCheveretoDirectURL.Checked;
+        }
+
+        #endregion Chevereto
+
         #endregion Image Uploaders
 
         #region Text Uploaders
 
         #region Pastebin
 
+        private void txtPastebinUsername_TextChanged(object sender, EventArgs e)
+        {
+            Config.PastebinSettings.Username = txtPastebinUsername.Text;
+        }
+
+        private void txtPastebinPassword_TextChanged(object sender, EventArgs e)
+        {
+            Config.PastebinSettings.Password = txtPastebinPassword.Text;
+        }
+
+        private void btnPastebinRegister_Click(object sender, EventArgs e)
+        {
+            URLHelpers.OpenURL("http://pastebin.com/signup");
+        }
+
         private void btnPastebinLogin_Click(object sender, EventArgs e)
         {
             PastebinLogin();
+        }
+
+        private void cbPastebinPrivacy_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Config.PastebinSettings.Exposure = (PastebinPrivacy)cbPastebinPrivacy.SelectedIndex;
+        }
+
+        private void cbPastebinExpiration_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Config.PastebinSettings.Expiration = (PastebinExpiration)cbPastebinExpiration.SelectedIndex;
+        }
+
+        private void txtPastebinSyntax_TextChanged(object sender, EventArgs e)
+        {
+            Config.PastebinSettings.TextFormat = txtPastebinSyntax.Text;
+        }
+
+        private void txtPastebinTitle_TextChanged(object sender, EventArgs e)
+        {
+            Config.PastebinSettings.Title = txtPastebinTitle.Text;
         }
 
         #endregion Pastebin
