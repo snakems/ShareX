@@ -1,6 +1,6 @@
 ﻿/*
  * Greenshot - a free and open source screenshot tool
- * Copyright (C) 2007-2013  Thomas Braun, Jens Klingen, Robin Krom
+ * Copyright (C) 2007-2014 Thomas Braun, Jens Klingen, Robin Krom
  *
  * For more information see: http://getgreenshot.org/
  * The Greenshot project is hosted on Sourceforge: http://sourceforge.net/projects/greenshot/
@@ -45,8 +45,12 @@ namespace Greenshot.Drawing
         public FilterContainer(Surface parent)
             : base(parent)
         {
+        }
+
+        protected override void InitializeFields()
+        {
             AddField(GetType(), FieldType.LINE_THICKNESS, 0);
-            AddField(GetType(), FieldType.LINE_COLOR, Color.Red);
+            AddField(GetType(), FieldType.LINE_COLOR, DefaultLineColor);
             AddField(GetType(), FieldType.SHADOW, false);
         }
 

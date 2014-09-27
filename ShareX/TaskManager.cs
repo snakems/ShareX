@@ -26,6 +26,7 @@
 using HelpersLib;
 using HistoryLib;
 using ShareX.Properties;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -407,7 +408,17 @@ namespace ShareX
 
                 if (progress >= 0)
                 {
-                    icon = TaskHelpers.GetProgressIcon(progress);
+                    try
+                    {
+                        icon = TaskHelpers.GetProgressIcon(progress);
+                    }
+                    catch (Exception e)
+                    {
+                        DebugHelper.WriteException(e);
+                        progress = -1;
+                        if (lastIconStatus == progress) return;
+                        icon = ShareXResources.Icon;
+                    }
                 }
                 else
                 {

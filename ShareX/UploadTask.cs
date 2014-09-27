@@ -472,21 +472,7 @@ namespace ShareX
 
             if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.SendImageToPrinter))
             {
-                if (Program.Settings.DontShowPrintSettingsDialog)
-                {
-                    using (PrintHelper printHelper = new PrintHelper(tempImage))
-                    {
-                        printHelper.Settings = Program.Settings.PrintSettings;
-                        printHelper.Print();
-                    }
-                }
-                else
-                {
-                    using (PrintForm printForm = new PrintForm(tempImage, Program.Settings.PrintSettings))
-                    {
-                        printForm.ShowDialog();
-                    }
-                }
+                TaskHelpers.PrintImage(tempImage);
             }
 
             if (Info.TaskSettings.AfterCaptureJob.HasFlagAny(AfterCaptureTasks.SaveImageToFile, AfterCaptureTasks.SaveImageToFileWithDialog, AfterCaptureTasks.UploadImageToHost))
@@ -774,6 +760,13 @@ namespace ShareX
                     textUploader = new Upaste(Program.UploadersConfig.UpasteUserKey)
                     {
                         IsPublic = Program.UploadersConfig.UpasteIsPublic
+                    };
+                    break;
+                case TextDestination.Hastebin:
+                    textUploader = new Hastebin()
+                    {
+                        CustomDomain = Program.UploadersConfig.HastebinCustomDomain,
+                        SyntaxHighlighting = Program.UploadersConfig.HastebinSyntaxHighlighting
                     };
                     break;
                 case TextDestination.CustomTextUploader:

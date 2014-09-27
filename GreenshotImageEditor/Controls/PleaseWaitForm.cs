@@ -29,7 +29,7 @@ namespace GreenshotPlugin.Controls
     /// <summary>
     /// Description of PleaseWaitForm.
     /// </summary>
-    public partial class PleaseWaitForm : Form
+    internal partial class PleaseWaitForm : Form
     {
         private Thread waitFor = null;
         private string title;
@@ -69,7 +69,7 @@ namespace GreenshotPlugin.Controls
             this.title = title;
             Text = title;
             label_pleasewait.Text = text;
-            cancelButton.Text = Language.GetString("CANCEL");
+            cancelButton.Text = "Cancel";
 
             // Make sure the form is shown.
             Show();

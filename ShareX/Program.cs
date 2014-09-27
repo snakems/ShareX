@@ -29,7 +29,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
@@ -39,7 +38,7 @@ namespace ShareX
 {
     internal static class Program
     {
-        public static bool IsBeta = false;
+        public static bool IsBeta = true;
 
         public static string Title
         {
