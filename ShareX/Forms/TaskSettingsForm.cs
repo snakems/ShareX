@@ -26,6 +26,7 @@
 using HelpersLib;
 using ImageEffectsLib;
 using ScreenCaptureLib;
+using ShareX.Properties;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -43,7 +44,7 @@ namespace ShareX
         private ToolStripDropDownItem tsmiImageFileUploaders, tsmiTextFileUploaders;
         private bool loaded;
 
-        private readonly string ConfigureEncoder = "Configure video encoders --->";
+        private readonly string ConfigureEncoder = Resources.TaskSettingsForm_ConfigureEncoder_Configure_CLI_video_encoders_____;
 
         public TaskSettingsForm(TaskSettings hotkeySetting, bool isDefault = false)
         {
@@ -165,10 +166,13 @@ namespace ShareX
             cbHistorySave.Checked = TaskSettings.GeneralSettings.SaveHistory;
 
             // Image - General
+            cbImageFormat.Items.AddRange(Enum.GetNames(typeof(EImageFormat)));
             cbImageFormat.SelectedIndex = (int)TaskSettings.ImageSettings.ImageFormat;
             nudImageJPEGQuality.Value = TaskSettings.ImageSettings.ImageJPEGQuality;
+            cbImageGIFQuality.Items.AddRange(Helpers.GetEnumDescriptions<GIFQuality>());
             cbImageGIFQuality.SelectedIndex = (int)TaskSettings.ImageSettings.ImageGIFQuality;
             nudUseImageFormat2After.Value = TaskSettings.ImageSettings.ImageSizeLimit;
+            cbImageFormat2.Items.AddRange(Enum.GetNames(typeof(EImageFormat)));
             cbImageFormat2.SelectedIndex = (int)TaskSettings.ImageSettings.ImageFormat2;
             cbImageFileExist.Items.Clear();
             cbImageFileExist.Items.AddRange(Helpers.GetEnumDescriptions<FileExistAction>());
@@ -264,17 +268,18 @@ namespace ShareX
         {
             if (IsDefault)
             {
-                Text = Application.ProductName + " - Task settings";
+                Text = "ShareX - " + Resources.TaskSettingsForm_UpdateWindowTitle_Task_settings;
             }
             else
             {
-                Text = Application.ProductName + " - Task settings for " + TaskSettings;
+                Text = "ShareX - " + string.Format(Resources.TaskSettingsForm_UpdateWindowTitle_Task_settings_for__0_, TaskSettings);
             }
         }
 
         private void UpdateVideoEncoders()
         {
             cboEncoder.Items.Clear();
+
             if (Program.Settings.VideoEncoders.Count > 0)
             {
                 Program.Settings.VideoEncoders.ForEach(x => cboEncoder.Items.Add(x));
@@ -283,6 +288,7 @@ namespace ShareX
             else if (!cboEncoder.Items.Contains(ConfigureEncoder))
             {
                 cboEncoder.Items.Add(ConfigureEncoder);
+                cboEncoder.SelectedIndex = 0;
             }
         }
 
@@ -463,27 +469,27 @@ namespace ShareX
 
         private void UpdateUploaderMenuNames()
         {
-            btnTask.Text = "Task: " + TaskSettings.Job.GetDescription();
+            btnTask.Text = string.Format(Resources.TaskSettingsForm_UpdateUploaderMenuNames_Task___0_, TaskSettings.Job.GetDescription());
 
-            btnAfterCapture.Text = "After capture: " + string.Join(", ", TaskSettings.AfterCaptureJob.GetFlags<AfterCaptureTasks>().
-                Select(x => x.GetDescription()).ToArray());
+            btnAfterCapture.Text = string.Format(Resources.TaskSettingsForm_UpdateUploaderMenuNames_After_capture___0_, string.Join(", ", TaskSettings.AfterCaptureJob.GetFlags<AfterCaptureTasks>().
+                Select(x => x.GetDescription()).ToArray()));
 
-            btnAfterUpload.Text = "After upload: " + string.Join(", ", TaskSettings.AfterUploadJob.GetFlags<AfterUploadTasks>().
-                Select(x => x.GetDescription()).ToArray());
+            btnAfterUpload.Text = string.Format(Resources.TaskSettingsForm_UpdateUploaderMenuNames_After_upload___0_, string.Join(", ", TaskSettings.AfterUploadJob.GetFlags<AfterUploadTasks>().
+                Select(x => x.GetDescription()).ToArray()));
 
             string imageUploader = TaskSettings.ImageDestination == ImageDestination.FileUploader ?
                 TaskSettings.ImageFileDestination.GetDescription() : TaskSettings.ImageDestination.GetDescription();
-            tsmiImageUploaders.Text = "Image uploader: " + imageUploader;
+            tsmiImageUploaders.Text = string.Format(Resources.TaskSettingsForm_UpdateUploaderMenuNames_Image_uploader___0_, imageUploader);
 
             string textUploader = TaskSettings.TextDestination == TextDestination.FileUploader ?
                 TaskSettings.TextFileDestination.GetDescription() : TaskSettings.TextDestination.GetDescription();
-            tsmiTextUploaders.Text = "Text uploader: " + textUploader;
+            tsmiTextUploaders.Text = string.Format(Resources.TaskSettingsForm_UpdateUploaderMenuNames_Text_uploader___0_, textUploader);
 
-            tsmiFileUploaders.Text = "File uploader: " + TaskSettings.FileDestination.GetDescription();
+            tsmiFileUploaders.Text = string.Format(Resources.TaskSettingsForm_UpdateUploaderMenuNames_File_uploader___0_, TaskSettings.FileDestination.GetDescription());
 
-            tsmiURLShorteners.Text = "URL shortener: " + TaskSettings.URLShortenerDestination.GetDescription();
+            tsmiURLShorteners.Text = string.Format(Resources.TaskSettingsForm_UpdateUploaderMenuNames_URL_shortener___0_, TaskSettings.URLShortenerDestination.GetDescription());
 
-            tsmiURLSharingServices.Text = "URL sharing service: " + TaskSettings.URLSharingServiceDestination.GetDescription();
+            tsmiURLSharingServices.Text = string.Format(Resources.TaskSettingsForm_UpdateUploaderMenuNames_URL_sharing_service___0_, TaskSettings.URLSharingServiceDestination.GetDescription());
         }
 
         private void tbDescription_TextChanged(object sender, EventArgs e)
@@ -606,14 +612,6 @@ namespace ShareX
             TaskSettings.ImageSettings.FileExistAction = (FileExistAction)cbImageFileExist.SelectedIndex;
         }
 
-        private void btnWatermarkSettings_Click(object sender, EventArgs e)
-        {
-            using (WatermarkForm watermarkForm = new WatermarkForm(TaskSettings.ImageSettings.WatermarkConfig) { Icon = Icon })
-            {
-                watermarkForm.ShowDialog();
-            }
-        }
-
         private void cbImageEffectOnlyRegionCapture_CheckedChanged(object sender, EventArgs e)
         {
             TaskSettings.ImageSettings.ImageEffectOnlyRegionCapture = cbImageEffectOnlyRegionCapture.Checked;
@@ -626,7 +624,7 @@ namespace ShareX
 
         private void btnImageEffects_Click(object sender, EventArgs e)
         {
-            using (ImageEffectsForm imageEffectsForm = new ImageEffectsForm(ShareXResources.Logo, TaskSettings.ImageSettings.ImageEffects))
+            using (ImageEffectsForm imageEffectsForm = new ImageEffectsForm(ShareXResources.LogoBlack, TaskSettings.ImageSettings.ImageEffects))
             {
                 if (imageEffectsForm.ShowDialog() == DialogResult.OK)
                 {
@@ -753,7 +751,7 @@ namespace ShareX
                     catch (Exception ex)
                     {
                         TaskSettings.CaptureSettings.AVIOptions.CompressOptions = new AVICOMPRESSOPTIONS();
-                        MessageBox.Show(ex.ToString(), Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(ex.ToString(), "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     break;
                 case ScreenRecordOutput.FFmpeg:
@@ -998,7 +996,8 @@ namespace ShareX
                 MaxTitleLength = TaskSettings.AdvancedSettings.NamePatternMaxTitleLength
             };
 
-            lblNameFormatPatternPreviewActiveWindow.Text = "Preview: " + nameParser.Parse(TaskSettings.UploadSettings.NameFormatPatternActiveWindow);
+            lblNameFormatPatternPreviewActiveWindow.Text = Resources.TaskSettingsForm_txtNameFormatPatternActiveWindow_TextChanged_Preview_ + " " +
+                nameParser.Parse(TaskSettings.UploadSettings.NameFormatPatternActiveWindow);
         }
 
         private void btnResetAutoIncrementNumber_Click(object sender, EventArgs e)
@@ -1017,7 +1016,8 @@ namespace ShareX
                 MaxTitleLength = TaskSettings.AdvancedSettings.NamePatternMaxTitleLength
             };
 
-            lblNameFormatPatternPreview.Text = "Preview: " + nameParser.Parse(TaskSettings.UploadSettings.NameFormatPattern);
+            lblNameFormatPatternPreview.Text = Resources.TaskSettingsForm_txtNameFormatPatternActiveWindow_TextChanged_Preview_ + " " +
+                nameParser.Parse(TaskSettings.UploadSettings.NameFormatPattern);
         }
 
         private void chkClipboardUploadContents_CheckedChanged(object sender, EventArgs e)

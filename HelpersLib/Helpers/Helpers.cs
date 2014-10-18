@@ -23,6 +23,7 @@
 
 #endregion License Information (GPL v3)
 
+using HelpersLib.Properties;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -34,6 +35,7 @@ using System.Media;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reflection;
+using System.Resources;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -263,6 +265,30 @@ namespace HelpersLib
             return Enum.GetValues(typeof(T)).OfType<Enum>().Select(x => x.GetDescription()).ToArray();
         }
 
+        public static List<string> GetLocalizedEnumDescriptions<T>()
+        {
+            Assembly assembly = Assembly.GetCallingAssembly();
+            string resourcePath = assembly.GetName().Name + ".Properties.Resources";
+            ResourceManager resourceManager = new ResourceManager(resourcePath, assembly);
+            return GetLocalizedEnumDescriptions<T>(resourceManager);
+        }
+
+        public static List<string> GetLocalizedEnumDescriptions<T>(ResourceManager resourceManager)
+        {
+            List<string> result = new List<string>();
+            Type type = typeof(T);
+            string typeName = type.Name;
+
+            foreach (string enumName in Enum.GetNames(type))
+            {
+                string resourceName = typeName + "_" + enumName;
+                string description = resourceManager.GetString(resourceName);
+                result.Add(description);
+            }
+
+            return result;
+        }
+
         public static int GetEnumLength<T>()
         {
             return Enum.GetValues(typeof(T)).Length;
@@ -331,7 +357,7 @@ namespace HelpersLib
                 }
                 else
                 {
-                    MessageBox.Show("Folder not exist:\r\n" + folderPath, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show(Resources.Helpers_OpenFolder_Folder_not_exist_ + "\r\n" + folderPath, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
@@ -775,7 +801,7 @@ namespace HelpersLib
                 catch (Exception e)
                 {
                     DebugHelper.WriteException(e);
-                    MessageBox.Show("Download failed:\r\n" + e.ToString(), "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(Resources.Helpers_DownloadString_Download_failed_ + "\r\n" + e, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
 

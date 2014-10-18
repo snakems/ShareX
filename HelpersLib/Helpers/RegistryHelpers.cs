@@ -23,6 +23,7 @@
 
 #endregion License Information (GPL v3)
 
+using HelpersLib.Properties;
 using Microsoft.Win32;
 using System;
 using System.IO;
@@ -46,7 +47,7 @@ namespace HelpersLib
         private static readonly string ShellExtMenuFolders = @"Software\Classes\Folder\shell\" + ApplicationName;
         private static readonly string ShellExtMenuFoldersCmd = ShellExtMenuFolders + @"\command";
 
-        private static readonly string ShellExtDesc = "Upload with " + ApplicationName;
+        private static readonly string ShellExtDesc = string.Format(Resources.RegistryHelpers_ShellExtDesc_Upload_with__0_, ApplicationName);
         private static readonly string ShellExtIcon = ApplicationPath + ",0";
         private static readonly string ShellExtPath = ApplicationPath + " \"%1\"";
 
@@ -54,7 +55,7 @@ namespace HelpersLib
         {
             try
             {
-                return CheckRegistry(WindowsStartupRun, Application.ProductName, StartupPath);
+                return CheckRegistry(WindowsStartupRun, ApplicationName, StartupPath);
             }
             catch (Exception e)
             {
@@ -74,11 +75,11 @@ namespace HelpersLib
                     {
                         if (startWithWindows)
                         {
-                            regkey.SetValue(Application.ProductName, StartupPath, RegistryValueKind.String);
+                            regkey.SetValue(ApplicationName, StartupPath, RegistryValueKind.String);
                         }
                         else
                         {
-                            regkey.DeleteValue(Application.ProductName, false);
+                            regkey.DeleteValue(ApplicationName, false);
                         }
                     }
                 }

@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
+using ShareX.Properties;
 using SingleInstanceApplication;
 using System;
 using System.Diagnostics;
@@ -64,7 +65,6 @@ namespace ShareX
         public static UploadersConfig UploadersConfig { get; private set; }
         public static HotkeysConfig HotkeysConfig { get; private set; }
 
-        public static ManualResetEvent SettingsResetEvent { get; private set; }
         public static ManualResetEvent UploaderSettingsResetEvent { get; private set; }
         public static ManualResetEvent HotkeySettingsResetEvent { get; private set; }
 
@@ -95,7 +95,7 @@ namespace ShareX
         {
             get
             {
-                if (!string.IsNullOrEmpty(CustomPersonalPath) && Directory.Exists(CustomPersonalPath))
+                if (!string.IsNullOrEmpty(CustomPersonalPath))
                 {
                     return CustomPersonalPath;
                 }
@@ -247,6 +247,8 @@ namespace ShareX
 
         #endregion Paths
 
+        private static bool restarting;
+
         [STAThread]
         private static void Main(string[] args)
         {
@@ -267,11 +269,19 @@ namespace ShareX
                 {
                     Run();
                 }
+
+                if (restarting)
+                {
+                    Process.Start(Application.ExecutablePath);
+                }
             }
         }
 
         private static void Run()
         {
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+
             IsSilentRun = CLIHelper.CheckArgs(Arguments, "silent", "s");
             IsSandbox = CLIHelper.CheckArgs(Arguments, "sandbox");
 
@@ -288,14 +298,20 @@ namespace ShareX
                     CheckPersonalPathConfig();
                 }
 
-                if (!string.IsNullOrEmpty(PersonalPath) && !Directory.Exists(PersonalPath))
+                if (!Directory.Exists(PersonalPath))
                 {
-                    Directory.CreateDirectory(PersonalPath);
+                    try
+                    {
+                        Directory.CreateDirectory(PersonalPath);
+                    }
+                    catch (Exception e)
+                    {
+                        MessageBox.Show(Resources.Program_Run_Unable_to_create_folder_ + string.Format(" \"{0}\"\r\n\r\n{1}", PersonalPath, e.ToString()),
+                            "ShareX - " + Resources.Program_Run_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        CustomPersonalPath = "";
+                    }
                 }
             }
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
 
             DebugHelper.WriteLine("{0} started", Title);
             DebugHelper.WriteLine("Operating system: " + Environment.OSVersion.VersionString);
@@ -308,19 +324,17 @@ namespace ShareX
                 DebugHelper.WriteLine("Git: https://github.com/ShareX/ShareX/tree/" + gitHash);
             }
 
-            SettingsResetEvent = new ManualResetEvent(false);
+            LoadProgramSettings();
+
             UploaderSettingsResetEvent = new ManualResetEvent(false);
             HotkeySettingsResetEvent = new ManualResetEvent(false);
             TaskEx.Run(() => LoadSettings());
 
+            LanguageHelper.ChangeLanguage(Settings.Language);
+
             DebugHelper.WriteLine("MainForm init started");
             MainForm = new MainForm();
             DebugHelper.WriteLine("MainForm init finished");
-
-            if (Settings == null)
-            {
-                SettingsResetEvent.WaitOne();
-            }
 
             Application.Run(MainForm);
 
@@ -330,6 +344,12 @@ namespace ShareX
 
             DebugHelper.WriteLine("ShareX closing");
             DebugHelper.Logger.SaveLog(LogsFilePath);
+        }
+
+        public static void Restart()
+        {
+            restarting = true;
+            Application.Exit();
         }
 
         private static void SingleInstanceCallback(object sender, InstanceCallbackEventArgs args)
@@ -377,8 +397,6 @@ namespace ShareX
 
         public static void LoadSettings()
         {
-            LoadProgramSettings();
-            SettingsResetEvent.Set();
             LoadUploadersConfig();
             UploaderSettingsResetEvent.Set();
             LoadHotkeySettings();
@@ -468,8 +486,8 @@ namespace ShareX
                     }
                     catch (UnauthorizedAccessException)
                     {
-                        MessageBox.Show("Can't access to \"" + PersonalPathConfig + "\" file.\r\nPlease run ShareX as administrator to change personal folder path.", "ShareX",
-                            MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        MessageBox.Show(string.Format(Resources.Program_WritePersonalPathConfig_Cant_access_to_file, PersonalPathConfig),
+                            "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
             }

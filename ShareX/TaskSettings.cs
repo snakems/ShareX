@@ -33,6 +33,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
+using System.Globalization;
 using UploadersLib;
 
 namespace ShareX
@@ -62,7 +63,7 @@ namespace ShareX
         public AfterUploadTasks AfterUploadJob = AfterUploadTasks.CopyURLToClipboard;
 
         public bool UseDefaultDestinations = true;
-        public ImageDestination ImageDestination = ImageDestination.Imgur;
+        public ImageDestination ImageDestination = DefaultImageDestination();
         public FileDestination ImageFileDestination = FileDestination.Dropbox;
         public TextDestination TextDestination = TextDestination.Pastebin;
         public FileDestination TextFileDestination = FileDestination.Dropbox;
@@ -238,6 +239,13 @@ namespace ShareX
                 return Program.ScreenshotsFolder;
             }
         }
+
+        private static ImageDestination DefaultImageDestination()
+        {
+            return CultureInfo.CurrentCulture.Name.Equals("tr-TR", StringComparison.InvariantCultureIgnoreCase) ||
+                CultureInfo.CurrentUICulture.Name.Equals("tr-TR", StringComparison.InvariantCultureIgnoreCase) ?
+                ImageDestination.HizliResim : ImageDestination.Imgur;
+        }
     }
 
     public class TaskSettingsGeneral
@@ -272,8 +280,6 @@ namespace ShareX
         public bool ShowImageEffectsWindowAfterCapture = false;
         public bool ImageEffectOnlyRegionCapture = false;
 
-        public WatermarkConfig WatermarkConfig = new WatermarkConfig();
-
         #endregion Image / Effects
 
         #region Image / Thumbnail
@@ -291,7 +297,7 @@ namespace ShareX
         #region Capture / General
 
         public bool ShowCursor = true;
-        public bool CaptureTransparent = true;
+        public bool CaptureTransparent = !Helpers.IsWindows8OrGreater();
         public bool CaptureShadow = true;
         public int CaptureShadowOffset = 20;
         public bool CaptureClientArea = false;

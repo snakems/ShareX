@@ -28,6 +28,18 @@ using System.ComponentModel;
 
 namespace ShareX
 {
+    public enum SupportedLanguage
+    {
+        [Description("Automatic")]
+        Automatic,
+        [Description("English")]
+        English,
+        [Description("Deutsch")]
+        German,
+        [Description("Türkçe")]
+        Turkish
+    }
+
     public enum EImageFormat
     {
         [Description("png")]
@@ -56,47 +68,28 @@ namespace ShareX
     public enum AfterCaptureTasks
     {
         None = 0,
-        [Description("Add image effects")]
         AddImageEffects = 1,
-        [Description("Add watermark")]
-        AddWatermark = 1 << 1,
-        [Description("Annotate image")]
-        AnnotateImage = 1 << 2,
-        [Description("Copy image to clipboard")]
-        CopyImageToClipboard = 1 << 3,
-        [Description("Print image")]
-        SendImageToPrinter = 1 << 4,
-        [Description("Save image to file")]
-        SaveImageToFile = 1 << 5,
-        [Description("Save image to file as...")]
-        SaveImageToFileWithDialog = 1 << 6,
-        [Description("Save thumbnail image to file")]
-        SaveThumbnailImageToFile = 1 << 7,
-        [Description("Copy file to clipboard")]
-        CopyFileToClipboard = 1 << 8,
-        [Description("Copy file path to clipboard")]
-        CopyFilePathToClipboard = 1 << 9,
-        [Description("Perform actions")]
-        PerformActions = 1 << 10,
-        [Description("Upload image to host")]
-        UploadImageToHost = 1 << 11,
-        [Description("Delete file locally")]
-        DeleteFile = 1 << 12
+        AnnotateImage = 1 << 1,
+        CopyImageToClipboard = 1 << 2,
+        SendImageToPrinter = 1 << 3,
+        SaveImageToFile = 1 << 4,
+        SaveImageToFileWithDialog = 1 << 5,
+        SaveThumbnailImageToFile = 1 << 6,
+        CopyFileToClipboard = 1 << 7,
+        CopyFilePathToClipboard = 1 << 8,
+        PerformActions = 1 << 9,
+        UploadImageToHost = 1 << 10,
+        DeleteFile = 1 << 11
     }
 
     [Flags]
     public enum AfterUploadTasks
     {
         None = 0,
-        [Description("Shorten URL")]
         UseURLShortener = 1,
-        [Description("Share URL")]
         ShareURL = 1 << 1,
-        [Description("Copy URL to clipboard")]
         CopyURLToClipboard = 1 << 2,
-        [Description("Open URL")]
         OpenURL = 1 << 3,
-        [Description("Show QR code window")]
         ShowQRCode = 1 << 4
     }
 

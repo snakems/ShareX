@@ -40,7 +40,7 @@ namespace UploadersLib
 {
     public class Uploader
     {
-        private static readonly string UserAgent = string.Format("{0} {1}", Application.ProductName, Application.ProductVersion);
+        private static readonly string UserAgent = "ShareX " + Application.ProductVersion;
 
         public delegate void ProgressEventHandler(ProgressManager progress);
         public event ProgressEventHandler ProgressChanged;
@@ -355,7 +355,7 @@ namespace UploadersLib
             request.CookieContainer = new CookieContainer();
             if (cookies != null) request.CookieContainer.Add(cookies);
             if (headers != null) request.Headers.Add(headers);
-            request.KeepAlive = false;
+            request.KeepAlive = true;
             request.Method = method.ToString();
             request.Pipelined = false;
             request.ProtocolVersion = HttpVersion.Version11;

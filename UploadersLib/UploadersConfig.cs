@@ -27,7 +27,6 @@ using CG.Web.MegaApiClient;
 using HelpersLib;
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using UploadersLib.FileUploaders;
 using UploadersLib.HelperClasses;
 using UploadersLib.ImageUploaders;
@@ -78,8 +77,8 @@ namespace UploadersLib
 
         // Chevereto
 
-        public string CheveretoAPIKey = string.Empty;
         public string CheveretoWebsite = string.Empty;
+        public string CheveretoAPIKey = string.Empty;
         public bool CheveretoDirectURL = true;
 
         #endregion Image uploaders
@@ -196,7 +195,7 @@ namespace UploadersLib
         public bool EmailRememberLastTo = true;
         public bool EmailConfirmSend = true;
         public string EmailLastTo = string.Empty;
-        public string EmailDefaultSubject = "Sending email from " + Application.ProductName;
+        public string EmailDefaultSubject = "Sending email from ShareX";
         public string EmailDefaultBody = "Screenshot is attached.";
 
         // Jira

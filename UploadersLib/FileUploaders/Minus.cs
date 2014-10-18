@@ -28,7 +28,6 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Windows.Forms;
 using UploadersLib.HelperClasses;
 
 namespace UploadersLib.FileUploaders
@@ -156,7 +155,7 @@ namespace UploadersLib.FileUploaders
             }
             else
             {
-                MinusFolder mf = CreateFolder(Application.ProductName, true);
+                MinusFolder mf = CreateFolder("ShareX", true);
                 if (mf != null)
                 {
                     Config.FolderList.Add(mf);

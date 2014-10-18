@@ -29,7 +29,6 @@ using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
 using System.Threading;
-using System.Windows.Forms;
 
 namespace SingleInstanceApplication
 {
@@ -73,7 +72,7 @@ namespace SingleInstanceApplication
         {
             try
             {
-                return CreateSingleInstance(Application.ProductName, callback, args);
+                return CreateSingleInstance("ShareX", callback, args);
             }
             catch
             {
