@@ -23,48 +23,38 @@
 
 #endregion License Information (GPL v3)
 
-using System;
+using HelpersLib;
+using System.ComponentModel;
+using System.Drawing;
 
-namespace HelpersLib
+namespace ImageEffectsLib
 {
-    public class DWMManager : IDisposable
+    [Description("Rounded corners")]
+    internal class RoundedCorners : ImageEffect
     {
-        private bool isDWMEnabled;
-        private bool autoEnable;
+        private int cornerRadius;
 
-        public DWMManager()
+        [DefaultValue(20)]
+        public int CornerRadius
         {
-            isDWMEnabled = NativeMethods.IsDWMEnabled();
-        }
-
-        public void AutoDisable()
-        {
-            if (isDWMEnabled)
+            get
             {
-                ChangeComposition(false);
-                autoEnable = true;
+                return cornerRadius;
+            }
+            set
+            {
+                cornerRadius = value.Min(0);
             }
         }
 
-        public void ChangeComposition(bool enable)
+        public RoundedCorners()
         {
-            try
-            {
-                NativeMethods.DwmEnableComposition(enable ? CompositionAction.DWM_EC_ENABLECOMPOSITION : CompositionAction.DWM_EC_DISABLECOMPOSITION);
-            }
-            catch (Exception e)
-            {
-                DebugHelper.WriteException(e);
-            }
+            this.ApplyDefaultPropertyValues();
         }
 
-        public void Dispose()
+        public override Image Apply(Image img)
         {
-            if (isDWMEnabled && autoEnable)
-            {
-                ChangeComposition(true);
-                autoEnable = false;
-            }
+            return ImageHelpers.RoundedCorners(img, CornerRadius);
         }
     }
 }

@@ -27,12 +27,12 @@ using HelpersLib;
 using ImageEffectsLib;
 using ScreenCaptureLib;
 using ShareX.Properties;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Drawing.Text;
 using System.IO;
 using System.Windows.Forms;
 using UploadersLib;
@@ -76,7 +76,7 @@ namespace ShareX
                 (img.Width > taskSettings.ImageSettings.ThumbnailWidth && img.Height > taskSettings.ImageSettings.ThumbnailHeight)))
             {
                 string thumbnailFileName = Path.GetFileNameWithoutExtension(filename) + taskSettings.ImageSettings.ThumbnailName + ".jpg";
-                string thumbnailFilePath = TaskHelpers.CheckFilePath(folder, thumbnailFileName, taskSettings);
+                string thumbnailFilePath = CheckFilePath(folder, thumbnailFileName, taskSettings);
 
                 if (!string.IsNullOrEmpty(thumbnailFilePath))
                 {
@@ -231,7 +231,7 @@ namespace ShareX
                     Program.MainForm.InvokeSafe(() => newFilePath = ImageHelpers.SaveImageFileDialog(x, filePath));
                     return newFilePath;
                 },
-                x => Program.MainForm.InvokeSafe(() => TaskHelpers.PrintImage(x)));
+                x => Program.MainForm.InvokeSafe(() => PrintImage(x)));
         }
 
         public static void PrintImage(Image img)
@@ -373,8 +373,6 @@ namespace ShareX
             using (Bitmap bmp = new Bitmap(16, 16))
             using (Graphics g = Graphics.FromImage(bmp))
             {
-                g.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-
                 g.Clear(Color.Black);
 
                 int width = (int)(16 * (percentage / 100f));
@@ -387,7 +385,7 @@ namespace ShareX
                     }
                 }
 
-                using (Font font = new Font("Arial", 7, FontStyle.Bold))
+                using (Font font = new Font("Arial", 11, GraphicsUnit.Pixel))
                 using (StringFormat sf = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center })
                 {
                     g.DrawString(percentage.ToString(), font, Brushes.White, 8, 8, sf);
@@ -507,10 +505,8 @@ namespace ShareX
             }
         }
 
-        public static void OpenScreenColorPicker(TaskSettings taskSettings = null)
+        public static void OpenScreenColorPicker()
         {
-            if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
-
             new ScreenColorPicker().Show();
         }
 
@@ -547,7 +543,7 @@ namespace ShareX
 
             if (!string.IsNullOrEmpty(filePath))
             {
-                TaskHelpers.AnnotateImage(filePath);
+                AnnotateImage(filePath);
             }
         }
 

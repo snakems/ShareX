@@ -81,7 +81,8 @@ namespace ShareX
                         "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                else if (!Program.Settings.VideoEncoders[taskSettings.CaptureSettings.VideoEncoderSelected].IsValid())
+
+                if (!Program.Settings.VideoEncoders[taskSettings.CaptureSettings.VideoEncoderSelected].IsValid())
                 {
                     MessageBox.Show(Resources.ScreenRecordForm_StartRecording_CLI_video_encoder_file_does_not_exist__ +
                         Program.Settings.VideoEncoders[taskSettings.CaptureSettings.VideoEncoderSelected].Path,
@@ -138,7 +139,9 @@ namespace ShareX
             string path = "";
 
             float duration = taskSettings.CaptureSettings.ScreenRecordFixedDuration ? taskSettings.CaptureSettings.ScreenRecordDuration : 0;
+
             regionForm = ScreenRegionForm.Show(captureRectangle, StopRecording, duration);
+            regionForm.RecordResetEvent = new ManualResetEvent(false);
 
             TaskEx.Run(() =>
             {
@@ -177,11 +180,21 @@ namespace ShareX
 
                     screenRecorder = new ScreenRecorder(options, captureRectangle, taskSettings.CaptureSettings.ScreenRecordOutput);
 
-                    int delay = (int)(taskSettings.CaptureSettings.ScreenRecordStartDelay * 1000);
-
-                    if (delay > 0)
+                    if (regionForm != null && regionForm.RecordResetEvent != null)
                     {
-                        Thread.Sleep(delay);
+                        if (taskSettings.CaptureSettings.ScreenRecordAutoStart)
+                        {
+                            int delay = (int)(taskSettings.CaptureSettings.ScreenRecordStartDelay * 1000);
+
+                            if (delay > 0)
+                            {
+                                regionForm.RecordResetEvent.WaitOne(delay);
+                            }
+                        }
+                        else
+                        {
+                            regionForm.RecordResetEvent.WaitOne();
+                        }
                     }
 
                     TrayIcon.Text = "ShareX - " + Resources.ScreenRecordForm_StartRecording_Click_tray_icon_to_stop_recording_;
@@ -204,6 +217,11 @@ namespace ShareX
 
                     if (regionForm != null)
                     {
+                        if (regionForm.RecordResetEvent != null)
+                        {
+                            regionForm.RecordResetEvent.Dispose();
+                        }
+
                         this.InvokeSafe(() => regionForm.Close());
                     }
                 }

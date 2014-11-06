@@ -23,11 +23,13 @@
 
 #endregion License Information (GPL v3)
 
+using HelpersLib.Properties;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Resources;
 
 namespace HelpersLib
 {
@@ -40,10 +42,32 @@ namespace HelpersLib
             if (fi != null)
             {
                 DescriptionAttribute[] attributes = (DescriptionAttribute[])fi.GetCustomAttributes(typeof(DescriptionAttribute), false);
-                return (attributes.Length > 0) ? attributes[0].Description : value.ToString();
+
+                if (attributes.Length > 0)
+                {
+                    return attributes[0].Description;
+                }
             }
 
             return value.ToString();
+        }
+
+        public static string GetLocalizedDescription(this Enum value)
+        {
+            return value.GetLocalizedDescription(Resources.ResourceManager);
+        }
+
+        public static string GetLocalizedDescription(this Enum value, ResourceManager resourceManager)
+        {
+            string resourceName = value.GetType().Name + "_" + value;
+            string description = resourceManager.GetString(resourceName);
+
+            if (string.IsNullOrEmpty(description))
+            {
+                description = value.GetDescription();
+            }
+
+            return description;
         }
 
         public static int GetIndex(this Enum value)

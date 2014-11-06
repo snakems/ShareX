@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Media;
@@ -265,28 +266,22 @@ namespace HelpersLib
             return Enum.GetValues(typeof(T)).OfType<Enum>().Select(x => x.GetDescription()).ToArray();
         }
 
-        public static List<string> GetLocalizedEnumDescriptions<T>()
+        /*public static string[] GetLocalizedEnumDescriptions<T>()
         {
-            Assembly assembly = Assembly.GetCallingAssembly();
+            Assembly assembly = typeof(T).Assembly;
             string resourcePath = assembly.GetName().Name + ".Properties.Resources";
             ResourceManager resourceManager = new ResourceManager(resourcePath, assembly);
             return GetLocalizedEnumDescriptions<T>(resourceManager);
+        }*/
+
+        public static string[] GetLocalizedEnumDescriptions<T>()
+        {
+            return GetLocalizedEnumDescriptions<T>(Resources.ResourceManager);
         }
 
-        public static List<string> GetLocalizedEnumDescriptions<T>(ResourceManager resourceManager)
+        public static string[] GetLocalizedEnumDescriptions<T>(ResourceManager resourceManager)
         {
-            List<string> result = new List<string>();
-            Type type = typeof(T);
-            string typeName = type.Name;
-
-            foreach (string enumName in Enum.GetNames(type))
-            {
-                string resourceName = typeName + "_" + enumName;
-                string description = resourceManager.GetString(resourceName);
-                result.Add(description);
-            }
-
-            return result;
+            return Enum.GetValues(typeof(T)).OfType<Enum>().Select(x => x.GetLocalizedDescription(resourceManager)).ToArray();
         }
 
         public static int GetEnumLength<T>()
@@ -312,7 +307,7 @@ namespace HelpersLib
             return newNames;
         }
 
-        // returns a list of public static fields of the class' type (similar to enum values)
+        // returns a list of public static fields of the class type (similar to enum values)
         public static T[] GetValueFields<T>()
         {
             var res = new List<T>();
@@ -806,6 +801,29 @@ namespace HelpersLib
             }
 
             return null;
+        }
+
+        public static void SetDefaultUICulture(CultureInfo culture)
+        {
+            Type type = typeof(CultureInfo);
+
+            try
+            {
+                // .NET 4.0
+                type.InvokeMember("s_userDefaultUICulture", BindingFlags.SetField | BindingFlags.NonPublic | BindingFlags.Static, null, culture, new object[] { culture });
+            }
+            catch
+            {
+                try
+                {
+                    // .NET 2.0
+                    type.InvokeMember("m_userDefaultUICulture", BindingFlags.SetField | BindingFlags.NonPublic | BindingFlags.Static, null, culture, new object[] { culture });
+                }
+                catch
+                {
+                    DebugHelper.WriteLine("SetDefaultUICulture failed: " + culture.DisplayName);
+                }
+            }
         }
     }
 }

@@ -23,48 +23,41 @@
 
 #endregion License Information (GPL v3)
 
-using System;
+using HelpersLib;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Design;
 
-namespace HelpersLib
+namespace ImageEffectsLib
 {
-    public class DWMManager : IDisposable
+    internal class Outline : ImageEffect
     {
-        private bool isDWMEnabled;
-        private bool autoEnable;
+        private int size;
 
-        public DWMManager()
+        [DefaultValue(1)]
+        public int Size
         {
-            isDWMEnabled = NativeMethods.IsDWMEnabled();
-        }
-
-        public void AutoDisable()
-        {
-            if (isDWMEnabled)
+            get
             {
-                ChangeComposition(false);
-                autoEnable = true;
+                return size;
+            }
+            set
+            {
+                size = value.Min(1);
             }
         }
 
-        public void ChangeComposition(bool enable)
+        [DefaultValue(typeof(Color), "Black"), Editor(typeof(MyColorEditor), typeof(UITypeEditor)), TypeConverter(typeof(MyColorConverter))]
+        public Color Color { get; set; }
+
+        public Outline()
         {
-            try
-            {
-                NativeMethods.DwmEnableComposition(enable ? CompositionAction.DWM_EC_ENABLECOMPOSITION : CompositionAction.DWM_EC_DISABLECOMPOSITION);
-            }
-            catch (Exception e)
-            {
-                DebugHelper.WriteException(e);
-            }
+            this.ApplyDefaultPropertyValues();
         }
 
-        public void Dispose()
+        public override Image Apply(Image img)
         {
-            if (isDWMEnabled && autoEnable)
-            {
-                ChangeComposition(true);
-                autoEnable = false;
-            }
+            return ImageHelpers.Outline(img, Size, Color);
         }
     }
 }

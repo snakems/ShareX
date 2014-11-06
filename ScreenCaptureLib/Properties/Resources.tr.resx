@@ -117,56 +117,50 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="txtExtension.Location" type="System.Drawing.Point, System.Drawing">
-    <value>144, 80</value>
+  <data name="FFmpegHelper_Record_FFmpeg_error" xml:space="preserve">
+    <value>FFmpeg hatası</value>
   </data>
-  <data name="txtExtension.Size" type="System.Drawing.Size, System.Drawing">
-    <value>168, 20</value>
+  <data name="FFmpegOptionsForm_buttonFFmpegBrowse_Click_Browse_for_ffmpeg_exe" xml:space="preserve">
+    <value>ffmpeg.exe için gözat</value>
   </data>
-  <data name="lblExt.Size" type="System.Drawing.Size, System.Drawing">
-    <value>122, 13</value>
+  <data name="FFmpegOptionsForm_DownloaderForm_InstallRequested_Download_of_FFmpeg_failed_" xml:space="preserve">
+    <value>FFmpeg indirme hatası.</value>
   </data>
-  <data name="lblExt.Text" xml:space="preserve">
-    <value>Dateinamenerweiterung:</value>
+  <data name="FFmpegOptionsForm_DownloaderForm_InstallRequested_Successfully_downloaded_FFmpeg_" xml:space="preserve">
+    <value>FFmpeg başarıyla indirildi.</value>
   </data>
-  <data name="txtArguments.Location" type="System.Drawing.Point, System.Drawing">
-    <value>144, 56</value>
+  <data name="FFmpegOptionsForm_UpdateUI_Quality_" xml:space="preserve">
+    <value>Kalite:</value>
   </data>
-  <data name="txtArguments.Size" type="System.Drawing.Size, System.Drawing">
-    <value>168, 20</value>
+  <data name="Surface_InitializeComponent_Region_capture" xml:space="preserve">
+    <value>Yakalama bölgesi</value>
   </data>
-  <data name="txtPath.Location" type="System.Drawing.Point, System.Drawing">
-    <value>144, 32</value>
+  <data name="RectangleLight_InitializeComponent_Rectangle_capture_light" xml:space="preserve">
+    <value>Dikdörtgen yakalama basit</value>
   </data>
-  <data name="txtPath.Size" type="System.Drawing.Size, System.Drawing">
-    <value>120, 20</value>
+  <data name="RectangleAnnotate_InitializeComponent_Rectangle_capture_annotate" xml:space="preserve">
+    <value>Dikdörtgen yakalama dipnot</value>
   </data>
-  <data name="txtName.Location" type="System.Drawing.Point, System.Drawing">
-    <value>144, 8</value>
+  <data name="HardDiskCache_GetImageEnumerator_Cache_file_size_cannot_exceed" xml:space="preserve">
+    <value>Önbellek dosya boyutu {0} bytes dan fazla olamaz.
+Lütfen GIF yerine FFmpeg ekran kaydetmeyi kullanın.</value>
   </data>
-  <data name="txtName.Size" type="System.Drawing.Size, System.Drawing">
-    <value>168, 20</value>
+  <data name="RectangleAnnotate_DrawTips_Drawing_mode_off" xml:space="preserve">
+    <value>Ctrl: Çizme modu ░ Boşluk: Tam ekran yakalama</value>
   </data>
-  <data name="lblArgs.Size" type="System.Drawing.Size, System.Drawing">
-    <value>104, 13</value>
+  <data name="RectangleAnnotate_DrawTips_Drawing_mode_on" xml:space="preserve">
+    <value>Ctrl: Bölge modu ░ Shift: Kalem rengi ░ Fare tekerleği: Kalem boyutu ░ Boşluk: Tam ekran yakalama</value>
   </data>
-  <data name="lblArgs.Text" xml:space="preserve">
-    <value>Konsolenargumente:</value>
+  <data name="FFmpegOptionsForm_UpdateUI_Bitrate___0_k" xml:space="preserve">
+    <value>Bit hızı: {0}k</value>
   </data>
-  <data name="lblPath.Text" xml:space="preserve">
-    <value>Pfad:</value>
+  <data name="RectangleRegion_GetAreaText_Area" xml:space="preserve">
+    <value>X: {0} / Y: {1}
+G: {2} / Y: {3}</value>
   </data>
-  <data name="btnCancel.Text" xml:space="preserve">
-    <value>Abbrechen</value>
+  <data name="RectangleRegion_GetRulerText_Ruler_info" xml:space="preserve">
+    <value>X: {0} / Y: {1} / X2: {2} / Y2: {3}
+Genişlik: {4} px / Yükseklik: {5} px
+Mesafe: {6:0.00} px / Açı: {7:0.00}°</value>
   </data>
-  <data name="$this.Text" xml:space="preserve">
-    <value>Encoder hinzufügen</value>
-  </data>
-  <data name="btnOK.Text" xml:space="preserve">
-		<value>OK</value>
-	</data>
-  <data name="lblName.Text" xml:space="preserve">
-		<value>Name:</value>
-	</data>
 </root>

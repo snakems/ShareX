@@ -98,6 +98,7 @@
             this.tpCapture = new System.Windows.Forms.TabPage();
             this.tcCapture = new System.Windows.Forms.TabControl();
             this.tpCaptureGeneral = new System.Windows.Forms.TabPage();
+            this.lblCaptureShadowOffset = new System.Windows.Forms.Label();
             this.cbCaptureAutoHideTaskbar = new System.Windows.Forms.CheckBox();
             this.lblScreenshotDelayInfo = new System.Windows.Forms.Label();
             this.nudScreenshotDelay = new System.Windows.Forms.NumericUpDown();
@@ -112,6 +113,8 @@
             this.tpRectangleAnnotate = new System.Windows.Forms.TabPage();
             this.pgRectangleAnnotate = new System.Windows.Forms.PropertyGrid();
             this.tpScreenRecorder = new System.Windows.Forms.TabPage();
+            this.lblScreenRecorderStartDelay = new System.Windows.Forms.Label();
+            this.chkScreenRecordAutoStart = new System.Windows.Forms.CheckBox();
             this.cbScreenRecordAutoDisableAero = new System.Windows.Forms.CheckBox();
             this.lblScreenRecorderFixedDuration = new System.Windows.Forms.Label();
             this.nudScreenRecordFPS = new System.Windows.Forms.NumericUpDown();
@@ -121,7 +124,6 @@
             this.btnEncoderConfig = new System.Windows.Forms.Button();
             this.cboEncoder = new System.Windows.Forms.ComboBox();
             this.nudScreenRecorderDuration = new System.Windows.Forms.NumericUpDown();
-            this.lblScreenRecorderStartDelay = new System.Windows.Forms.Label();
             this.nudScreenRecorderStartDelay = new System.Windows.Forms.NumericUpDown();
             this.cbScreenRecorderOutput = new System.Windows.Forms.ComboBox();
             this.lblScreenRecorderOutput = new System.Windows.Forms.Label();
@@ -732,6 +734,7 @@
             // 
             // tpCaptureGeneral
             // 
+            this.tpCaptureGeneral.Controls.Add(this.lblCaptureShadowOffset);
             this.tpCaptureGeneral.Controls.Add(this.cbCaptureAutoHideTaskbar);
             this.tpCaptureGeneral.Controls.Add(this.lblScreenshotDelayInfo);
             this.tpCaptureGeneral.Controls.Add(this.nudScreenshotDelay);
@@ -744,6 +747,11 @@
             resources.ApplyResources(this.tpCaptureGeneral, "tpCaptureGeneral");
             this.tpCaptureGeneral.Name = "tpCaptureGeneral";
             this.tpCaptureGeneral.UseVisualStyleBackColor = true;
+            // 
+            // lblCaptureShadowOffset
+            // 
+            resources.ApplyResources(this.lblCaptureShadowOffset, "lblCaptureShadowOffset");
+            this.lblCaptureShadowOffset.Name = "lblCaptureShadowOffset";
             // 
             // cbCaptureAutoHideTaskbar
             // 
@@ -855,6 +863,8 @@
             // 
             // tpScreenRecorder
             // 
+            this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderStartDelay);
+            this.tpScreenRecorder.Controls.Add(this.chkScreenRecordAutoStart);
             this.tpScreenRecorder.Controls.Add(this.cbScreenRecordAutoDisableAero);
             this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderFixedDuration);
             this.tpScreenRecorder.Controls.Add(this.nudScreenRecordFPS);
@@ -864,7 +874,6 @@
             this.tpScreenRecorder.Controls.Add(this.btnEncoderConfig);
             this.tpScreenRecorder.Controls.Add(this.cboEncoder);
             this.tpScreenRecorder.Controls.Add(this.nudScreenRecorderDuration);
-            this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderStartDelay);
             this.tpScreenRecorder.Controls.Add(this.nudScreenRecorderStartDelay);
             this.tpScreenRecorder.Controls.Add(this.cbScreenRecorderOutput);
             this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderOutput);
@@ -874,6 +883,18 @@
             resources.ApplyResources(this.tpScreenRecorder, "tpScreenRecorder");
             this.tpScreenRecorder.Name = "tpScreenRecorder";
             this.tpScreenRecorder.UseVisualStyleBackColor = true;
+            // 
+            // lblScreenRecorderStartDelay
+            // 
+            resources.ApplyResources(this.lblScreenRecorderStartDelay, "lblScreenRecorderStartDelay");
+            this.lblScreenRecorderStartDelay.Name = "lblScreenRecorderStartDelay";
+            // 
+            // chkScreenRecordAutoStart
+            // 
+            resources.ApplyResources(this.chkScreenRecordAutoStart, "chkScreenRecordAutoStart");
+            this.chkScreenRecordAutoStart.Name = "chkScreenRecordAutoStart";
+            this.chkScreenRecordAutoStart.UseVisualStyleBackColor = true;
+            this.chkScreenRecordAutoStart.CheckedChanged += new System.EventHandler(this.chkScreenRecordAutoStart_CheckedChanged);
             // 
             // cbScreenRecordAutoDisableAero
             // 
@@ -968,11 +989,6 @@
             0,
             0});
             this.nudScreenRecorderDuration.ValueChanged += new System.EventHandler(this.nudScreenRecorderDuration_ValueChanged);
-            // 
-            // lblScreenRecorderStartDelay
-            // 
-            resources.ApplyResources(this.lblScreenRecorderStartDelay, "lblScreenRecorderStartDelay");
-            this.lblScreenRecorderStartDelay.Name = "lblScreenRecorderStartDelay";
             // 
             // nudScreenRecorderStartDelay
             // 
@@ -1534,7 +1550,6 @@
         private System.Windows.Forms.PropertyGrid pgIndexerConfig;
         private System.Windows.Forms.CheckBox chkUseDefaultIndexerSettings;
         private System.Windows.Forms.NumericUpDown nudScreenRecorderStartDelay;
-        private System.Windows.Forms.Label lblScreenRecorderStartDelay;
         private System.Windows.Forms.Button btnImageEffects;
         private System.Windows.Forms.CheckBox cbImageEffectOnlyRegionCapture;
         private System.Windows.Forms.CheckBox chkShowImageEffectsWindowAfterCapture;
@@ -1576,6 +1591,9 @@
         private System.Windows.Forms.ColumnHeader chActionsExtensions;
         private System.Windows.Forms.Button btnActionsDuplicate;
         private System.Windows.Forms.Label lblImageEffectsNote;
+        private System.Windows.Forms.Label lblCaptureShadowOffset;
+        private System.Windows.Forms.CheckBox chkScreenRecordAutoStart;
+        private System.Windows.Forms.Label lblScreenRecorderStartDelay;
 
 
 

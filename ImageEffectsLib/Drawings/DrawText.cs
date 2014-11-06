@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -55,7 +54,7 @@ namespace ImageEffectsLib
             }
         }
 
-        [DefaultValue(false), Description("If watermark size bigger than source image then don't draw it.")]
+        [DefaultValue(true), Description("If text watermark size bigger than source image then don't draw it.")]
         public bool AutoHide { get; set; }
 
         [DefaultValue("getsharex.com")]

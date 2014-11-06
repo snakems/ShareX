@@ -538,8 +538,8 @@ Would you like to restart ShareX?</value>
     <value>URL is empty.</value>
   </data>
   <data name="UploadTask_DoUploadJob_First_time_upload_warning_text" xml:space="preserve">
-    <value>Are you sure you want to upload screenshot?
-You can press 'No' for cancel current upload and disable auto uploading screenshots.</value>
+    <value>Are you sure you want to upload this screenshot?
+Press 'No' to cancel the current upload and disable screenshot auto uploading.</value>
   </data>
   <data name="UploadTask_DoUploadJob_First_time_upload_warning" xml:space="preserve">
     <value>First time upload warning</value>
@@ -645,56 +645,5 @@ here</value>
   <data name="Program_WritePersonalPathConfig_Cant_access_to_file" xml:space="preserve">
     <value>Can't access to "{0}" file.
 Please run ShareX as administrator to change personal folder path.</value>
-  </data>
-  <data name="AfterCaptureTasks_AddImageEffects" xml:space="preserve">
-    <value>Add image effects</value>
-  </data>
-  <data name="AfterCaptureTasks_AnnotateImage" xml:space="preserve">
-    <value>Open in image editor</value>
-  </data>
-  <data name="AfterCaptureTasks_CopyFilePathToClipboard" xml:space="preserve">
-    <value>Copy file path to clipboard</value>
-  </data>
-  <data name="AfterCaptureTasks_CopyFileToClipboard" xml:space="preserve">
-    <value>Copy file to clipboard</value>
-  </data>
-  <data name="AfterCaptureTasks_CopyImageToClipboard" xml:space="preserve">
-    <value>Copy image to clipboard</value>
-  </data>
-  <data name="AfterCaptureTasks_DeleteFile" xml:space="preserve">
-    <value>Delete file locally</value>
-  </data>
-  <data name="AfterCaptureTasks_PerformActions" xml:space="preserve">
-    <value>Perform actions</value>
-  </data>
-  <data name="AfterCaptureTasks_SaveImageToFile" xml:space="preserve">
-    <value>Save image to file</value>
-  </data>
-  <data name="AfterCaptureTasks_SaveImageToFileWithDialog" xml:space="preserve">
-    <value>Save image to file as...</value>
-  </data>
-  <data name="AfterCaptureTasks_SaveThumbnailImageToFile" xml:space="preserve">
-    <value>Save thumbnail image to file</value>
-  </data>
-  <data name="AfterCaptureTasks_SendImageToPrinter" xml:space="preserve">
-    <value>Print image</value>
-  </data>
-  <data name="AfterCaptureTasks_UploadImageToHost" xml:space="preserve">
-    <value>Upload image to host</value>
-  </data>
-  <data name="AfterUploadTasks_CopyURLToClipboard" xml:space="preserve">
-    <value>Copy URL to clipboard</value>
-  </data>
-  <data name="AfterUploadTasks_OpenURL" xml:space="preserve">
-    <value>Open URL</value>
-  </data>
-  <data name="AfterUploadTasks_ShareURL" xml:space="preserve">
-    <value>Share URL</value>
-  </data>
-  <data name="AfterUploadTasks_ShowQRCode" xml:space="preserve">
-    <value>Show QR code window</value>
-  </data>
-  <data name="AfterUploadTasks_UseURLShortener" xml:space="preserve">
-    <value>Shorten URL</value>
   </data>
 </root>

@@ -23,12 +23,21 @@
 
 #endregion License Information (GPL v3)
 
+using System.ComponentModel;
 using System.Drawing;
 
 namespace ImageEffectsLib
 {
     public abstract class ImageEffect
     {
+        [DefaultValue(true), Browsable(false)]
+        public bool Enabled { get; set; }
+
+        protected ImageEffect()
+        {
+            Enabled = true;
+        }
+
         public abstract Image Apply(Image img);
     }
 }

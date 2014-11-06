@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using HelpersLib;
+using ShareX.Properties;
 using System.ComponentModel;
 using System.Globalization;
 using System.Threading;
@@ -51,9 +52,6 @@ namespace ShareX
                     case SupportedLanguage.English:
                         cultureName = "en-US";
                         break;
-                    case SupportedLanguage.German:
-                        cultureName = "de-DE";
-                        break;
                     case SupportedLanguage.Turkish:
                         cultureName = "tr-TR";
                         break;
@@ -62,9 +60,9 @@ namespace ShareX
                 currentCulture = CultureInfo.GetCultureInfo(cultureName);
             }
 
-            if (currentCulture.CompareInfo != Thread.CurrentThread.CurrentUICulture.CompareInfo)
+            if (!currentCulture.Equals(Thread.CurrentThread.CurrentUICulture))
             {
-                Thread.CurrentThread.CurrentUICulture = currentCulture;
+                Helpers.SetDefaultUICulture(currentCulture);
                 DebugHelper.WriteLine("Language changed to: " + currentCulture.DisplayName);
 
                 foreach (Form form in forms)

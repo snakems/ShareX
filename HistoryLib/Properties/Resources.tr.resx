@@ -117,20 +117,100 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lblScreenColorPickerTip.Text" xml:space="preserve">
-    <value>Drücken Sie "Strg" wenn dieses Fenster
-fokusiert ist um die Farbauswahl zu stoppen.</value>
+  <data name="HistoryItemManager_InitializeComponent_Show" xml:space="preserve">
+    <value>Göster</value>
   </data>
-  <data name="btnColorPicker.Text" xml:space="preserve">
-    <value>Bildschirm-Farbausfahl</value>
+  <data name="HistoryForm_HistoryForm_Current_culture___0__" xml:space="preserve">
+    <value>Aktif kültür ({0})</value>
   </data>
-  <data name="btnCopyAll.Text" xml:space="preserve">
-		<value>Alles kopieren</value>
-	</data>
-  <data name="$this.Text" xml:space="preserve">
-		<value>ShareX - Farbauswahl</value>
-	</data>
-  <data name="btnCancel.Text" xml:space="preserve">
-		<value>Abbrechen</value>
-	</data>
+  <data name="HistoryForm_HistoryForm_History_" xml:space="preserve">
+    <value>Geçmiş: {0}</value>
+  </data>
+  <data name="HistoryForm_UpdateItemCount___Filtered___0_" xml:space="preserve">
+    <value>Filtrelenmiş: {0}</value>
+  </data>
+  <data name="HistoryForm_UpdateItemCount_Total___0_" xml:space="preserve">
+    <value>Toplam: {0}</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Copy" xml:space="preserve">
+    <value>Kopyala</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Deletion_URL" xml:space="preserve">
+    <value>Silme adresi</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_File" xml:space="preserve">
+    <value>Dosya</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_File_name" xml:space="preserve">
+    <value>Dosya adı</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_File_name_with_extension" xml:space="preserve">
+    <value>Uzantılı dosya adı</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_File_path" xml:space="preserve">
+    <value>Dosya yolu</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Folder" xml:space="preserve">
+    <value>Dizin</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Forum__BBCode__image" xml:space="preserve">
+    <value>Forum (BBCode) resim</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Forum__BBCode__link" xml:space="preserve">
+    <value>Forum (BBCode) link</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Forum__BBCode__linked_image" xml:space="preserve">
+    <value>Forum (BBCode) linkli resim</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_HTML_image" xml:space="preserve">
+    <value>HTML resim</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_HTML_link" xml:space="preserve">
+    <value>HTML link</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_HTML_linked_image" xml:space="preserve">
+    <value>HTML linkli resim</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Image" xml:space="preserve">
+    <value>Resim</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Image_preview" xml:space="preserve">
+    <value>Resim önizleme</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_More_info" xml:space="preserve">
+    <value>Daha fazla bilgi</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Open" xml:space="preserve">
+    <value>Aç</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Shortened_URL" xml:space="preserve">
+    <value>Kısaltılmış adres</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Text" xml:space="preserve">
+    <value>Yazı</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_Thumbnail_URL" xml:space="preserve">
+    <value>Küçük resim adresi</value>
+  </data>
+  <data name="HistoryItemManager_InitializeComponent_URL" xml:space="preserve">
+    <value>Adres</value>
+  </data>
+  <data name="HistoryItemManager_UpdateTexts_HTML_link___0__" xml:space="preserve">
+    <value>HTML link ({0})</value>
+  </data>
+  <data name="HistoryItemManager_UpdateTexts_URLs___0__" xml:space="preserve">
+    <value>Adresler ({0})</value>
+  </data>
+  <data name="ObjectListView_ObjectListView_Copy_name" xml:space="preserve">
+    <value>Adı kopyala</value>
+  </data>
+  <data name="ObjectListView_ObjectListView_Copy_value" xml:space="preserve">
+    <value>Değeri kopyala</value>
+  </data>
+  <data name="ObjectListView_ObjectListView_Name" xml:space="preserve">
+    <value>Ad</value>
+  </data>
+  <data name="ObjectListView_ObjectListView_Value" xml:space="preserve">
+    <value>Değer</value>
+  </data>
 </root>

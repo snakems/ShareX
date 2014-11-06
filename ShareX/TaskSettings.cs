@@ -46,7 +46,7 @@ namespace ShareX
         {
             get
             {
-                return !string.IsNullOrEmpty(description) ? description : Job.GetDescription();
+                return !string.IsNullOrEmpty(description) ? description : Job.GetLocalizedDescription();
             }
             set
             {
@@ -117,12 +117,7 @@ namespace ShareX
 
         public override string ToString()
         {
-            if (!string.IsNullOrEmpty(Description))
-            {
-                return Description;
-            }
-
-            return Job.GetDescription();
+            return Description;
         }
 
         public bool IsUsingDefaultSettings
@@ -332,6 +327,7 @@ namespace ShareX
         public int GIFFPS = 5;
         public bool ScreenRecordFixedDuration = false;
         public float ScreenRecordDuration = 3f;
+        public bool ScreenRecordAutoStart = true;
         public float ScreenRecordStartDelay = 0.5f;
         public bool ScreenRecordAutoDisableAero = false;
 
@@ -410,7 +406,7 @@ namespace ShareX
         [Category("After upload / Notifications"), DefaultValue(ContentAlignment.BottomRight), Description("Specify where should toast notification window appear on the screen.")]
         public ContentAlignment ToastWindowPlacement { get; set; }
 
-        [Category("After upload / Notifications"), DefaultValue(ToastClickAction.OpenUrl), Description("Specify action after toast notification window is left clicked.")]
+        [Category("After upload / Notifications"), DefaultValue(ToastClickAction.OpenUrl), Description("Specify action after toast notification window is left clicked."), TypeConverter(typeof(EnumDescriptionConverter))]
         public ToastClickAction ToastWindowClickAction { get; set; }
 
         private Size toastWindowSize;

@@ -128,15 +128,11 @@ namespace HelpersLib
         Screenshot
     }
 
-    public enum GIFQuality
+    public enum GIFQuality // Localized
     {
-        [Description("Default .NET encoding (Fast encoding but average quality)")]
         Default,
-        [Description("Octree quantizer 256 colors (Slow encoding but better quality)")]
         Bit8,
-        [Description("Octree quantizer 16 colors")]
         Bit4,
-        [Description("Palette quantizer grayscale 256 colors")]
         Grayscale
     }
 
@@ -168,18 +164,6 @@ namespace HelpersLib
     {
         ReportStarted,
         ReportProgress
-    }
-
-    public enum WindowButtonAction
-    {
-        [Description("Minimize to Tray")]
-        MinimizeToTray,
-        [Description("Minimize to Taskbar")]
-        MinimizeToTaskbar,
-        [Description("Exit Application")]
-        ExitApplication,
-        [Description("Do Nothing")]
-        Nothing
     }
 
     public enum TriangleAngle
@@ -285,7 +269,7 @@ namespace HelpersLib
         RGB, RGBA, ARGB
     }
 
-    public enum ProxyMethod
+    public enum ProxyMethod // Localized
     {
         None,
         Manual,
