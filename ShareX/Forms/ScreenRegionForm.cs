@@ -37,11 +37,12 @@ namespace ShareX
     {
         public event Action StopRequested;
 
-        public bool IsRecording { get; set; }
+        public bool IsRecording { get; private set; }
         public bool IsCountdown { get; set; }
         public TimeSpan Countdown { get; set; }
         public Stopwatch Timer { get; private set; }
         public ManualResetEvent RecordResetEvent { get; set; }
+        public bool AbortRequested { get; private set; }
 
         private Color borderColor = Color.Red;
         private Rectangle borderRectangle;
@@ -66,6 +67,11 @@ namespace ShareX
             Timer = new Stopwatch();
         }
 
+        private void ScreenRegionForm_Shown(object sender, EventArgs e)
+        {
+            this.ShowActivate();
+        }
+
         protected void OnStopRequested()
         {
             if (StopRequested != null)
@@ -76,23 +82,18 @@ namespace ShareX
 
         public static ScreenRegionForm Show(Rectangle captureRectangle, Action stopRequested, float duration = 0)
         {
-            if (captureRectangle != CaptureHelpers.GetScreenBounds())
+            ScreenRegionForm regionForm = new ScreenRegionForm(captureRectangle);
+            regionForm.StopRequested += stopRequested;
+
+            if (duration > 0)
             {
-                ScreenRegionForm regionForm = new ScreenRegionForm(captureRectangle);
-                regionForm.StopRequested += stopRequested;
-
-                if (duration > 0)
-                {
-                    regionForm.IsCountdown = true;
-                    regionForm.Countdown = TimeSpan.FromSeconds(duration);
-                }
-
-                regionForm.UpdateTimer();
-                regionForm.Show();
-                return regionForm;
+                regionForm.IsCountdown = true;
+                regionForm.Countdown = TimeSpan.FromSeconds(duration);
             }
 
-            return null;
+            regionForm.UpdateTimer();
+            regionForm.Show();
+            return regionForm;
         }
 
         public void StartTimer()
@@ -143,7 +144,7 @@ namespace ShareX
             UpdateTimer();
         }
 
-        private void btnStop_Click(object sender, EventArgs e)
+        private void Stop()
         {
             if (IsRecording)
             {
@@ -152,6 +153,23 @@ namespace ShareX
             else if (RecordResetEvent != null)
             {
                 RecordResetEvent.Set();
+            }
+        }
+
+        private void btnStop_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                Stop();
+            }
+        }
+
+        private void btnAbort_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                AbortRequested = true;
+                Stop();
             }
         }
     }

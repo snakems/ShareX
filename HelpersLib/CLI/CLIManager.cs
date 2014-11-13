@@ -25,60 +25,143 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 
-namespace HelpersLib.CLI
+namespace HelpersLib
 {
     public class CLIManager
     {
-        public List<CLICommand> Commands { get; set; }
+        public string[] Arguments { get; private set; }
+        public List<CLICommand> Commands { get; private set; }
+        public List<CLICommandAction> Actions { get; private set; }
 
-        public List<CLICommandAction> Actions { get; set; }
-
-        private string input;
-        private CLIParser parser;
-
-        public CLIManager(string text)
+        public CLIManager()
         {
-            input = text;
-            parser = new CLIParser();
+            Commands = new List<CLICommand>();
+            Actions = new List<CLICommandAction>();
         }
 
-        public bool Parse()
+        public CLIManager(string[] arguments)
+            : this()
         {
-            bool result = false;
+            Arguments = arguments;
+        }
 
+        public CLIManager(string arguments)
+            : this()
+        {
+            Arguments = ParseCLI(arguments);
+        }
+
+        public bool ParseCommands()
+        {
             try
             {
-                List<string> commands = parser.Parse(input);
-
                 CLICommand lastCommand = null;
 
-                foreach (string cmd in commands)
+                foreach (string argument in Arguments)
                 {
-                    if (cmd[0] == '-')
+                    if (lastCommand == null || argument[0] == '-')
                     {
-                        string command = cmd.Substring(1);
-                        lastCommand = new CLICommand(command);
-                        Commands.Add(lastCommand);
-                    }
-                    else if (lastCommand != null && string.IsNullOrEmpty(lastCommand.Parameter))
-                    {
-                        lastCommand.Parameter = cmd;
+                        CLICommand command = new CLICommand();
+
+                        if (argument[0] == '-')
+                        {
+                            command.IsCommand = true;
+                            command.Command = argument.Substring(1);
+                            lastCommand = command;
+                        }
+                        else
+                        {
+                            command.Command = argument;
+                        }
+
+                        Commands.Add(command);
                     }
                     else
                     {
-                        throw new Exception("Command not starting with '-' or more than one parameter exist.");
+                        lastCommand.Parameter = argument;
+                        lastCommand = null;
                     }
                 }
 
-                result = true;
+                return true;
             }
             catch (Exception e)
             {
                 DebugHelper.WriteException(e);
             }
 
-            return result;
+            return false;
+        }
+
+        private string[] ParseCLI(string arguments)
+        {
+            List<string> commands = new List<string>();
+
+            bool inDoubleQuotes = false;
+
+            for (int i = 0, start = 0; i < arguments.Length; i++)
+            {
+                if ((!inDoubleQuotes && char.IsWhiteSpace(arguments[i])) || (inDoubleQuotes && arguments[i] == '"'))
+                {
+                    string command = arguments.Substring(start, i - start);
+
+                    if (!string.IsNullOrEmpty(command))
+                    {
+                        commands.Add(command);
+                    }
+
+                    if (inDoubleQuotes) inDoubleQuotes = false;
+                    start = i + 1;
+                }
+                else if (arguments[i] == '"')
+                {
+                    inDoubleQuotes = true;
+                    start = i + 1;
+                }
+            }
+
+            return commands.ToArray();
+        }
+
+        public bool IsCommandExist(params string[] commands)
+        {
+            if (Commands != null && commands != null)
+            {
+                foreach (string command in commands.Where(x => !string.IsNullOrEmpty(x)))
+                {
+                    string command1 = command;
+
+                    if (command1[0] == '-')
+                    {
+                        command1 = command1.Substring(1);
+                    }
+
+                    foreach (CLICommand command2 in Commands.Where(x => x != null && x.IsCommand && !string.IsNullOrEmpty(x.Command)))
+                    {
+                        if (command1.Equals(command2.Command, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public string GetParameter(string command)
+        {
+            CLICommand cliCommand = Commands.Find(x => command.Equals(x.Command, StringComparison.InvariantCultureIgnoreCase));
+
+            if (cliCommand != null)
+            {
+                return cliCommand.Parameter;
+            }
+
+            return null;
         }
 
         public void ExecuteActions()
@@ -87,6 +170,23 @@ namespace HelpersLib.CLI
             {
                 action.CheckCommands(Commands);
             }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (CLICommand command in Commands)
+            {
+                if (sb.Length > 0)
+                {
+                    sb.AppendLine();
+                }
+
+                sb.Append(command);
+            }
+
+            return sb.ToString();
         }
     }
 }
