@@ -23,12 +23,12 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
+using ShareX.HelpersLib;
+using ShareX.UploadersLib;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Design;
-using UploadersLib;
 
 namespace ShareX
 {
@@ -134,6 +134,9 @@ namespace ShareX
         [Category("Application"), DefaultValue(HotkeyType.RectangleRegion), Description("You can set which action to happen when you middle click tray icon."), TypeConverter(typeof(EnumDescriptionConverter))]
         public HotkeyType TrayMiddleClickAction { get; set; }
 
+        [Category("Application"), DefaultValue(true), Description("Show tips in main window list when list is empty.")]
+        public bool ShowMainWindowTip { get; set; }
+
         [Category("Application / Config"), DefaultValue(false), Description("Automatically detect external changes to UploaderConfig file and load settigns to memory.")]
         public bool DetectUploaderConfigFileChanges { get; set; }
 
@@ -185,5 +188,11 @@ namespace ShareX
         public bool AutoCaptureWaitUpload = true;
 
         #endregion AutoCapture Form
+
+        #region ScreenRecord Form
+
+        public Rectangle ScreenRecordRegion = Rectangle.Empty;
+
+        #endregion ScreenRecord Form
     }
 }

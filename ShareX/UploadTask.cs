@@ -23,8 +23,15 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
+using ShareX.HelpersLib;
 using ShareX.Properties;
+using ShareX.UploadersLib;
+using ShareX.UploadersLib.FileUploaders;
+using ShareX.UploadersLib.GUI;
+using ShareX.UploadersLib.HelperClasses;
+using ShareX.UploadersLib.ImageUploaders;
+using ShareX.UploadersLib.TextUploaders;
+using ShareX.UploadersLib.URLShorteners;
 using System;
 using System.Drawing;
 using System.IO;
@@ -32,13 +39,6 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using UploadersLib;
-using UploadersLib.FileUploaders;
-using UploadersLib.GUI;
-using UploadersLib.HelperClasses;
-using UploadersLib.ImageUploaders;
-using UploadersLib.TextUploaders;
-using UploadersLib.URLShorteners;
 
 namespace ShareX
 {
@@ -115,7 +115,16 @@ namespace ShareX
             else
             {
                 task.Info.Job = TaskJob.FileUpload;
-                task.Data = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+
+                try
+                {
+                    task.Data = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show("ShareX - " + Resources.TaskManager_task_UploadCompleted_Error, e.Message, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return null;
+                }
             }
 
             return task;
@@ -712,9 +721,10 @@ namespace ShareX
                     };
                     break;
                 case ImageDestination.CustomImageUploader:
-                    if (Program.UploadersConfig.CustomUploadersList.IsValidIndex(Program.UploadersConfig.CustomImageUploaderSelected))
+                    CustomUploaderItem customUploader = GetCustomUploader(Program.UploadersConfig.CustomImageUploaderSelected);
+                    if (customUploader != null)
                     {
-                        imageUploader = new CustomImageUploader(Program.UploadersConfig.CustomUploadersList[Program.UploadersConfig.CustomImageUploaderSelected]);
+                        imageUploader = new CustomImageUploader(customUploader);
                     }
                     break;
             }
@@ -772,9 +782,10 @@ namespace ShareX
                     };
                     break;
                 case TextDestination.CustomTextUploader:
-                    if (Program.UploadersConfig.CustomUploadersList.IsValidIndex(Program.UploadersConfig.CustomTextUploaderSelected))
+                    CustomUploaderItem customUploader = GetCustomUploader(Program.UploadersConfig.CustomTextUploaderSelected);
+                    if (customUploader != null)
                     {
-                        textUploader = new CustomTextUploader(Program.UploadersConfig.CustomUploadersList[Program.UploadersConfig.CustomTextUploaderSelected]);
+                        textUploader = new CustomTextUploader(customUploader);
                     }
                     break;
             }
@@ -818,14 +829,10 @@ namespace ShareX
                         ShareURLType = Program.UploadersConfig.DropboxURLType
                     };
                     break;
-                /*case FileDestination.OneDrive:
-                    fileUploader = new OneDrive(Program.UploadersConfig.OneDriveOAuth2Info);
-                    break;*/
-                case FileDestination.Copy:
-                    fileUploader = new Copy(Program.UploadersConfig.CopyOAuthInfo, Program.UploadersConfig.CopyAccountInfo)
+                case FileDestination.OneDrive:
+                    fileUploader = new OneDrive(Program.UploadersConfig.OneDriveOAuth2Info)
                     {
-                        UploadPath = NameParser.Parse(NameParserType.URL, Copy.TidyUploadPath(Program.UploadersConfig.CopyUploadPath)),
-                        URLType = Program.UploadersConfig.CopyURLType
+                        AutoCreateShareableLink = Program.UploadersConfig.OneDriveAutoCreateShareableLink
                     };
                     break;
                 case FileDestination.GoogleDrive:
@@ -833,6 +840,13 @@ namespace ShareX
                     {
                         IsPublic = Program.UploadersConfig.GoogleDriveIsPublic,
                         FolderID = Program.UploadersConfig.GoogleDriveUseFolder ? Program.UploadersConfig.GoogleDriveFolderID : null
+                    };
+                    break;
+                case FileDestination.Copy:
+                    fileUploader = new Copy(Program.UploadersConfig.CopyOAuthInfo, Program.UploadersConfig.CopyAccountInfo)
+                    {
+                        UploadPath = NameParser.Parse(NameParserType.URL, Copy.TidyUploadPath(Program.UploadersConfig.CopyUploadPath)),
+                        URLType = Program.UploadersConfig.CopyURLType
                     };
                     break;
                 case FileDestination.RapidShare:
@@ -876,34 +890,23 @@ namespace ShareX
                     };
                     break;
                 case FileDestination.CustomFileUploader:
-                    if (Program.UploadersConfig.CustomUploadersList.IsValidIndex(Program.UploadersConfig.CustomFileUploaderSelected))
+                    CustomUploaderItem customUploader = GetCustomUploader(Program.UploadersConfig.CustomFileUploaderSelected);
+                    if (customUploader != null)
                     {
-                        fileUploader = new CustomFileUploader(Program.UploadersConfig.CustomUploadersList[Program.UploadersConfig.CustomFileUploaderSelected]);
+                        fileUploader = new CustomFileUploader(customUploader);
                     }
                     break;
                 case FileDestination.FTP:
-                    int index;
-
-                    if (Info.TaskSettings.OverrideFTP)
+                    FTPAccount ftpAccount = GetFTPAccount(Program.UploadersConfig.GetFTPIndex(Info.DataType));
+                    if (ftpAccount != null)
                     {
-                        index = Info.TaskSettings.FTPIndex.BetweenOrDefault(0, Program.UploadersConfig.FTPAccountList.Count - 1);
-                    }
-                    else
-                    {
-                        index = Program.UploadersConfig.GetFTPIndex(Info.DataType);
-                    }
-
-                    FTPAccount account = Program.UploadersConfig.FTPAccountList.ReturnIfValidIndex(index);
-
-                    if (account != null)
-                    {
-                        if (account.Protocol == FTPProtocol.FTP || account.Protocol == FTPProtocol.FTPS)
+                        if (ftpAccount.Protocol == FTPProtocol.FTP || ftpAccount.Protocol == FTPProtocol.FTPS)
                         {
-                            fileUploader = new FTP(account);
+                            fileUploader = new FTP(ftpAccount);
                         }
-                        else if (account.Protocol == FTPProtocol.SFTP)
+                        else if (ftpAccount.Protocol == FTPProtocol.SFTP)
                         {
-                            fileUploader = new SFTP(account);
+                            fileUploader = new SFTP(ftpAccount);
                         }
                     }
                     break;
@@ -1042,9 +1045,10 @@ namespace ShareX
                     };
                     break;
                 case UrlShortenerType.CustomURLShortener:
-                    if (Program.UploadersConfig.CustomUploadersList.IsValidIndex(Program.UploadersConfig.CustomURLShortenerSelected))
+                    CustomUploaderItem customUploader = GetCustomUploader(Program.UploadersConfig.CustomURLShortenerSelected);
+                    if (customUploader != null)
                     {
-                        urlShortener = new CustomURLShortener(Program.UploadersConfig.CustomUploadersList[Program.UploadersConfig.CustomURLShortenerSelected]);
+                        urlShortener = new CustomURLShortener(customUploader);
                     }
                     break;
             }
@@ -1142,6 +1146,26 @@ namespace ShareX
                         break;
                 }
             }
+        }
+
+        private FTPAccount GetFTPAccount(int index)
+        {
+            if (Info.TaskSettings.OverrideFTP)
+            {
+                index = Info.TaskSettings.FTPIndex.BetweenOrDefault(0, Program.UploadersConfig.FTPAccountList.Count - 1);
+            }
+
+            return Program.UploadersConfig.FTPAccountList.ReturnIfValidIndex(index);
+        }
+
+        private CustomUploaderItem GetCustomUploader(int index)
+        {
+            if (Info.TaskSettings.OverrideCustomUploader)
+            {
+                index = Info.TaskSettings.CustomUploaderIndex.BetweenOrDefault(0, Program.UploadersConfig.CustomUploadersList.Count - 1);
+            }
+
+            return Program.UploadersConfig.CustomUploadersList.ReturnIfValidIndex(index);
         }
 
         private void ThreadCompleted()

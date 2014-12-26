@@ -23,11 +23,12 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
-using ImageEffectsLib;
-using IndexerLib;
 using Newtonsoft.Json;
-using ScreenCaptureLib;
+using ShareX.HelpersLib;
+using ShareX.ImageEffectsLib;
+using ShareX.IndexerLib;
+using ShareX.ScreenCaptureLib;
+using ShareX.UploadersLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -35,7 +36,6 @@ using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Globalization;
-using UploadersLib;
 
 namespace ShareX
 {
@@ -58,7 +58,7 @@ namespace ShareX
         public HotkeyType Job = HotkeyType.None;
 
         public bool UseDefaultAfterCaptureJob = true;
-        public AfterCaptureTasks AfterCaptureJob = AfterCaptureTasks.AddImageEffects | AfterCaptureTasks.CopyImageToClipboard | AfterCaptureTasks.SaveImageToFile | AfterCaptureTasks.UploadImageToHost;
+        public AfterCaptureTasks AfterCaptureJob = AfterCaptureTasks.CopyImageToClipboard | AfterCaptureTasks.SaveImageToFile | AfterCaptureTasks.UploadImageToHost;
 
         public bool UseDefaultAfterUploadJob = true;
         public AfterUploadTasks AfterUploadJob = AfterUploadTasks.CopyURLToClipboard;
@@ -74,6 +74,9 @@ namespace ShareX
 
         public bool OverrideFTP = false;
         public int FTPIndex = 0;
+
+        public bool OverrideCustomUploader = false;
+        public int CustomUploaderIndex = 0;
 
         public bool UseDefaultGeneralSettings = true;
         public TaskSettingsGeneral GeneralSettings = new TaskSettingsGeneral();
@@ -125,7 +128,7 @@ namespace ShareX
         {
             get
             {
-                return UseDefaultAfterCaptureJob && UseDefaultAfterUploadJob && UseDefaultDestinations && !OverrideFTP && UseDefaultGeneralSettings &&
+                return UseDefaultAfterCaptureJob && UseDefaultAfterUploadJob && UseDefaultDestinations && !OverrideFTP && !OverrideCustomUploader && UseDefaultGeneralSettings &&
                     UseDefaultImageSettings && UseDefaultCaptureSettings && UseDefaultUploadSettings && UseDefaultActions && UseDefaultIndexerSettings &&
                     UseDefaultAdvancedSettings && !WatchFolderEnabled;
             }
@@ -391,7 +394,7 @@ namespace ShareX
 
         private float toastWindowDuration;
 
-        [Category("After upload / Notifications"), DefaultValue(4f), Description("Specify how long should toast notification window will stay on screen (in seconds).")]
+        [Category("After upload / Notifications"), DefaultValue(3f), Description("Specify how long should toast notification window will stay on screen (in seconds).")]
         public float ToastWindowDuration
         {
             get
@@ -400,7 +403,7 @@ namespace ShareX
             }
             set
             {
-                toastWindowDuration = Math.Max(value, 1f);
+                toastWindowDuration = Math.Max(value, 0f);
             }
         }
 
