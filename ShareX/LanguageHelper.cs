@@ -23,8 +23,7 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
-using ShareX.Properties;
+using ShareX.HelpersLib;
 using System.ComponentModel;
 using System.Globalization;
 using System.Threading;
@@ -54,6 +53,9 @@ namespace ShareX
                         break;
                     case SupportedLanguage.Turkish:
                         cultureName = "tr-TR";
+                        break;
+                    case SupportedLanguage.German:
+                        cultureName = "de-DE";
                         break;
                 }
 

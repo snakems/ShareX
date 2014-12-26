@@ -23,10 +23,12 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
-using ImageEffectsLib;
-using ScreenCaptureLib;
+using ShareX.HelpersLib;
+using ShareX.ImageEffectsLib;
 using ShareX.Properties;
+using ShareX.ScreenCaptureLib;
+using ShareX.UploadersLib;
+using ShareX.UploadersLib.HelperClasses;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -35,8 +37,6 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
-using UploadersLib;
-using UploadersLib.HelperClasses;
 
 namespace ShareX
 {
@@ -93,6 +93,10 @@ namespace ShareX
                         thumbImage = ImageHelpers.FillBackground(thumbImage, Color.White);
                         thumbImage.SaveJPG(thumbnailFilePath, 90);
                         return thumbnailFilePath;
+                    }
+                    catch (Exception e)
+                    {
+                        DebugHelper.WriteException(e);
                     }
                     finally
                     {
@@ -313,12 +317,13 @@ namespace ShareX
             }
         }
 
-        public static bool SelectRegion(out Rectangle rect)
+        public static bool SelectRegion(out Rectangle rect, TaskSettings taskSettings)
         {
             using (RectangleRegion surface = new RectangleRegion())
             {
-                surface.AreaManager.WindowCaptureMode = true;
-                surface.AreaManager.IncludeControls = true;
+                surface.Config = taskSettings.CaptureSettings.SurfaceOptions;
+                surface.Config.QuickCrop = true;
+                surface.Config.ForceWindowCapture = true;
                 surface.Prepare();
                 surface.ShowDialog();
 
@@ -348,8 +353,7 @@ namespace ShareX
                 surfaceOptions = new SurfaceOptions();
             }
 
-            using (Image fullscreen = Screenshot.CaptureFullscreen())
-            using (RectangleRegion surface = new RectangleRegion(fullscreen))
+            using (RectangleRegion surface = new RectangleRegion())
             {
                 surface.Config = surfaceOptions;
                 surface.OneClickMode = true;
@@ -360,7 +364,7 @@ namespace ShareX
                 {
                     PointInfo pointInfo = new PointInfo();
                     pointInfo.Position = CaptureHelpers.ClientToScreen(surface.OneClickPosition);
-                    pointInfo.Color = ((Bitmap)fullscreen).GetPixel(surface.OneClickPosition.X, surface.OneClickPosition.Y);
+                    pointInfo.Color = ((Bitmap)surface.SurfaceImage).GetPixel(surface.OneClickPosition.X, surface.OneClickPosition.Y);
                     return pointInfo;
                 }
             }
@@ -452,17 +456,17 @@ namespace ShareX
         {
             TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
             taskSettings.CaptureSettings.ScreenRecordOutput = ScreenRecordOutput.FFmpeg;
-            DoScreenRecording(taskSettings);
+            StartScreenRecording(taskSettings);
         }
 
         public static void DoScreenRecordingGIF()
         {
             TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
             taskSettings.CaptureSettings.ScreenRecordOutput = ScreenRecordOutput.GIF;
-            DoScreenRecording(taskSettings);
+            StartScreenRecording(taskSettings);
         }
 
-        public static void DoScreenRecording(TaskSettings taskSettings = null)
+        public static void StartScreenRecording(TaskSettings taskSettings = null, bool skipRegionSelection = false)
         {
             if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
 
@@ -470,17 +474,27 @@ namespace ShareX
 
             if (form.IsRecording)
             {
-                form.StopRecording();
+                form.StartStopRecording();
             }
             else
             {
-                form.StartRecording(taskSettings);
+                form.StartRecording(taskSettings, skipRegionSelection);
             }
         }
 
         public static void OpenAutoCapture()
         {
             AutoCaptureForm.Instance.ShowActivate();
+        }
+
+        public static void StartAutoCapture()
+        {
+            if (!AutoCaptureForm.IsRunning)
+            {
+                AutoCaptureForm form = AutoCaptureForm.Instance;
+                form.Show();
+                form.Execute();
+            }
         }
 
         public static void OpenScreenshotsFolder()
@@ -495,16 +509,6 @@ namespace ShareX
             }
         }
 
-        public static void StartAutoCapture()
-        {
-            if (!AutoCaptureForm.IsRunning)
-            {
-                AutoCaptureForm form = AutoCaptureForm.Instance;
-                form.Show();
-                form.Execute();
-            }
-        }
-
         public static void OpenScreenColorPicker()
         {
             new ScreenColorPicker().Show();
@@ -512,8 +516,7 @@ namespace ShareX
 
         public static void OpenRuler()
         {
-            using (Image fullscreen = Screenshot.CaptureFullscreen())
-            using (RectangleRegion surface = new RectangleRegion(fullscreen))
+            using (RectangleRegion surface = new RectangleRegion())
             {
                 surface.RulerMode = true;
                 surface.Config.QuickCrop = false;

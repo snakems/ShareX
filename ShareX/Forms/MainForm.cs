@@ -23,18 +23,19 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
-using HistoryLib;
-using ScreenCaptureLib;
+using ShareX.HelpersLib;
+using ShareX.HistoryLib;
 using ShareX.Properties;
+using ShareX.ScreenCaptureLib;
+using ShareX.UploadersLib;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
-using UploadersLib;
 
 namespace ShareX
 {
@@ -160,8 +161,6 @@ namespace ShareX
             il.Images.Add(Resources.navigation_000_button);
             lvUploads.SmallImageList = il;
 
-            pbLogo.LoadImage(ColorMatrixManager.Alpha(0.5f).Apply(ShareXResources.Logo));
-
             TaskManager.ListViewControl = lvUploads;
             uim = new UploadInfoManager(lvUploads);
 
@@ -193,11 +192,34 @@ namespace ShareX
             tsddbWorkflows.DropDownItems.Add(tsmi);
 
             tsmiTrayWorkflows.Visible = tsmiTrayWorkflows.DropDownItems.Count > 0;
+
+            UpdateMainFormTip();
+        }
+
+        private void UpdateMainFormTip()
+        {
+            TaskManager.UpdateMainFormTip();
+
+            StringBuilder sb = new StringBuilder(Resources.MainForm_UpdateMainFormTip_You_can_drag_and_drop_files_to_this_window_);
+
+            if (Program.HotkeysConfig.Hotkeys.Count > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine();
+                sb.AppendLine(Resources.MainForm_UpdateMainFormTip_Currently_configured_hotkeys_);
+
+                foreach (HotkeySettings hotkey in Program.HotkeysConfig.Hotkeys.Where(x => x.HotkeyInfo.IsValidHotkey))
+                {
+                    sb.AppendFormat("{0}  |  {1}\r\n", hotkey.HotkeyInfo, hotkey.TaskSettings.Description);
+                }
+            }
+
+            lblMainFormTip.Text = sb.ToString().Trim();
         }
 
         private ToolStripMenuItem WorkflowMenuItem(HotkeySettings hotkeySetting)
         {
-            ToolStripMenuItem tsmi = new ToolStripMenuItem(hotkeySetting.TaskSettings.Description);
+            ToolStripMenuItem tsmi = new ToolStripMenuItem(hotkeySetting.TaskSettings.Description.Replace("&", "&&"));
             if (hotkeySetting.HotkeyInfo.IsValidHotkey)
             {
                 tsmi.ShortcutKeyDisplayString = "  " + hotkeySetting.HotkeyInfo;
@@ -669,21 +691,47 @@ namespace ShareX
             {
                 DebugHelper.WriteLine("CommandLine: " + command.Command);
 
-                if (command.IsCommand)
+                if (command.IsCommand && (CheckCLIHotkey(command) || CheckCLIWorkflow(command)))
                 {
-                    foreach (HotkeyType job in Helpers.GetEnums<HotkeyType>())
+                    continue;
+                }
+
+                UploadManager.UploadFile(command.Command);
+            }
+        }
+
+        private bool CheckCLIHotkey(CLICommand command)
+        {
+            foreach (HotkeyType job in Helpers.GetEnums<HotkeyType>())
+            {
+                if (command.Command.Equals(job.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                {
+                    ExecuteJob(job);
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private bool CheckCLIWorkflow(CLICommand command)
+        {
+            if (command.Command.Equals("workflow", StringComparison.InvariantCultureIgnoreCase) && !string.IsNullOrEmpty(command.Parameter) && Program.HotkeysConfig != null)
+            {
+                foreach (HotkeySettings hotkeySetting in Program.HotkeysConfig.Hotkeys)
+                {
+                    if (hotkeySetting.TaskSettings.Job != HotkeyType.None)
                     {
-                        if (command.Command.Equals(job.ToString(), StringComparison.InvariantCultureIgnoreCase))
+                        if (command.Parameter == hotkeySetting.TaskSettings.Description)
                         {
-                            ExecuteJob(job);
+                            ExecuteJob(hotkeySetting.TaskSettings);
+                            return true;
                         }
                     }
                 }
-                else
-                {
-                    UploadManager.UploadFile(command.Command);
-                }
             }
+
+            return false;
         }
 
         private UploadTask[] GetCurrentTasks()
@@ -1476,10 +1524,16 @@ namespace ShareX
                     CaptureScreenshot(CaptureType.LastRegion, safeTaskSettings, false);
                     break;
                 case HotkeyType.ScreenRecorder:
-                    TaskHelpers.DoScreenRecording(safeTaskSettings);
+                    TaskHelpers.StartScreenRecording(safeTaskSettings, false);
+                    break;
+                case HotkeyType.StartScreenRecorder:
+                    TaskHelpers.StartScreenRecording(safeTaskSettings, true);
                     break;
                 case HotkeyType.AutoCapture:
                     TaskHelpers.OpenAutoCapture();
+                    break;
+                case HotkeyType.StartAutoCapture:
+                    TaskHelpers.StartAutoCapture();
                     break;
                 case HotkeyType.OpenScreenshotsFolder:
                     TaskHelpers.OpenScreenshotsFolder();

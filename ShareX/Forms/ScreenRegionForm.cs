@@ -23,7 +23,7 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
+using ShareX.HelpersLib;
 using ShareX.Properties;
 using System;
 using System.Diagnostics;
@@ -144,7 +144,7 @@ namespace ShareX
             UpdateTimer();
         }
 
-        private void Stop()
+        public void StartStop()
         {
             if (IsRecording)
             {
@@ -160,7 +160,7 @@ namespace ShareX
         {
             if (e.Button == MouseButtons.Left)
             {
-                Stop();
+                StartStop();
             }
         }
 
@@ -169,7 +169,7 @@ namespace ShareX
             if (e.Button == MouseButtons.Left)
             {
                 AbortRequested = true;
-                Stop();
+                StartStop();
             }
         }
     }

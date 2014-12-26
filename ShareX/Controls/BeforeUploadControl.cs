@@ -23,11 +23,11 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
+using ShareX.HelpersLib;
+using ShareX.UploadersLib;
 using System;
 using System.Linq;
 using System.Windows.Forms;
-using UploadersLib;
 
 namespace ShareX
 {
@@ -35,6 +35,7 @@ namespace ShareX
     {
         public delegate void EventHandler(string currentDestination);
         public event EventHandler InitCompleted;
+        private EDataType UploadDestination;
 
         public BeforeUploadControl()
         {
@@ -43,6 +44,7 @@ namespace ShareX
 
         public void Init(TaskInfo info)
         {
+            UploadDestination = info.UploadDestination;
             switch (info.DataType)
             {
                 case EDataType.Image:
@@ -113,8 +115,10 @@ namespace ShareX
 
             flp.Controls.OfType<RadioButton>().ForEach(x =>
             {
-                x.Checked = (x.Tag is ImageDestination && (ImageDestination)x.Tag == taskSettings.ImageDestination) ||
-                    (x.Tag is FileDestination && (FileDestination)x.Tag == taskSettings.ImageFileDestination);
+                if (UploadDestination == EDataType.Image)
+                    x.Checked = (x.Tag is ImageDestination && (ImageDestination)x.Tag == taskSettings.ImageDestination);
+                else
+                    x.Checked = (x.Tag is FileDestination && (FileDestination)x.Tag == taskSettings.ImageFileDestination);
             });
         }
 
@@ -149,45 +153,44 @@ namespace ShareX
 
         private void SetDestinations(bool isActive, EDataType dataType, object destination, TaskSettings taskSettings)
         {
-            if (isActive)
+            if (!isActive) return;
+
+            switch (dataType)
             {
-                switch (dataType)
-                {
-                    case EDataType.Image:
-                        if (destination is ImageDestination)
-                        {
-                            taskSettings.ImageDestination = (ImageDestination)destination;
-                        }
-                        else if (destination is FileDestination)
-                        {
-                            taskSettings.ImageDestination = ImageDestination.FileUploader;
-                            taskSettings.ImageFileDestination = (FileDestination)destination;
-                        }
-                        break;
-                    case EDataType.Text:
-                        if (destination is TextDestination)
-                        {
-                            taskSettings.TextDestination = (TextDestination)destination;
-                        }
-                        else if (destination is FileDestination)
-                        {
-                            taskSettings.TextDestination = TextDestination.FileUploader;
-                            taskSettings.TextFileDestination = (FileDestination)destination;
-                        }
-                        break;
-                    case EDataType.File:
-                        if (destination is FileDestination)
-                        {
-                            taskSettings.ImageFileDestination = taskSettings.FileDestination = (FileDestination)destination;
-                        }
-                        break;
-                    case EDataType.URL:
-                        if (destination is UrlShortenerType)
-                        {
-                            taskSettings.URLShortenerDestination = (UrlShortenerType)destination;
-                        }
-                        break;
-                }
+                case EDataType.Image:
+                    if (destination is ImageDestination)
+                    {
+                        taskSettings.ImageDestination = (ImageDestination)destination;
+                    }
+                    else if (destination is FileDestination)
+                    {
+                        taskSettings.ImageDestination = ImageDestination.FileUploader;
+                        taskSettings.ImageFileDestination = (FileDestination)destination;
+                    }
+                    break;
+                case EDataType.Text:
+                    if (destination is TextDestination)
+                    {
+                        taskSettings.TextDestination = (TextDestination)destination;
+                    }
+                    else if (destination is FileDestination)
+                    {
+                        taskSettings.TextDestination = TextDestination.FileUploader;
+                        taskSettings.TextFileDestination = (FileDestination)destination;
+                    }
+                    break;
+                case EDataType.File:
+                    if (destination is FileDestination)
+                    {
+                        taskSettings.ImageFileDestination = taskSettings.FileDestination = (FileDestination)destination;
+                    }
+                    break;
+                case EDataType.URL:
+                    if (destination is UrlShortenerType)
+                    {
+                        taskSettings.URLShortenerDestination = (UrlShortenerType)destination;
+                    }
+                    break;
             }
         }
     }

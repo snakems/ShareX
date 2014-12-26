@@ -1,6 +1,7 @@
 #define MyAppName "ShareX"
 #define MyAppFile "ShareX.exe"
-#define MyAppPath "..\ShareX\bin\Release\ShareX.exe"
+#define MyAppParentDir "..\ShareX\bin\Release"
+#define MyAppPath MyAppParentDir + "\ShareX.exe"
 #dim Version[4]
 #expr ParseVersion(MyAppPath, Version[0], Version[1], Version[2], Version[3])
 #define MyAppVersion Str(Version[0]) + "." + Str(Version[1]) + "." + Str(Version[2])
@@ -26,7 +27,6 @@ CreateAppDir=true
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 DirExistsWarning=no
-InfoBeforeFile=..\VersionHistory.txt
 InternalCompressLevel=ultra64
 LanguageDetectionMethod=uilanguage
 LicenseFile=..\LICENSE.txt
@@ -61,14 +61,15 @@ Name: "CreateSendToIcon"; Description: "Create a send to shortcut"; GroupDescrip
 Name: "CreateStartupIcon"; Description: "Launch {#MyAppName} automatically at Windows startup"; GroupDescription: "Other tasks:"
 
 [Files]
-Source: "..\ShareX\bin\Release\ShareX.exe"; DestDir: {app}; Flags: ignoreversion
-Source: "..\ShareX\bin\Release\ShareX.exe.config"; DestDir: {app}; Flags: ignoreversion
-Source: "..\ShareX\bin\Release\*.dll"; DestDir: {app}; Flags: ignoreversion
-Source: "..\ShareX\bin\Release\*.css"; DestDir: {app}; Flags: ignoreversion
-Source: "..\ShareX\bin\Release\*.txt"; DestDir: {app}; Flags: ignoreversion
+Source: "{#MyAppParentDir}\ShareX.exe"; DestDir: {app}; Flags: ignoreversion
+Source: "{#MyAppParentDir}\ShareX.exe.config"; DestDir: {app}; Flags: ignoreversion
+Source: "{#MyAppParentDir}\*.dll"; DestDir: {app}; Flags: ignoreversion
+Source: "{#MyAppParentDir}\*.css"; DestDir: {app}; Flags: ignoreversion
+Source: "{#MyAppParentDir}\*.txt"; DestDir: {app}; Flags: ignoreversion
 
 ; Language resources
-Source: "..\ShareX\bin\Release\tr\*.resources.dll"; DestDir: {app}\Languages\tr; Flags: ignoreversion
+Source: "{#MyAppParentDir}\tr\*.resources.dll"; DestDir: {app}\Languages\tr; Flags: ignoreversion
+Source: "{#MyAppParentDir}\de\*.resources.dll"; DestDir: {app}\Languages\de; Flags: ignoreversion
 
 ; Required for screen/audio recording
 Source: "..\Lib\screen-capture-recorder.dll"; DestDir: {app}; Flags: regserver 32bit; Check: IsAdminLoggedOn and not IsWin64
@@ -110,13 +111,13 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
-	initwinversion();
+  initwinversion();
 
   msi31('3.1');
   dotnetfx40full();
   vcredist2010();
 
-	Result := true;
+  Result := true;
 end;
 
 function DesktopIconExists(): Boolean;

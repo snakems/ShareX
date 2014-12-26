@@ -34,7 +34,9 @@ namespace ShareX
         [Description("English")]
         English,
         [Description("Türkçe")]
-        Turkish
+        Turkish,
+        [Description("Deutsch")]
+        German
     }
 
     public enum EImageFormat
@@ -140,7 +142,9 @@ namespace ShareX
         FreeHandRegion,
         LastRegion,
         ScreenRecorder,
+        StartScreenRecorder,
         AutoCapture,
+        StartAutoCapture,
         OpenScreenshotsFolder,
         ScreenColorPicker,
         Ruler,

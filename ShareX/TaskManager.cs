@@ -23,8 +23,8 @@
 
 #endregion License Information (GPL v3)
 
-using HelpersLib;
-using HistoryLib;
+using ShareX.HelpersLib;
+using ShareX.HistoryLib;
 using ShareX.Properties;
 using System;
 using System.Collections.Generic;
@@ -53,7 +53,7 @@ namespace ShareX
         public static void Start(UploadTask task)
         {
             Tasks.Add(task);
-            UpdateDragAndDropTip();
+            UpdateMainFormTip();
             task.StatusChanged += task_StatusChanged;
             task.UploadStarted += task_UploadStarted;
             task.UploadProgressChanged += task_UploadProgressChanged;
@@ -68,7 +68,7 @@ namespace ShareX
             {
                 task.Stop();
                 Tasks.Remove(task);
-                UpdateDragAndDropTip();
+                UpdateMainFormTip();
 
                 ListViewItem lvi = FindListViewItem(task);
 
@@ -114,9 +114,9 @@ namespace ShareX
             }
         }
 
-        private static void UpdateDragAndDropTip()
+        public static void UpdateMainFormTip()
         {
-            Program.MainForm.pBackground.Visible = Tasks.Count == 0;
+            Program.MainForm.lblMainFormTip.Visible = Program.Settings.ShowMainWindowTip && Tasks.Count == 0;
         }
 
         private static ListViewItem FindListViewItem(UploadTask task)
@@ -262,9 +262,18 @@ namespace ShareX
                                 lvi.ImageIndex = 1;
                             }
 
-                            if (task.Info.TaskSettings.GeneralSettings.PlaySoundAfterUpload)
+                            if (!info.TaskSettings.AdvancedSettings.DisableNotifications)
                             {
-                                Helpers.PlaySoundAsync(Resources.ErrorSound);
+                                if (task.Info.TaskSettings.GeneralSettings.PlaySoundAfterUpload)
+                                {
+                                    Helpers.PlaySoundAsync(Resources.ErrorSound);
+                                }
+
+                                if (info.TaskSettings.GeneralSettings.PopUpNotification != PopUpNotificationType.None && Program.MainForm.niTray.Visible)
+                                {
+                                    Program.MainForm.niTray.ShowBalloonTip(5000, "ShareX - " + Resources.TaskManager_task_UploadCompleted_Error,
+                                        errors, ToolTipIcon.Error);
+                                }
                             }
                         }
                         else
@@ -354,8 +363,15 @@ namespace ShareX
             }
             finally
             {
-                StartTasks();
-                UpdateProgressUI();
+                if (!IsBusy && Program.CLI.IsCommandExist("AutoClose"))
+                {
+                    Application.Exit();
+                }
+                else
+                {
+                    StartTasks();
+                    UpdateProgressUI();
+                }
             }
         }
 
