@@ -138,17 +138,13 @@
             this.cbDropboxAutoCreateShareableLink = new System.Windows.Forms.CheckBox();
             this.btnDropboxShowFiles = new System.Windows.Forms.Button();
             this.pbDropboxLogo = new System.Windows.Forms.PictureBox();
-            this.btnDropboxRegister = new System.Windows.Forms.Button();
             this.lblDropboxStatus = new System.Windows.Forms.Label();
             this.lblDropboxPathTip = new System.Windows.Forms.Label();
             this.lblDropboxPath = new System.Windows.Forms.Label();
             this.txtDropboxPath = new System.Windows.Forms.TextBox();
             this.tpOneDrive = new System.Windows.Forms.TabPage();
-            this.lblOneDriveFolderTip = new System.Windows.Forms.Label();
-            this.lvOneDriveFolders = new ShareX.HelpersLib.MyListView();
-            this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.tvOneDrive = new System.Windows.Forms.TreeView();
             this.lblOneDriveFolderID = new System.Windows.Forms.Label();
-            this.btnOneDriveRefreshFolders = new System.Windows.Forms.Button();
             this.cbOneDriveCreateShareableLink = new System.Windows.Forms.CheckBox();
             this.oAuth2OneDrive = new ShareX.UploadersLib.OAuthControl();
             this.tpGoogleDrive = new System.Windows.Forms.TabPage();
@@ -173,11 +169,18 @@
             this.pbCopyLogo = new System.Windows.Forms.PictureBox();
             this.lblCopyURLType = new System.Windows.Forms.Label();
             this.cbCopyURLType = new System.Windows.Forms.ComboBox();
-            this.btnCopyRegister = new System.Windows.Forms.Button();
             this.lblCopyStatus = new System.Windows.Forms.Label();
             this.lblCopyPath = new System.Windows.Forms.Label();
             this.txtCopyPath = new System.Windows.Forms.TextBox();
             this.oAuthCopy = new ShareX.UploadersLib.OAuthControl();
+            this.tpHubic = new System.Windows.Forms.TabPage();
+            this.cbHubicPublishLink = new System.Windows.Forms.CheckBox();
+            this.lblHubicSelectedFolderNote = new System.Windows.Forms.Label();
+            this.lvHubicFolders = new ShareX.HelpersLib.MyListView();
+            this.chHubicFolderName = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.lblHubicSelectedFolder = new System.Windows.Forms.Label();
+            this.btnHubicRefreshFolders = new System.Windows.Forms.Button();
+            this.oauth2Hubic = new ShareX.UploadersLib.OAuthControl();
             this.tpAmazonS3 = new System.Windows.Forms.TabPage();
             this.txtAmazonS3CustomDomain = new System.Windows.Forms.TextBox();
             this.lblAmazonS3PathPreviewLabel = new System.Windows.Forms.Label();
@@ -232,15 +235,6 @@
             this.btnPushbulletGetDeviceList = new System.Windows.Forms.Button();
             this.lblPushbulletUserKey = new System.Windows.Forms.Label();
             this.txtPushbulletUserKey = new System.Windows.Forms.TextBox();
-            this.tpRapidShare = new System.Windows.Forms.TabPage();
-            this.txtRapidShareFolderID = new System.Windows.Forms.TextBox();
-            this.lblRapidShareFolderID = new System.Windows.Forms.Label();
-            this.btnRapidShareRefreshFolders = new System.Windows.Forms.Button();
-            this.tvRapidShareFolders = new System.Windows.Forms.TreeView();
-            this.lblRapidSharePassword = new System.Windows.Forms.Label();
-            this.lblRapidSharePremiumUsername = new System.Windows.Forms.Label();
-            this.txtRapidSharePassword = new System.Windows.Forms.TextBox();
-            this.txtRapidShareUsername = new System.Windows.Forms.TextBox();
             this.tpSendSpace = new System.Windows.Forms.TabPage();
             this.btnSendSpaceRegister = new System.Windows.Forms.Button();
             this.lblSendSpacePassword = new System.Windows.Forms.Label();
@@ -248,8 +242,6 @@
             this.txtSendSpacePassword = new System.Windows.Forms.TextBox();
             this.txtSendSpaceUserName = new System.Windows.Forms.TextBox();
             this.atcSendSpaceAccountType = new ShareX.UploadersLib.AccountTypeControl();
-            this.tpMediaCrush = new System.Windows.Forms.TabPage();
-            this.cbMediaCrushDirectLink = new System.Windows.Forms.CheckBox();
             this.tpGe_tt = new System.Windows.Forms.TabPage();
             this.lblGe_ttStatus = new System.Windows.Forms.Label();
             this.lblGe_ttPassword = new System.Windows.Forms.Label();
@@ -288,6 +280,10 @@
             this.txtJiraHost = new System.Windows.Forms.TextBox();
             this.lblJiraHost = new System.Windows.Forms.Label();
             this.oAuthJira = new ShareX.UploadersLib.OAuthControl();
+            this.tpLambda = new System.Windows.Forms.TabPage();
+            this.lblLambdaInfo = new System.Windows.Forms.Label();
+            this.lblLambdaApiKey = new System.Windows.Forms.Label();
+            this.txtLambdaApiKey = new System.Windows.Forms.TextBox();
             this.tpEmail = new System.Windows.Forms.TabPage();
             this.chkEmailConfirm = new System.Windows.Forms.CheckBox();
             this.lblEmailSmtpServer = new System.Windows.Forms.Label();
@@ -446,14 +442,13 @@
             this.tpBox.SuspendLayout();
             this.tpCopy.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCopyLogo)).BeginInit();
+            this.tpHubic.SuspendLayout();
             this.tpAmazonS3.SuspendLayout();
             this.tpMega.SuspendLayout();
             this.tpOwnCloud.SuspendLayout();
             this.tpMediaFire.SuspendLayout();
             this.tpPushbullet.SuspendLayout();
-            this.tpRapidShare.SuspendLayout();
             this.tpSendSpace.SuspendLayout();
-            this.tpMediaCrush.SuspendLayout();
             this.tpGe_tt.SuspendLayout();
             this.tpHostr.SuspendLayout();
             this.tpMinus.SuspendLayout();
@@ -461,6 +456,7 @@
             this.gbMinusUpload.SuspendLayout();
             this.tpJira.SuspendLayout();
             this.gpJiraServer.SuspendLayout();
+            this.tpLambda.SuspendLayout();
             this.tpEmail.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudEmailSmtpPort)).BeginInit();
             this.tpSharedFolder.SuspendLayout();
@@ -1163,18 +1159,18 @@
             this.tcFileUploaders.Controls.Add(this.tpGoogleDrive);
             this.tcFileUploaders.Controls.Add(this.tpBox);
             this.tcFileUploaders.Controls.Add(this.tpCopy);
+            this.tcFileUploaders.Controls.Add(this.tpHubic);
             this.tcFileUploaders.Controls.Add(this.tpAmazonS3);
             this.tcFileUploaders.Controls.Add(this.tpMega);
             this.tcFileUploaders.Controls.Add(this.tpOwnCloud);
             this.tcFileUploaders.Controls.Add(this.tpMediaFire);
             this.tcFileUploaders.Controls.Add(this.tpPushbullet);
-            this.tcFileUploaders.Controls.Add(this.tpRapidShare);
             this.tcFileUploaders.Controls.Add(this.tpSendSpace);
-            this.tcFileUploaders.Controls.Add(this.tpMediaCrush);
             this.tcFileUploaders.Controls.Add(this.tpGe_tt);
             this.tcFileUploaders.Controls.Add(this.tpHostr);
             this.tcFileUploaders.Controls.Add(this.tpMinus);
             this.tcFileUploaders.Controls.Add(this.tpJira);
+            this.tcFileUploaders.Controls.Add(this.tpLambda);
             this.tcFileUploaders.Controls.Add(this.tpEmail);
             this.tcFileUploaders.Controls.Add(this.tpSharedFolder);
             resources.ApplyResources(this.tcFileUploaders, "tcFileUploaders");
@@ -1263,7 +1259,6 @@
             this.tpDropbox.Controls.Add(this.cbDropboxAutoCreateShareableLink);
             this.tpDropbox.Controls.Add(this.btnDropboxShowFiles);
             this.tpDropbox.Controls.Add(this.pbDropboxLogo);
-            this.tpDropbox.Controls.Add(this.btnDropboxRegister);
             this.tpDropbox.Controls.Add(this.lblDropboxStatus);
             this.tpDropbox.Controls.Add(this.lblDropboxPathTip);
             this.tpDropbox.Controls.Add(this.lblDropboxPath);
@@ -1311,13 +1306,6 @@
             this.pbDropboxLogo.TabStop = false;
             this.pbDropboxLogo.Click += new System.EventHandler(this.pbDropboxLogo_Click);
             // 
-            // btnDropboxRegister
-            // 
-            resources.ApplyResources(this.btnDropboxRegister, "btnDropboxRegister");
-            this.btnDropboxRegister.Name = "btnDropboxRegister";
-            this.btnDropboxRegister.UseVisualStyleBackColor = true;
-            this.btnDropboxRegister.Click += new System.EventHandler(this.btnDropboxRegister_Click);
-            // 
             // lblDropboxStatus
             // 
             resources.ApplyResources(this.lblDropboxStatus, "lblDropboxStatus");
@@ -1341,49 +1329,25 @@
             // 
             // tpOneDrive
             // 
-            this.tpOneDrive.Controls.Add(this.lblOneDriveFolderTip);
-            this.tpOneDrive.Controls.Add(this.lvOneDriveFolders);
+            this.tpOneDrive.Controls.Add(this.tvOneDrive);
             this.tpOneDrive.Controls.Add(this.lblOneDriveFolderID);
-            this.tpOneDrive.Controls.Add(this.btnOneDriveRefreshFolders);
             this.tpOneDrive.Controls.Add(this.cbOneDriveCreateShareableLink);
             this.tpOneDrive.Controls.Add(this.oAuth2OneDrive);
             resources.ApplyResources(this.tpOneDrive, "tpOneDrive");
             this.tpOneDrive.Name = "tpOneDrive";
             this.tpOneDrive.UseVisualStyleBackColor = true;
             // 
-            // lblOneDriveFolderTip
+            // tvOneDrive
             // 
-            resources.ApplyResources(this.lblOneDriveFolderTip, "lblOneDriveFolderTip");
-            this.lblOneDriveFolderTip.Name = "lblOneDriveFolderTip";
-            // 
-            // lvOneDriveFolders
-            // 
-            this.lvOneDriveFolders.AutoFillColumn = true;
-            this.lvOneDriveFolders.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1});
-            this.lvOneDriveFolders.FullRowSelect = true;
-            resources.ApplyResources(this.lvOneDriveFolders, "lvOneDriveFolders");
-            this.lvOneDriveFolders.Name = "lvOneDriveFolders";
-            this.lvOneDriveFolders.UseCompatibleStateImageBehavior = false;
-            this.lvOneDriveFolders.View = System.Windows.Forms.View.Details;
-            this.lvOneDriveFolders.SelectedIndexChanged += new System.EventHandler(this.lvOneDriveFolders_SelectedIndexChanged);
-            this.lvOneDriveFolders.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvOneDriveFolders_MouseDoubleClick);
-            // 
-            // columnHeader1
-            // 
-            resources.ApplyResources(this.columnHeader1, "columnHeader1");
+            resources.ApplyResources(this.tvOneDrive, "tvOneDrive");
+            this.tvOneDrive.Name = "tvOneDrive";
+            this.tvOneDrive.AfterExpand += new System.Windows.Forms.TreeViewEventHandler(this.tvOneDrive_AfterExpand);
+            this.tvOneDrive.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvOneDrive_AfterSelect);
             // 
             // lblOneDriveFolderID
             // 
             resources.ApplyResources(this.lblOneDriveFolderID, "lblOneDriveFolderID");
             this.lblOneDriveFolderID.Name = "lblOneDriveFolderID";
-            // 
-            // btnOneDriveRefreshFolders
-            // 
-            resources.ApplyResources(this.btnOneDriveRefreshFolders, "btnOneDriveRefreshFolders");
-            this.btnOneDriveRefreshFolders.Name = "btnOneDriveRefreshFolders";
-            this.btnOneDriveRefreshFolders.UseVisualStyleBackColor = true;
-            this.btnOneDriveRefreshFolders.Click += new System.EventHandler(this.btnOneDriveRefreshFolders_Click);
             // 
             // cbOneDriveCreateShareableLink
             // 
@@ -1544,7 +1508,6 @@
             this.tpCopy.Controls.Add(this.pbCopyLogo);
             this.tpCopy.Controls.Add(this.lblCopyURLType);
             this.tpCopy.Controls.Add(this.cbCopyURLType);
-            this.tpCopy.Controls.Add(this.btnCopyRegister);
             this.tpCopy.Controls.Add(this.lblCopyStatus);
             this.tpCopy.Controls.Add(this.lblCopyPath);
             this.tpCopy.Controls.Add(this.txtCopyPath);
@@ -1574,13 +1537,6 @@
             this.cbCopyURLType.Name = "cbCopyURLType";
             this.cbCopyURLType.SelectedIndexChanged += new System.EventHandler(this.cbCopyURLType_SelectedIndexChanged);
             // 
-            // btnCopyRegister
-            // 
-            resources.ApplyResources(this.btnCopyRegister, "btnCopyRegister");
-            this.btnCopyRegister.Name = "btnCopyRegister";
-            this.btnCopyRegister.UseVisualStyleBackColor = true;
-            this.btnCopyRegister.Click += new System.EventHandler(this.btnCopyRegister_Click);
-            // 
             // lblCopyStatus
             // 
             resources.ApplyResources(this.lblCopyStatus, "lblCopyStatus");
@@ -1605,6 +1561,68 @@
             this.oAuthCopy.OpenButtonClicked += new ShareX.UploadersLib.OAuthControl.OpenButtonClickedEventHandler(this.oAuthCopy_OpenButtonClicked);
             this.oAuthCopy.CompleteButtonClicked += new ShareX.UploadersLib.OAuthControl.CompleteButtonClickedEventHandler(this.oAuthCopy_CompleteButtonClicked);
             this.oAuthCopy.ClearButtonClicked += new ShareX.UploadersLib.OAuthControl.ClearButtonclickedEventHandler(this.oAuthCopy_ClearButtonClicked);
+            // 
+            // tpHubic
+            // 
+            this.tpHubic.Controls.Add(this.cbHubicPublishLink);
+            this.tpHubic.Controls.Add(this.lblHubicSelectedFolderNote);
+            this.tpHubic.Controls.Add(this.lvHubicFolders);
+            this.tpHubic.Controls.Add(this.lblHubicSelectedFolder);
+            this.tpHubic.Controls.Add(this.btnHubicRefreshFolders);
+            this.tpHubic.Controls.Add(this.oauth2Hubic);
+            resources.ApplyResources(this.tpHubic, "tpHubic");
+            this.tpHubic.Name = "tpHubic";
+            this.tpHubic.UseVisualStyleBackColor = true;
+            // 
+            // cbHubicPublishLink
+            // 
+            resources.ApplyResources(this.cbHubicPublishLink, "cbHubicPublishLink");
+            this.cbHubicPublishLink.Name = "cbHubicPublishLink";
+            this.cbHubicPublishLink.UseVisualStyleBackColor = true;
+            this.cbHubicPublishLink.CheckedChanged += new System.EventHandler(this.cbHubicPublishLink_CheckedChanged);
+            // 
+            // lblHubicSelectedFolderNote
+            // 
+            resources.ApplyResources(this.lblHubicSelectedFolderNote, "lblHubicSelectedFolderNote");
+            this.lblHubicSelectedFolderNote.Name = "lblHubicSelectedFolderNote";
+            // 
+            // lvHubicFolders
+            // 
+            this.lvHubicFolders.AutoFillColumn = true;
+            this.lvHubicFolders.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.chHubicFolderName});
+            this.lvHubicFolders.FullRowSelect = true;
+            resources.ApplyResources(this.lvHubicFolders, "lvHubicFolders");
+            this.lvHubicFolders.Name = "lvHubicFolders";
+            this.lvHubicFolders.UseCompatibleStateImageBehavior = false;
+            this.lvHubicFolders.View = System.Windows.Forms.View.Details;
+            this.lvHubicFolders.SelectedIndexChanged += new System.EventHandler(this.lvHubicFolders_SelectedIndexChanged);
+            this.lvHubicFolders.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.lvHubicFolders_MouseDoubleClick);
+            // 
+            // chHubicFolderName
+            // 
+            resources.ApplyResources(this.chHubicFolderName, "chHubicFolderName");
+            // 
+            // lblHubicSelectedFolder
+            // 
+            resources.ApplyResources(this.lblHubicSelectedFolder, "lblHubicSelectedFolder");
+            this.lblHubicSelectedFolder.Name = "lblHubicSelectedFolder";
+            // 
+            // btnHubicRefreshFolders
+            // 
+            resources.ApplyResources(this.btnHubicRefreshFolders, "btnHubicRefreshFolders");
+            this.btnHubicRefreshFolders.Name = "btnHubicRefreshFolders";
+            this.btnHubicRefreshFolders.UseVisualStyleBackColor = true;
+            this.btnHubicRefreshFolders.Click += new System.EventHandler(this.btnHubicRefreshFolders_Click);
+            // 
+            // oauth2Hubic
+            // 
+            resources.ApplyResources(this.oauth2Hubic, "oauth2Hubic");
+            this.oauth2Hubic.Name = "oauth2Hubic";
+            this.oauth2Hubic.OpenButtonClicked += new ShareX.UploadersLib.OAuthControl.OpenButtonClickedEventHandler(this.oAuth2Hubic_OpenButtonClicked);
+            this.oauth2Hubic.CompleteButtonClicked += new ShareX.UploadersLib.OAuthControl.CompleteButtonClickedEventHandler(this.oAuth2Hubic_CompleteButtonClicked);
+            this.oauth2Hubic.ClearButtonClicked += new ShareX.UploadersLib.OAuthControl.ClearButtonclickedEventHandler(this.oAuth2Hubic_ClearButtonClicked);
+            this.oauth2Hubic.RefreshButtonClicked += new ShareX.UploadersLib.OAuthControl.RefreshButtonClickedEventHandler(this.oAuth2Hubic_RefreshButtonClicked);
             // 
             // tpAmazonS3
             // 
@@ -1990,67 +2008,6 @@
             this.txtPushbulletUserKey.UseSystemPasswordChar = true;
             this.txtPushbulletUserKey.TextChanged += new System.EventHandler(this.txtPushbulletUserKey_TextChanged);
             // 
-            // tpRapidShare
-            // 
-            this.tpRapidShare.Controls.Add(this.txtRapidShareFolderID);
-            this.tpRapidShare.Controls.Add(this.lblRapidShareFolderID);
-            this.tpRapidShare.Controls.Add(this.btnRapidShareRefreshFolders);
-            this.tpRapidShare.Controls.Add(this.tvRapidShareFolders);
-            this.tpRapidShare.Controls.Add(this.lblRapidSharePassword);
-            this.tpRapidShare.Controls.Add(this.lblRapidSharePremiumUsername);
-            this.tpRapidShare.Controls.Add(this.txtRapidSharePassword);
-            this.tpRapidShare.Controls.Add(this.txtRapidShareUsername);
-            resources.ApplyResources(this.tpRapidShare, "tpRapidShare");
-            this.tpRapidShare.Name = "tpRapidShare";
-            this.tpRapidShare.UseVisualStyleBackColor = true;
-            // 
-            // txtRapidShareFolderID
-            // 
-            resources.ApplyResources(this.txtRapidShareFolderID, "txtRapidShareFolderID");
-            this.txtRapidShareFolderID.Name = "txtRapidShareFolderID";
-            this.txtRapidShareFolderID.TextChanged += new System.EventHandler(this.txtRapidShareFolderID_TextChanged);
-            // 
-            // lblRapidShareFolderID
-            // 
-            resources.ApplyResources(this.lblRapidShareFolderID, "lblRapidShareFolderID");
-            this.lblRapidShareFolderID.Name = "lblRapidShareFolderID";
-            // 
-            // btnRapidShareRefreshFolders
-            // 
-            resources.ApplyResources(this.btnRapidShareRefreshFolders, "btnRapidShareRefreshFolders");
-            this.btnRapidShareRefreshFolders.Name = "btnRapidShareRefreshFolders";
-            this.btnRapidShareRefreshFolders.UseVisualStyleBackColor = true;
-            this.btnRapidShareRefreshFolders.Click += new System.EventHandler(this.btnRapidShareRefreshFolders_Click);
-            // 
-            // tvRapidShareFolders
-            // 
-            resources.ApplyResources(this.tvRapidShareFolders, "tvRapidShareFolders");
-            this.tvRapidShareFolders.Name = "tvRapidShareFolders";
-            this.tvRapidShareFolders.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvRapidShareFolders_AfterSelect);
-            // 
-            // lblRapidSharePassword
-            // 
-            resources.ApplyResources(this.lblRapidSharePassword, "lblRapidSharePassword");
-            this.lblRapidSharePassword.Name = "lblRapidSharePassword";
-            // 
-            // lblRapidSharePremiumUsername
-            // 
-            resources.ApplyResources(this.lblRapidSharePremiumUsername, "lblRapidSharePremiumUsername");
-            this.lblRapidSharePremiumUsername.Name = "lblRapidSharePremiumUsername";
-            // 
-            // txtRapidSharePassword
-            // 
-            resources.ApplyResources(this.txtRapidSharePassword, "txtRapidSharePassword");
-            this.txtRapidSharePassword.Name = "txtRapidSharePassword";
-            this.txtRapidSharePassword.UseSystemPasswordChar = true;
-            this.txtRapidSharePassword.TextChanged += new System.EventHandler(this.txtRapidSharePassword_TextChanged);
-            // 
-            // txtRapidShareUsername
-            // 
-            resources.ApplyResources(this.txtRapidShareUsername, "txtRapidShareUsername");
-            this.txtRapidShareUsername.Name = "txtRapidShareUsername";
-            this.txtRapidShareUsername.TextChanged += new System.EventHandler(this.txtRapidShareUsername_TextChanged);
-            // 
             // tpSendSpace
             // 
             this.tpSendSpace.Controls.Add(this.btnSendSpaceRegister);
@@ -2099,20 +2056,6 @@
             this.atcSendSpaceAccountType.Name = "atcSendSpaceAccountType";
             this.atcSendSpaceAccountType.SelectedAccountType = ShareX.UploadersLib.AccountType.Anonymous;
             this.atcSendSpaceAccountType.AccountTypeChanged += new ShareX.UploadersLib.AccountTypeControl.AccountTypeChangedEventHandler(this.atcSendSpaceAccountType_AccountTypeChanged);
-            // 
-            // tpMediaCrush
-            // 
-            this.tpMediaCrush.Controls.Add(this.cbMediaCrushDirectLink);
-            resources.ApplyResources(this.tpMediaCrush, "tpMediaCrush");
-            this.tpMediaCrush.Name = "tpMediaCrush";
-            this.tpMediaCrush.UseVisualStyleBackColor = true;
-            // 
-            // cbMediaCrushDirectLink
-            // 
-            resources.ApplyResources(this.cbMediaCrushDirectLink, "cbMediaCrushDirectLink");
-            this.cbMediaCrushDirectLink.Name = "cbMediaCrushDirectLink";
-            this.cbMediaCrushDirectLink.UseVisualStyleBackColor = true;
-            this.cbMediaCrushDirectLink.CheckedChanged += new System.EventHandler(this.cbMediaCrushDirectLink_CheckedChanged);
             // 
             // tpGe_tt
             // 
@@ -2377,6 +2320,33 @@
             this.oAuthJira.CompleteButtonClicked += new ShareX.UploadersLib.OAuthControl.CompleteButtonClickedEventHandler(this.oAuthJira_CompleteButtonClicked);
             this.oAuthJira.ClearButtonClicked += new ShareX.UploadersLib.OAuthControl.ClearButtonclickedEventHandler(this.oAuthJira_ClearButtonClicked);
             this.oAuthJira.RefreshButtonClicked += new ShareX.UploadersLib.OAuthControl.RefreshButtonClickedEventHandler(this.oAuthJira_RefreshButtonClicked);
+            // 
+            // tpLambda
+            // 
+            this.tpLambda.Controls.Add(this.lblLambdaInfo);
+            this.tpLambda.Controls.Add(this.lblLambdaApiKey);
+            this.tpLambda.Controls.Add(this.txtLambdaApiKey);
+            resources.ApplyResources(this.tpLambda, "tpLambda");
+            this.tpLambda.Name = "tpLambda";
+            this.tpLambda.UseVisualStyleBackColor = true;
+            // 
+            // lblLambdaInfo
+            // 
+            resources.ApplyResources(this.lblLambdaInfo, "lblLambdaInfo");
+            this.lblLambdaInfo.Name = "lblLambdaInfo";
+            this.lblLambdaInfo.Click += new System.EventHandler(this.lambdaInfoLabel_Click);
+            // 
+            // lblLambdaApiKey
+            // 
+            resources.ApplyResources(this.lblLambdaApiKey, "lblLambdaApiKey");
+            this.lblLambdaApiKey.Name = "lblLambdaApiKey";
+            // 
+            // txtLambdaApiKey
+            // 
+            resources.ApplyResources(this.txtLambdaApiKey, "txtLambdaApiKey");
+            this.txtLambdaApiKey.Name = "txtLambdaApiKey";
+            this.txtLambdaApiKey.UseSystemPasswordChar = true;
+            this.txtLambdaApiKey.TextChanged += new System.EventHandler(this.txtLambdaApiKey_TextChanged);
             // 
             // tpEmail
             // 
@@ -3403,6 +3373,8 @@
             this.tpCopy.ResumeLayout(false);
             this.tpCopy.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbCopyLogo)).EndInit();
+            this.tpHubic.ResumeLayout(false);
+            this.tpHubic.PerformLayout();
             this.tpAmazonS3.ResumeLayout(false);
             this.tpAmazonS3.PerformLayout();
             this.tpMega.ResumeLayout(false);
@@ -3413,12 +3385,8 @@
             this.tpMediaFire.PerformLayout();
             this.tpPushbullet.ResumeLayout(false);
             this.tpPushbullet.PerformLayout();
-            this.tpRapidShare.ResumeLayout(false);
-            this.tpRapidShare.PerformLayout();
             this.tpSendSpace.ResumeLayout(false);
             this.tpSendSpace.PerformLayout();
-            this.tpMediaCrush.ResumeLayout(false);
-            this.tpMediaCrush.PerformLayout();
             this.tpGe_tt.ResumeLayout(false);
             this.tpGe_tt.PerformLayout();
             this.tpHostr.ResumeLayout(false);
@@ -3433,6 +3401,8 @@
             this.tpJira.PerformLayout();
             this.gpJiraServer.ResumeLayout(false);
             this.gpJiraServer.PerformLayout();
+            this.tpLambda.ResumeLayout(false);
+            this.tpLambda.PerformLayout();
             this.tpEmail.ResumeLayout(false);
             this.tpEmail.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.nudEmailSmtpPort)).EndInit();
@@ -3564,7 +3534,6 @@
         private System.Windows.Forms.CheckBox cbDropboxAutoCreateShareableLink;
         private System.Windows.Forms.Button btnDropboxShowFiles;
         private System.Windows.Forms.PictureBox pbDropboxLogo;
-        private System.Windows.Forms.Button btnDropboxRegister;
         private System.Windows.Forms.Label lblDropboxStatus;
         private System.Windows.Forms.Label lblDropboxPathTip;
         private System.Windows.Forms.Label lblDropboxPath;
@@ -3575,7 +3544,6 @@
         private OAuthControl oAuthCopy;
         private System.Windows.Forms.Button btnCopyShowFiles;
         private System.Windows.Forms.PictureBox pbCopyLogo;
-        private System.Windows.Forms.Button btnCopyRegister;
         private System.Windows.Forms.Label lblCopyStatus;
         private System.Windows.Forms.Label lblCopyPath;
         private System.Windows.Forms.TextBox txtCopyPath;
@@ -3635,15 +3603,6 @@
         private System.Windows.Forms.Label lblBoxFolderID;
         private System.Windows.Forms.Button btnBoxRefreshFolders;
         private OAuthControl oauth2Box;
-        private System.Windows.Forms.TabPage tpRapidShare;
-        private System.Windows.Forms.TextBox txtRapidShareFolderID;
-        private System.Windows.Forms.Label lblRapidShareFolderID;
-        private System.Windows.Forms.Button btnRapidShareRefreshFolders;
-        private System.Windows.Forms.TreeView tvRapidShareFolders;
-        private System.Windows.Forms.Label lblRapidSharePassword;
-        private System.Windows.Forms.Label lblRapidSharePremiumUsername;
-        private System.Windows.Forms.TextBox txtRapidSharePassword;
-        private System.Windows.Forms.TextBox txtRapidShareUsername;
         private System.Windows.Forms.TabPage tpSendSpace;
         private System.Windows.Forms.Button btnSendSpaceRegister;
         private System.Windows.Forms.Label lblSendSpacePassword;
@@ -3834,8 +3793,6 @@
         private System.Windows.Forms.CheckBox cbMediaFireUseLongLink;
         private System.Windows.Forms.TabPage tpOneDrive;
         private OAuthControl oAuth2OneDrive;
-        private System.Windows.Forms.TabPage tpMediaCrush;
-        private System.Windows.Forms.CheckBox cbMediaCrushDirectLink;
         private System.Windows.Forms.CheckBox cbOwnCloudIgnoreInvalidCert;
         private System.Windows.Forms.CheckBox cbImgurUploadSelectedAlbum;
         private System.Windows.Forms.Label lblPastebinLoginStatus;
@@ -3865,10 +3822,19 @@
         private System.Windows.Forms.Label lblHastebinSyntaxHighlighting;
         private System.Windows.Forms.Label lblHastebinCustomDomain;
         private System.Windows.Forms.CheckBox cbOneDriveCreateShareableLink;
-        private System.Windows.Forms.Label lblOneDriveFolderTip;
-        private HelpersLib.MyListView lvOneDriveFolders;
-        private System.Windows.Forms.ColumnHeader columnHeader1;
         private System.Windows.Forms.Label lblOneDriveFolderID;
-        private System.Windows.Forms.Button btnOneDriveRefreshFolders;        
+        private System.Windows.Forms.TreeView tvOneDrive;
+        private System.Windows.Forms.TabPage tpHubic;
+        private OAuthControl oauth2Hubic;
+        private System.Windows.Forms.Label lblHubicSelectedFolderNote;
+        private HelpersLib.MyListView lvHubicFolders;
+        private System.Windows.Forms.ColumnHeader chHubicFolderName;
+        private System.Windows.Forms.Label lblHubicSelectedFolder;
+        private System.Windows.Forms.Button btnHubicRefreshFolders;
+        private System.Windows.Forms.CheckBox cbHubicPublishLink;
+        private System.Windows.Forms.TabPage tpLambda;
+        private System.Windows.Forms.Label lblLambdaApiKey;
+        private System.Windows.Forms.TextBox txtLambdaApiKey;
+        private System.Windows.Forms.Label lblLambdaInfo;        
     }
 }

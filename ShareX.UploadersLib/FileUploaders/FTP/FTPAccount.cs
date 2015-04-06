@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -138,9 +138,9 @@ namespace ShareX.UploadersLib
             FTPSCertificateLocation = string.Empty;
         }
 
-        public string GetSubFolderPath(string filename = null)
+        public string GetSubFolderPath(string filename = null, NameParserType nameParserType = NameParserType.URL)
         {
-            string path = NameParser.Parse(NameParserType.URL, SubFolderPath.Replace("%host", Host));
+            string path = NameParser.Parse(nameParserType, SubFolderPath.Replace("%host", Host));
             return URLHelpers.CombineURL(path, filename);
         }
 
@@ -175,9 +175,8 @@ namespace ShareX.UploadersLib
                 subFolderPath = GetSubFolderPath();
             }
 
-            subFolderPath = URLHelpers.URLPathEncode(subFolderPath);
-
             UriBuilder httpHomeUri;
+
             var httpHomePath = GetHttpHomePath();
 
             if (string.IsNullOrEmpty(httpHomePath))
@@ -190,6 +189,7 @@ namespace ShareX.UploadersLib
                 }
 
                 httpHomeUri = new UriBuilder(URLHelpers.CombineURL(host, subFolderPath, filename));
+                httpHomeUri.Port = -1; //Since httpHomePath is not set, it's safe to erase UriBuilder's assumed port number
             }
             else
             {
@@ -231,7 +231,7 @@ namespace ShareX.UploadersLib
             }
 
             httpHomeUri.Scheme = BrowserProtocol.GetDescription();
-            return Uri.EscapeUriString(httpHomeUri.Uri.ToString());
+            return httpHomeUri.Uri.AbsoluteUri;
         }
 
         public string GetFtpPath(string filemame)
@@ -241,7 +241,7 @@ namespace ShareX.UploadersLib
                 return string.Empty;
             }
 
-            return URLHelpers.CombineURL(FTPAddress, GetSubFolderPath(filemame));
+            return URLHelpers.CombineURL(FTPAddress, GetSubFolderPath(filemame, NameParserType.FolderPath));
         }
 
         public override string ToString()

@@ -273,9 +273,6 @@
   <data name="tpRectangleAnnotate.Text" xml:space="preserve">
     <value>Dikdörtgen dipnot</value>
   </data>
-  <data name="cbScreenRecordAutoDisableAero.Text" xml:space="preserve">
-    <value>Kaydetme sırasında Windows Aero otomatik kapatılsın (Aero kaydetme performansını düşürür)</value>
-  </data>
   <data name="lblScreenRecorderFixedDuration.Text" xml:space="preserve">
     <value>saniye</value>
   </data>
@@ -285,17 +282,11 @@
   <data name="chkRunScreencastCLI.Text" xml:space="preserve">
     <value>Ardından CLI çalıştır:</value>
   </data>
-  <data name="btnScreenRecorderOptions.Text" xml:space="preserve">
-    <value>Ayarlar...</value>
-  </data>
   <data name="btnEncoderConfig.Text" xml:space="preserve">
     <value>Profiller...</value>
   </data>
   <data name="lblScreenRecorderStartDelay.Text" xml:space="preserve">
     <value>saniye sonra</value>
-  </data>
-  <data name="lblScreenRecorderOutput.Text" xml:space="preserve">
-    <value>Çıktı:</value>
   </data>
   <data name="cbScreenRecorderFixedDuration.Text" xml:space="preserve">
     <value>Sabit süre:</value>
@@ -428,5 +419,8 @@
   </data>
   <data name="chkOverrideCustomUploader.Text" xml:space="preserve">
     <value>Özel yükleyiciyi değiştir:</value>
+  </data>
+  <data name="btnScreenRecorderFFmpegOptions.Text" xml:space="preserve">
+    <value>FFmpeg ayarları...</value>
   </data>
 </root>

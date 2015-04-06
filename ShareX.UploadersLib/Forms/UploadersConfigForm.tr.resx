@@ -123,9 +123,6 @@
   <data name="btnBoxRefreshFolders.Text" xml:space="preserve">
     <value>Dizin listesini yenile</value>
   </data>
-  <data name="btnCopyRegister.Text" xml:space="preserve">
-    <value>Kayıt ol...</value>
-  </data>
   <data name="btnCustomUploaderAdd.Text" xml:space="preserve">
     <value>Ekle</value>
   </data>
@@ -228,9 +225,6 @@
   <data name="lblPastebinPassword.Text" xml:space="preserve">
     <value>Şifre:</value>
   </data>
-  <data name="lblRapidSharePassword.Text" xml:space="preserve">
-    <value>Şifre:</value>
-  </data>
   <data name="lblMegaPassword.Text" xml:space="preserve">
     <value>Şifre:</value>
   </data>
@@ -253,9 +247,6 @@
     <value>Kullanıcı adı:</value>
   </data>
   <data name="lblMinusUsername.Text" xml:space="preserve">
-    <value>Kullanıcı adı:</value>
-  </data>
-  <data name="lblRapidSharePremiumUsername.Text" xml:space="preserve">
     <value>Kullanıcı adı:</value>
   </data>
   <data name="lblOwnCloudUsername.Text" xml:space="preserve">
@@ -345,9 +336,6 @@
   <data name="btnMinusRefreshAuth.Text" xml:space="preserve">
     <value>Yetki yenile</value>
   </data>
-  <data name="btnRapidShareRefreshFolders.Text" xml:space="preserve">
-    <value>Dizin listesini yenile</value>
-  </data>
   <data name="btnGoogleDriveRefreshFolders.Text" xml:space="preserve">
     <value>Dizin listesini yenile</value>
   </data>
@@ -358,9 +346,6 @@
     <value>Kayıt...</value>
   </data>
   <data name="btnPastebinRegister.Text" xml:space="preserve">
-    <value>Kayıt...</value>
-  </data>
-  <data name="btnDropboxRegister.Text" xml:space="preserve">
     <value>Kayıt...</value>
   </data>
   <data name="btnMinusReadFolderList.Text" xml:space="preserve">
@@ -650,9 +635,6 @@ Bir başka deyişle Amazon S3'den bazı durumlarda kaybolabilirler.</value>
   <data name="lblGoogleDriveFolderID.Text" xml:space="preserve">
     <value>Dizin ID:</value>
   </data>
-  <data name="lblRapidShareFolderID.Text" xml:space="preserve">
-    <value>Yükleme için Dizin ID:</value>
-  </data>
   <data name="lblPhotobucketParentAlbumPath.Text" xml:space="preserve">
     <value>Üst albüm yolu</value>
   </data>
@@ -670,9 +652,6 @@ Bir başka deyişle Amazon S3'den bazı durumlarda kaybolabilirler.</value>
   </data>
   <data name="lblCustomUploaderFileForm.Text" xml:space="preserve">
     <value>Dosya form adı:</value>
-  </data>
-  <data name="cbMediaCrushDirectLink.Text" xml:space="preserve">
-    <value>Direkt link (Adres sonuna "/direct" ekler)</value>
   </data>
   <data name="gbCustomUploaderArguments.Text" xml:space="preserve">
     <value>Parametreler</value>
@@ -733,5 +712,32 @@ Bir başka deyişle Amazon S3'den bazı durumlarda kaybolabilirler.</value>
   </data>
   <data name="lblSharedFolderText.Text" xml:space="preserve">
     <value>Yazı:</value>
+  </data>
+  <data name="cbOneDriveCreateShareableLink.Text" xml:space="preserve">
+    <value>Paylaşılabilir link oluştur</value>
+  </data>
+  <data name="lblOneDriveFolderID.Text" xml:space="preserve">
+    <value>Seçili dizin:</value>
+  </data>
+  <data name="btnHubicRefreshFolders.Text" xml:space="preserve">
+    <value>Dizin listesini yenile</value>
+  </data>
+  <data name="cbHubicPublishLink.Text" xml:space="preserve">
+    <value>Paylaşılabilir link oluştur (30 gün geçerli)</value>
+  </data>
+  <data name="chHubicFolderName.Text" xml:space="preserve">
+    <value>Dizin adı</value>
+  </data>
+  <data name="lblHubicSelectedFolder.Text" xml:space="preserve">
+    <value>Seçilmiş dizin:</value>
+  </data>
+  <data name="lblHubicSelectedFolderNote.Text" xml:space="preserve">
+    <value>Not: Dizin içine gitmek için dizin adına çift tıklayabilirsiniz.</value>
+  </data>
+  <data name="lblLambdaInfo.Text" xml:space="preserve">
+    <value>API anahtarını almak için Lambda sitesine giriş yapın https://lambda.sx/ adresinden ve sağ üstteki dişli tuşuna basın.</value>
+  </data>
+  <data name="lblLambdaApiKey.Text" xml:space="preserve">
+    <value>API anahtarı:</value>
   </data>
 </root>

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -26,7 +26,6 @@
 using ShareX.HelpersLib;
 using ShareX.UploadersLib.FileUploaders;
 using ShareX.UploadersLib.Forms;
-using ShareX.UploadersLib.GUI;
 using ShareX.UploadersLib.HelperClasses;
 using ShareX.UploadersLib.ImageUploaders;
 using ShareX.UploadersLib.Properties;
@@ -778,17 +777,8 @@ namespace ShareX.UploadersLib
                 if (!string.IsNullOrEmpty(url))
                 {
                     Config.BoxOAuth2Info = oauth;
-                    //Helpers.LoadBrowserAsync(url);
+                    URLHelpers.OpenURL(url);
                     DebugHelper.WriteLine("BoxAuthOpen - Authorization URL is opened: " + url);
-
-                    // Workaround for authorization because we don't have callback url which starts with https://
-                    using (OAuthWebForm oauthForm = new OAuthWebForm(url, "https://www.box.com/home/"))
-                    {
-                        if (oauthForm.ShowDialog() == DialogResult.OK)
-                        {
-                            BoxAuthComplete(oauthForm.Code);
-                        }
-                    }
                 }
                 else
                 {
@@ -894,6 +884,122 @@ namespace ShareX.UploadersLib
 
         #endregion Box
 
+        #region Hubic
+
+        public void HubicAuthOpen()
+        {
+            try
+            {
+                OAuth2Info oauth = new OAuth2Info(APIKeys.HubicClientID, APIKeys.HubicClientSecret);
+                HubicOpenstackAuthInfo osauth = new HubicOpenstackAuthInfo();
+
+                string url = new Hubic(oauth, osauth).GetAuthorizationURL();
+
+                if (!string.IsNullOrEmpty(url))
+                {
+                    Config.HubicOAuth2Info = oauth;
+                    Config.HubicOpenstackAuthInfo = osauth;
+                    URLHelpers.OpenURL(url);
+                    DebugHelper.WriteLine("HubicAuthOpen - Authorization URL is opened: " + url);
+                }
+                else
+                {
+                    DebugHelper.WriteLine("HubicAuthOpen - Authorization URL is empty.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void HubicAuthComplete(string code)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(code) && Config.HubicOAuth2Info != null)
+                {
+                    bool result = new Hubic(Config.HubicOAuth2Info, Config.HubicOpenstackAuthInfo).GetAccessToken(code);
+
+                    if (result)
+                    {
+                        oauth2Hubic.Status = OAuthLoginStatus.LoginSuccessful;
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_successful, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        oauth2Hubic.Status = OAuthLoginStatus.LoginFailed;
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_failed, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+
+                    btnHubicRefreshFolders.Enabled = result;
+                    btnHubicRefreshFolders.PerformClick();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void HubicAuthRefresh()
+        {
+            try
+            {
+                if (OAuth2Info.CheckOAuth(Config.HubicOAuth2Info))
+                {
+                    bool result = new Hubic(Config.HubicOAuth2Info, Config.HubicOpenstackAuthInfo).RefreshAccessToken();
+
+                    if (result)
+                    {
+                        oauth2Hubic.Status = OAuthLoginStatus.LoginSuccessful;
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_successful, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        oauth2Hubic.Status = OAuthLoginStatus.LoginFailed;
+                        MessageBox.Show(Resources.UploadersConfigForm_Login_failed, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.ToString(), Resources.UploadersConfigForm_Error, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public void HubicListFolders(HubicFolderInfo fileInfo)
+        {
+            lvHubicFolders.Items.Clear();
+
+            if (!OAuth2Info.CheckOAuth(Config.HubicOAuth2Info))
+            {
+                MessageBox.Show(Resources.UploadersConfigForm_ListFolders_Authentication_required_, Resources.UploadersConfigForm_HubicListFolders_Hubic_refresh_folders_list_failed,
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            else
+            {
+                Hubic hubic = new Hubic(Config.HubicOAuth2Info, Config.HubicOpenstackAuthInfo);
+                List<HubicFolderInfo> folders = hubic.GetFiles(fileInfo);
+                if (folders != null && folders.Count != 0)
+                {
+                    foreach (HubicFolderInfo folder in folders.Where(x => x.content_type == "application/directory" && x.name[0] != '.'))
+                    {
+                        HubicAddFolder(folder);
+                    }
+                }
+            }
+        }
+
+        private void HubicAddFolder(HubicFolderInfo folder)
+        {
+            ListViewItem lvi = new ListViewItem(folder.name);
+            lvi.Tag = folder;
+            lvHubicFolders.Items.Add(lvi);
+        }
+
+        #endregion Hubic
+
         #region OneDrive
 
         public void OneDriveAuthOpen()
@@ -926,20 +1032,20 @@ namespace ShareX.UploadersLib
             {
                 if (!string.IsNullOrEmpty(code) && Config.OneDriveOAuth2Info != null)
                 {
-                    OneDrive onedrive = new OneDrive(Config.OneDriveOAuth2Info);
+                    bool result = new OneDrive(Config.OneDriveOAuth2Info).GetAccessToken(code);
 
-                    if (onedrive.GetAccessToken(code))
+                    if (result)
                     {
-                        Config.OneDriveOAuth2Info = onedrive.AuthInfo;
                         oAuth2OneDrive.Status = OAuthLoginStatus.LoginSuccessful;
                         MessageBox.Show(Resources.UploadersConfigForm_Login_successful, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
-                        Config.OneDriveOAuth2Info = null;
                         oAuth2OneDrive.Status = OAuthLoginStatus.LoginFailed;
                         MessageBox.Show(Resources.UploadersConfigForm_Login_failed, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+
+                    tvOneDrive.Enabled = result;
                 }
             }
             catch (Exception ex)
@@ -967,6 +1073,8 @@ namespace ShareX.UploadersLib
                         oAuth2OneDrive.Status = OAuthLoginStatus.LoginFailed;
                         MessageBox.Show(Resources.UploadersConfigForm_Login_failed, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+
+                    tvOneDrive.Enabled = result;
                 }
             }
             catch (Exception ex)
@@ -975,51 +1083,31 @@ namespace ShareX.UploadersLib
             }
         }
 
-        private void OneDriveListFolders()
+        public void OneDriveListFolders(OneDriveFileInfo fileEntry, TreeNode tnParent)
         {
-            lvOneDriveFolders.Items.Clear();
-            OneDriveAddFolder(OneDrive.RootFolder);
-            OneDriveListFolders(OneDrive.RootFolder);
+            Application.DoEvents();
+            OneDrive oneDrive = new OneDrive(Config.OneDriveOAuth2Info);
+            OneDrivePathInfo oneDrivePathInfo = oneDrive.GetPathInfo(fileEntry.id);
+            tnParent.Nodes.Clear();
+            foreach (OneDriveFileInfo folder in oneDrivePathInfo.data.Where(x => x.id.StartsWith("folder.")))
+            {
+                OneDriveAddFolder(folder, tnParent);
+            }
         }
 
-        public void OneDriveListFolders(OneDriveFileInfo fileEntry)
+        private void OneDriveAddFolder(OneDriveFileInfo folder, TreeNode tnParent)
         {
-            if (!OAuth2Info.CheckOAuth(Config.OneDriveOAuth2Info))
+            TreeNode tn = new TreeNode(folder.name);
+            tn.Tag = folder;
+            tn.Nodes.Add(new TreeNode(Resources.UploadersConfigForm_OneDriveAddFolder_Querying_folders___));
+
+            if (tnParent != null)
             {
-                MessageBox.Show(Resources.UploadersConfigForm_ListFolders_Authentication_required_, Resources.UploadersConfigForm_OneDriveListFolders_OneDrive_refresh_folders_list_failed,
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                tnParent.Nodes.Add(tn);
             }
             else
             {
-                OneDrive onedrive = new OneDrive(Config.OneDriveOAuth2Info);
-                //OneDriveFileInfo files = onedrive.GetFiles(fileEntry);
-                //if (files != null && files.entries != null && files.entries.Length > 0)
-                //{
-                //    foreach (OneDriveFileInfo folder in files.entries.Where(x => x.type == "folder"))
-                //    {
-                //        OneDriveAddFolder(folder);
-                //    }
-                //}
-            }
-        }
-
-        private void OneDriveAddFolder(OneDriveFileInfo folder)
-        {
-            ListViewItem lvi = new ListViewItem(folder.name);
-            lvi.Tag = folder;
-            lvOneDriveFolders.Items.Add(lvi);
-        }
-
-        private void lvOneDriveFolders_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (lvOneDriveFolders.SelectedItems.Count > 0)
-            {
-                ListViewItem lvi = lvOneDriveFolders.SelectedItems[0];
-                OneDriveFileInfo file = lvi.Tag as OneDriveFileInfo;
-                if (file != null)
-                {
-                    lblOneDriveFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + file.name;
-                }
+                tvOneDrive.Nodes.Add(tn);
             }
         }
 

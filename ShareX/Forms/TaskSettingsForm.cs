@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -30,6 +30,7 @@ using ShareX.ScreenCaptureLib;
 using ShareX.UploadersLib;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -61,7 +62,7 @@ namespace ShareX
             }
             else
             {
-                tbDescription.Text = TaskSettings.Description;
+                tbDescription.Text = TaskSettings.Description ?? string.Empty;
                 cbUseDefaultAfterCaptureSettings.Checked = TaskSettings.UseDefaultAfterCaptureJob;
                 cbUseDefaultAfterUploadSettings.Checked = TaskSettings.UseDefaultAfterUploadJob;
                 cbUseDefaultDestinationSettings.Checked = TaskSettings.UseDefaultDestinations;
@@ -79,7 +80,7 @@ namespace ShareX
             AddEnumItemsContextMenu<HotkeyType>(x =>
             {
                 TaskSettings.Job = x;
-                tbDescription.Text = TaskSettings.Job.GetLocalizedDescription();
+                UpdateWindowTitle();
             }, cmsTask);
             AddMultiEnumItemsContextMenu<AfterCaptureTasks>(x => TaskSettings.AfterCaptureJob = TaskSettings.AfterCaptureJob.Swap(x), cmsAfterCapture);
             AddMultiEnumItemsContextMenu<AfterUploadTasks>(x => TaskSettings.AfterUploadJob = TaskSettings.AfterUploadJob.Swap(x), cmsAfterUpload);
@@ -218,24 +219,18 @@ namespace ShareX
             pgRectangleAnnotate.SelectedObject = TaskSettings.CaptureSettings.RectangleAnnotateOptions;
 
             // Capture / Screen recorder
-            cbScreenRecorderOutput.Items.AddRange(Helpers.GetEnumDescriptions<ScreenRecordOutput>());
-            cbScreenRecorderOutput.SelectedIndex = (int)TaskSettings.CaptureSettings.ScreenRecordOutput;
-            chkRunScreencastCLI.Checked = TaskSettings.CaptureSettings.RunScreencastCLI;
-            UpdateVideoEncoders();
-
             nudScreenRecordFPS.Value = TaskSettings.CaptureSettings.ScreenRecordFPS.Between((int)nudScreenRecordFPS.Minimum, (int)nudScreenRecordFPS.Maximum);
             nudGIFFPS.Value = TaskSettings.CaptureSettings.GIFFPS.Between((int)nudGIFFPS.Minimum, (int)nudGIFFPS.Maximum);
-            cbScreenRecorderFixedDuration.Checked = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
-            nudScreenRecorderDuration.Enabled = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
+            cbScreenRecorderFixedDuration.Checked = nudScreenRecorderDuration.Enabled = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
             nudScreenRecorderDuration.Value = (decimal)TaskSettings.CaptureSettings.ScreenRecordDuration;
-            chkScreenRecordAutoStart.Checked = TaskSettings.CaptureSettings.ScreenRecordAutoStart;
-            nudScreenRecorderStartDelay.Enabled = chkScreenRecordAutoStart.Checked;
+            chkScreenRecordAutoStart.Checked = nudScreenRecorderStartDelay.Enabled = TaskSettings.CaptureSettings.ScreenRecordAutoStart;
             nudScreenRecorderStartDelay.Value = (decimal)TaskSettings.CaptureSettings.ScreenRecordStartDelay;
-            cbScreenRecordAutoDisableAero.Checked = TaskSettings.CaptureSettings.ScreenRecordAutoDisableAero;
+            chkRunScreencastCLI.Checked = cboEncoder.Enabled = btnEncoderConfig.Enabled = TaskSettings.CaptureSettings.RunScreencastCLI;
+            UpdateVideoEncoders();
 
             // Actions
             TaskHelpers.AddDefaultExternalPrograms(TaskSettings);
-            TaskSettings.ExternalPrograms.ForEach(x => AddFileAction(x));
+            TaskSettings.ExternalPrograms.ForEach(AddFileAction);
 
             // Watch folders
             cbWatchFolderEnabled.Checked = TaskSettings.WatchFolderEnabled;
@@ -252,7 +247,17 @@ namespace ShareX
                 }
             }
 
-            // Upload / Name pattern
+            // Upload
+            cbNameFormatCustomTimeZone.Checked = cbNameFormatTimeZone.Enabled = TaskSettings.UploadSettings.UseCustomTimeZone;
+            cbNameFormatTimeZone.Items.AddRange(TimeZoneInfo.GetSystemTimeZones().ToArray());
+            for (int i = 0; i < cbNameFormatTimeZone.Items.Count; i++)
+            {
+                if (cbNameFormatTimeZone.Items[i].Equals(TaskSettings.UploadSettings.CustomTimeZone))
+                {
+                    cbNameFormatTimeZone.SelectedIndex = i;
+                    break;
+                }
+            }
             txtNameFormatPattern.Text = TaskSettings.UploadSettings.NameFormatPattern;
             txtNameFormatPatternActiveWindow.Text = TaskSettings.UploadSettings.NameFormatPatternActiveWindow;
             CodeMenu.Create<ReplCodeMenuEntry>(txtNameFormatPattern, ReplCodeMenuEntry.n, ReplCodeMenuEntry.t, ReplCodeMenuEntry.pn);
@@ -320,6 +325,25 @@ namespace ShareX
             }
         }
 
+        private void UpdateNameFormatPreviews()
+        {
+            NameParser nameParser = new NameParser(NameParserType.FileName)
+            {
+                AutoIncrementNumber = Program.Settings.NameParserAutoIncrementNumber,
+                WindowText = Text,
+                ProcessName = "ShareX",
+                MaxNameLength = TaskSettings.AdvancedSettings.NamePatternMaxLength,
+                MaxTitleLength = TaskSettings.AdvancedSettings.NamePatternMaxTitleLength,
+                CustomTimeZone = TaskSettings.UploadSettings.UseCustomTimeZone ? TaskSettings.UploadSettings.CustomTimeZone : null
+            };
+
+            lblNameFormatPatternPreview.Text = Resources.TaskSettingsForm_txtNameFormatPatternActiveWindow_TextChanged_Preview_ + " " +
+                nameParser.Parse(TaskSettings.UploadSettings.NameFormatPattern);
+
+            lblNameFormatPatternPreviewActiveWindow.Text = Resources.TaskSettingsForm_txtNameFormatPatternActiveWindow_TextChanged_Preview_ + " " +
+                nameParser.Parse(TaskSettings.UploadSettings.NameFormatPatternActiveWindow);
+        }
+
         private void TaskSettingsForm_Resize(object sender, EventArgs e)
         {
             Refresh();
@@ -338,7 +362,8 @@ namespace ShareX
                 EnableDisableToolStripMenuItems<FileDestination>(tsmiFileUploaders);
                 EnableDisableToolStripMenuItems<UrlShortenerType>(tsmiURLShorteners);
                 EnableDisableToolStripMenuItems<URLSharingServices>(tsmiURLSharingServices);
-                chkOverrideFTP.Visible = cboFTPaccounts.Visible = Program.UploadersConfig.FTPAccountList.Count > 1;
+                chkOverrideFTP.Enabled = cboFTPaccounts.Enabled = Program.UploadersConfig.FTPAccountList.Count > 1;
+                chkOverrideCustomUploader.Enabled = cbOverrideCustomUploader.Enabled = Program.UploadersConfig.CustomUploadersList.Count > 1;
             }
         }
 
@@ -734,59 +759,29 @@ namespace ShareX
 
         #region Screen recorder
 
-        private void cbScreenRecorderOutput_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            TaskSettings.CaptureSettings.ScreenRecordOutput = (ScreenRecordOutput)cbScreenRecorderOutput.SelectedIndex;
-            nudScreenRecordFPS.Enabled = btnScreenRecorderOptions.Enabled = TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVI ||
-                TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.FFmpeg;
-            btnEncoderConfig.Enabled = cboEncoder.Enabled = chkRunScreencastCLI.Enabled && chkRunScreencastCLI.Checked;
-            nudGIFFPS.Enabled = TaskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.GIF;
-        }
-
-        private void btnScreenRecorderOptions_Click(object sender, EventArgs e)
+        private void btnScreenRecorderFFmpegOptions_Click(object sender, EventArgs e)
         {
             ScreencastOptions options = new ScreencastOptions
             {
                 FFmpeg = TaskSettings.CaptureSettings.FFmpegOptions,
-                AVI = TaskSettings.CaptureSettings.AVIOptions,
-                ShowAVIOptionsDialog = true,
                 ScreenRecordFPS = TaskSettings.CaptureSettings.ScreenRecordFPS,
                 GIFFPS = TaskSettings.CaptureSettings.GIFFPS,
                 Duration = TaskSettings.CaptureSettings.ScreenRecordFixedDuration ? TaskSettings.CaptureSettings.ScreenRecordDuration : 0,
                 OutputPath = "output.mp4",
                 CaptureArea = Screen.PrimaryScreen.Bounds,
-                DrawCursor = TaskSettings.CaptureSettings.ShowCursor,
-                ParentWindow = this.Handle
+                DrawCursor = TaskSettings.CaptureSettings.ShowCursor
             };
 
-            switch (TaskSettings.CaptureSettings.ScreenRecordOutput)
+            using (FFmpegOptionsForm form = new FFmpegOptionsForm(options))
             {
-                case ScreenRecordOutput.AVI:
-
-                    try
-                    {
-                        options.OutputPath = Program.ScreenRecorderCacheFilePath;
-
-                        // Ugly workaround for show AVI compression dialog
-                        using (AVICache aviCache = new AVICache(options))
-                        {
-                            TaskSettings.CaptureSettings.AVIOptions.CompressOptions = options.AVI.CompressOptions;
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        TaskSettings.CaptureSettings.AVIOptions.CompressOptions = new AVICOMPRESSOPTIONS();
-                        MessageBox.Show(ex.ToString(), "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    break;
-                case ScreenRecordOutput.FFmpeg:
-                    using (FFmpegOptionsForm form = new FFmpegOptionsForm(options))
-                    {
-                        form.DefaultToolsPath = Path.Combine(Program.ToolsFolder, "ffmpeg.exe");
-                        form.ShowDialog();
-                    }
-                    break;
+                form.DefaultToolsPath = Path.Combine(Program.ToolsFolder, "ffmpeg.exe");
+                form.ShowDialog();
             }
+        }
+
+        private void chkRunScreencastCLI_CheckedChanged(object sender, EventArgs e)
+        {
+            TaskSettings.CaptureSettings.RunScreencastCLI = cboEncoder.Enabled = btnEncoderConfig.Enabled = chkRunScreencastCLI.Checked;
         }
 
         private void cboEncoder_SelectedIndexChanged(object sender, EventArgs e)
@@ -803,25 +798,38 @@ namespace ShareX
             }
         }
 
-        private void nudGIFFPS_ValueChanged(object sender, EventArgs e)
-        {
-            TaskSettings.CaptureSettings.GIFFPS = (int)nudGIFFPS.Value;
-        }
-
         private void nudScreenRecordFPS_ValueChanged(object sender, EventArgs e)
         {
             TaskSettings.CaptureSettings.ScreenRecordFPS = (int)nudScreenRecordFPS.Value;
+
+            if (TaskSettings.CaptureSettings.ScreenRecordFPS > 30)
+            {
+                nudScreenRecordFPS.ForeColor = Color.Red;
+            }
+            else
+            {
+                nudScreenRecordFPS.ForeColor = SystemColors.WindowText;
+            }
+        }
+
+        private void nudGIFFPS_ValueChanged(object sender, EventArgs e)
+        {
+            TaskSettings.CaptureSettings.GIFFPS = (int)nudGIFFPS.Value;
+
+            if (TaskSettings.CaptureSettings.GIFFPS > 15)
+            {
+                nudGIFFPS.ForeColor = Color.Red;
+            }
+            else
+            {
+                nudGIFFPS.ForeColor = SystemColors.WindowText;
+            }
         }
 
         private void cbScreenRecorderFixedDuration_CheckedChanged(object sender, EventArgs e)
         {
             TaskSettings.CaptureSettings.ScreenRecordFixedDuration = cbScreenRecorderFixedDuration.Checked;
             nudScreenRecorderDuration.Enabled = TaskSettings.CaptureSettings.ScreenRecordFixedDuration;
-        }
-
-        private void chkRunScreencastCLI_CheckedChanged(object sender, EventArgs e)
-        {
-            TaskSettings.CaptureSettings.RunScreencastCLI = btnEncoderConfig.Enabled = cboEncoder.Enabled = chkRunScreencastCLI.Checked;
         }
 
         private void nudScreenRecorderDuration_ValueChanged(object sender, EventArgs e)
@@ -838,11 +846,6 @@ namespace ShareX
         private void nudScreenRecorderStartDelay_ValueChanged(object sender, EventArgs e)
         {
             TaskSettings.CaptureSettings.ScreenRecordStartDelay = (float)nudScreenRecorderStartDelay.Value;
-        }
-
-        private void cbScreenRecordAutoDisableAero_CheckedChanged(object sender, EventArgs e)
-        {
-            TaskSettings.CaptureSettings.ScreenRecordAutoDisableAero = cbScreenRecordAutoDisableAero.Checked;
         }
 
         #endregion Screen recorder
@@ -1014,46 +1017,46 @@ namespace ShareX
             UpdateDefaultSettingVisibility();
         }
 
-        private void cbFileUploadUseNamePattern_CheckedChanged(object sender, EventArgs e)
+        private void cbNameFormatCustomTimeZone_CheckedChanged(object sender, EventArgs e)
         {
-            TaskSettings.UploadSettings.FileUploadUseNamePattern = cbFileUploadUseNamePattern.Checked;
+            TaskSettings.UploadSettings.UseCustomTimeZone = cbNameFormatCustomTimeZone.Checked;
+            cbNameFormatTimeZone.Enabled = TaskSettings.UploadSettings.UseCustomTimeZone;
+            UpdateNameFormatPreviews();
         }
 
-        private void txtNameFormatPatternActiveWindow_TextChanged(object sender, EventArgs e)
+        private void cbNameFormatTimeZone_SelectedIndexChanged(object sender, EventArgs e)
         {
-            TaskSettings.UploadSettings.NameFormatPatternActiveWindow = txtNameFormatPatternActiveWindow.Text;
+            TimeZoneInfo timeZoneInfo = cbNameFormatTimeZone.SelectedItem as TimeZoneInfo;
 
-            NameParser nameParser = new NameParser(NameParserType.FileName)
+            if (timeZoneInfo != null)
             {
-                AutoIncrementNumber = Program.Settings.NameParserAutoIncrementNumber,
-                WindowText = Text,
-                ProcessName = "ShareX",
-                MaxNameLength = TaskSettings.AdvancedSettings.NamePatternMaxLength,
-                MaxTitleLength = TaskSettings.AdvancedSettings.NamePatternMaxTitleLength
-            };
+                TaskSettings.UploadSettings.CustomTimeZone = timeZoneInfo;
+            }
 
-            lblNameFormatPatternPreviewActiveWindow.Text = Resources.TaskSettingsForm_txtNameFormatPatternActiveWindow_TextChanged_Preview_ + " " +
-                nameParser.Parse(TaskSettings.UploadSettings.NameFormatPatternActiveWindow);
-        }
-
-        private void btnResetAutoIncrementNumber_Click(object sender, EventArgs e)
-        {
-            Program.Settings.NameParserAutoIncrementNumber = 0;
+            UpdateNameFormatPreviews();
         }
 
         private void txtNameFormatPattern_TextChanged(object sender, EventArgs e)
         {
             TaskSettings.UploadSettings.NameFormatPattern = txtNameFormatPattern.Text;
+            UpdateNameFormatPreviews();
+        }
 
-            NameParser nameParser = new NameParser(NameParserType.FileName)
-            {
-                AutoIncrementNumber = Program.Settings.NameParserAutoIncrementNumber,
-                MaxNameLength = TaskSettings.AdvancedSettings.NamePatternMaxLength,
-                MaxTitleLength = TaskSettings.AdvancedSettings.NamePatternMaxTitleLength
-            };
+        private void txtNameFormatPatternActiveWindow_TextChanged(object sender, EventArgs e)
+        {
+            TaskSettings.UploadSettings.NameFormatPatternActiveWindow = txtNameFormatPatternActiveWindow.Text;
+            UpdateNameFormatPreviews();
+        }
 
-            lblNameFormatPatternPreview.Text = Resources.TaskSettingsForm_txtNameFormatPatternActiveWindow_TextChanged_Preview_ + " " +
-                nameParser.Parse(TaskSettings.UploadSettings.NameFormatPattern);
+        private void btnResetAutoIncrementNumber_Click(object sender, EventArgs e)
+        {
+            Program.Settings.NameParserAutoIncrementNumber = 0;
+            UpdateNameFormatPreviews();
+        }
+
+        private void cbFileUploadUseNamePattern_CheckedChanged(object sender, EventArgs e)
+        {
+            TaskSettings.UploadSettings.FileUploadUseNamePattern = cbFileUploadUseNamePattern.Checked;
         }
 
         private void chkClipboardUploadContents_CheckedChanged(object sender, EventArgs e)

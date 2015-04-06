@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -35,25 +35,13 @@ using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
-using System.Globalization;
+using System.Linq;
 
 namespace ShareX
 {
     public class TaskSettings
     {
-        private string description = string.Empty;
-
-        public string Description
-        {
-            get
-            {
-                return !string.IsNullOrEmpty(description) ? description : Job.GetLocalizedDescription();
-            }
-            set
-            {
-                description = value;
-            }
-        }
+        public string Description = string.Empty;
 
         public HotkeyType Job = HotkeyType.None;
 
@@ -64,7 +52,7 @@ namespace ShareX
         public AfterUploadTasks AfterUploadJob = AfterUploadTasks.CopyURLToClipboard;
 
         public bool UseDefaultDestinations = true;
-        public ImageDestination ImageDestination = DefaultImageDestination();
+        public ImageDestination ImageDestination = ImageDestination.Imgur;
         public FileDestination ImageFileDestination = FileDestination.Dropbox;
         public TextDestination TextDestination = TextDestination.Pastebin;
         public FileDestination TextFileDestination = FileDestination.Dropbox;
@@ -121,7 +109,7 @@ namespace ShareX
 
         public override string ToString()
         {
-            return Description;
+            return !string.IsNullOrEmpty(Description) ? Description : Job.GetLocalizedDescription();
         }
 
         public bool IsUsingDefaultSettings
@@ -238,13 +226,6 @@ namespace ShareX
                 return Program.ScreenshotsFolder;
             }
         }
-
-        private static ImageDestination DefaultImageDestination()
-        {
-            return CultureInfo.CurrentCulture.Name.Equals("tr-TR", StringComparison.InvariantCultureIgnoreCase) ||
-                CultureInfo.CurrentUICulture.Name.Equals("tr-TR", StringComparison.InvariantCultureIgnoreCase) ?
-                ImageDestination.HizliResim : ImageDestination.Imgur;
-        }
     }
 
     public class TaskSettingsGeneral
@@ -296,7 +277,7 @@ namespace ShareX
         #region Capture / General
 
         public bool ShowCursor = true;
-        public bool CaptureTransparent = !Helpers.IsWindows8OrGreater();
+        public bool CaptureTransparent = false;
         public bool CaptureShadow = true;
         public int CaptureShadowOffset = 20;
         public bool CaptureClientArea = false;
@@ -312,41 +293,38 @@ namespace ShareX
 
         #endregion Capture / Region capture
 
-        #region Capture / Rectangle annotate
-
-        public RectangleAnnotateOptions RectangleAnnotateOptions = new RectangleAnnotateOptions();
-
-        #endregion Capture / Rectangle annotate
-
         #region Capture / Screen recorder
 
-        public ScreenRecordOutput ScreenRecordOutput = ScreenRecordOutput.FFmpeg;
         public FFmpegOptions FFmpegOptions = new FFmpegOptions();
-        public AVIOptions AVIOptions = new AVIOptions();
-
-        public bool RunScreencastCLI = false;
-        public int VideoEncoderSelected = 0;
-
         public int ScreenRecordFPS = 20;
         public int GIFFPS = 5;
         public bool ScreenRecordFixedDuration = false;
         public float ScreenRecordDuration = 3f;
         public bool ScreenRecordAutoStart = true;
         public float ScreenRecordStartDelay = 0.5f;
-        public bool ScreenRecordAutoDisableAero = false;
+        public bool RunScreencastCLI = false;
+        public int VideoEncoderSelected = 0;
 
         #endregion Capture / Screen recorder
+
+        #region Capture / Rectangle annotate
+
+        public RectangleAnnotateOptions RectangleAnnotateOptions = new RectangleAnnotateOptions();
+
+        #endregion Capture / Rectangle annotate
     }
 
     public class TaskSettingsUpload
     {
-        #region Upload / Name pattern
+        #region Upload
 
+        public bool UseCustomTimeZone = false;
+        public TimeZoneInfo CustomTimeZone = TimeZoneInfo.Utc;
         public string NameFormatPattern = "%y-%mo-%d_%h-%mi-%s"; // Test: %y %mo %mon %mon2 %d %h %mi %s %ms %w %w2 %pm %rn %ra %width %height %app %ver
         public string NameFormatPatternActiveWindow = "%t_%y-%mo-%d_%h-%mi-%s";
         public bool FileUploadUseNamePattern = false;
 
-        #endregion Upload / Name pattern
+        #endregion Upload
 
         #region Upload / Clipboard upload
 
@@ -363,13 +341,13 @@ namespace ShareX
         [Category("General"), DefaultValue(false), Description("Allow after capture tasks for image files by treating them as images when files are handled during file upload, clipboard file upload, drag & drop, watch folder and other tasks.")]
         public bool ProcessImagesDuringFileUpload { get; set; }
 
-        [Category("General"), DefaultValue(true), Description("Use after capture tasks for clipboard image upload.")]
+        [Category("General"), DefaultValue(false), Description("Use after capture tasks for clipboard image upload.")]
         public bool ProcessImagesDuringClipboardUpload { get; set; }
 
         [Category("General"), DefaultValue(false), Description("If task contains upload job then this setting will clear clipboard when task start.")]
         public bool AutoClearClipboard { get; set; }
 
-        [Category("Image"), DefaultValue(256), Description("Preferred thumbnail width. 0 means aspect ratio will be used to adjust width according to height")]
+        [Category("Image"), DefaultValue(256), Description("Preferred thumbnail width. 0 means aspect ratio will be used to adjust width according to height.")]
         public int ThumbnailPreferredWidth { get; set; }
 
         [Category("Image"), DefaultValue(0), Description("Preferred thumbnail height. 0 means aspect ratio will be used to adjust height according to width.")]
@@ -378,6 +356,14 @@ namespace ShareX
         [Category("Paths"), Description("Custom capture path takes precedence over path configured in Application configuration.")]
         [Editor(typeof(DirectoryNameEditor), typeof(UITypeEditor))]
         public string CapturePath { get; set; }
+
+        [Category("Upload"), Description("Files with these file extensions will be uploaded using image uploader.")]
+        [Editor("System.Windows.Forms.Design.StringCollectionEditor,System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
+        public List<string> ImageExtensions { get; set; }
+
+        [Category("Upload"), Description("Files with these file extensions will be uploaded using text uploader.")]
+        [Editor("System.Windows.Forms.Design.StringCollectionEditor,System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
+        public List<string> TextExtensions { get; set; }
 
         [Category("After upload"), DefaultValue("$result"),
         Description("Clipboard content format after uploading. Supported variables: $result, $url, $shorturl, $thumbnailurl, $deletionurl, $filepath, $filename, $filenamenoext, $folderpath, $foldername, $uploadtime and other variables such as %y-%mo-%d etc.")]
@@ -453,9 +439,14 @@ namespace ShareX
         [Category("Name pattern"), DefaultValue(50), Description("Maximum name pattern title (%t) length for file name.")]
         public int NamePatternMaxTitleLength { get; set; }
 
+        [Category("Tools"), DefaultValue("$r, $g, $b"), Description("Copy this color format to clipboard after using screen color picker. Formats: $r, $g, $b, $hex, $x, $y")]
+        public string ScreenColorPickerFormat { get; set; }
+
         public TaskSettingsAdvanced()
         {
             this.ApplyDefaultPropertyValues();
+            ImageExtensions = Enum.GetNames(typeof(ImageFileExtensions)).ToList();
+            TextExtensions = Enum.GetNames(typeof(TextFileExtensions)).ToList();
         }
     }
 }

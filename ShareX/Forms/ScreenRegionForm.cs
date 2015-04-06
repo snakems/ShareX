@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -56,12 +56,21 @@ namespace ShareX
             borderRectangle0Based = new Rectangle(0, 0, borderRectangle.Width, borderRectangle.Height);
 
             Location = borderRectangle.Location;
-            Size = new Size(borderRectangle.Width, borderRectangle.Height + pInfo.Height);
-            pInfo.Location = new Point(Width - pInfo.Width, Height - pInfo.Height);
+            int windowWidth = Math.Max(borderRectangle.Width, pInfo.Width);
+            Size = new Size(windowWidth, borderRectangle.Height + pInfo.Height + 1);
+            pInfo.Location = new Point(0, borderRectangle.Height + 1);
 
             Region region = new Region(ClientRectangle);
             region.Exclude(borderRectangle0Based.Offset(-1));
-            region.Exclude(new Rectangle(0, pInfo.Location.Y, pInfo.Location.X, pInfo.Height));
+            region.Exclude(new Rectangle(0, borderRectangle.Height, windowWidth, 1));
+            if (borderRectangle.Width < pInfo.Width)
+            {
+                region.Exclude(new Rectangle(borderRectangle.Width, 0, pInfo.Width - borderRectangle.Width, borderRectangle.Height));
+            }
+            else if (borderRectangle.Width > pInfo.Width)
+            {
+                region.Exclude(new Rectangle(pInfo.Width, borderRectangle.Height + 1, borderRectangle.Width - pInfo.Width, pInfo.Height));
+            }
             Region = region;
 
             Timer = new Stopwatch();
@@ -83,16 +92,23 @@ namespace ShareX
         public static ScreenRegionForm Show(Rectangle captureRectangle, Action stopRequested, float duration = 0)
         {
             ScreenRegionForm regionForm = new ScreenRegionForm(captureRectangle);
-            regionForm.StopRequested += stopRequested;
 
-            if (duration > 0)
+            Thread thread = new Thread(() =>
             {
-                regionForm.IsCountdown = true;
-                regionForm.Countdown = TimeSpan.FromSeconds(duration);
-            }
+                regionForm.StopRequested += stopRequested;
 
-            regionForm.UpdateTimer();
-            regionForm.Show();
+                if (duration > 0)
+                {
+                    regionForm.IsCountdown = true;
+                    regionForm.Countdown = TimeSpan.FromSeconds(duration);
+                }
+
+                regionForm.UpdateTimer();
+                regionForm.ShowDialog();
+            });
+
+            thread.Start();
+
             return regionForm;
         }
 

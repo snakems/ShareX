@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -78,7 +78,7 @@ namespace ShareX.HelpersLib
                 catch (Exception e)
                 {
                     DebugHelper.WriteException(e);
-                    MessageBox.Show(Resources.ExportImportControl_Serialize_Export_failed_ + "\n\n" + e, "ShareX - " + Resources.ExportImportControl_Serialize_Error,
+                    MessageBox.Show(Resources.ExportImportControl_Serialize_Export_failed_ + "\n\n" + e, "ShareX - " + Resources.Error,
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
@@ -154,7 +154,7 @@ namespace ShareX.HelpersLib
             catch (Exception e)
             {
                 DebugHelper.WriteException(e);
-                MessageBox.Show(Resources.ExportImportControl_Deserialize_Import_failed_ + "\n\n" + e, "ShareX - " + Resources.ExportImportControl_Serialize_Error,
+                MessageBox.Show(Resources.ExportImportControl_Deserialize_Import_failed_ + "\n\n" + e, "ShareX - " + Resources.Error,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
 

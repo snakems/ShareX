@@ -124,10 +124,6 @@
   <data name="FFmpegHelper_Record_FFmpeg_error" xml:space="preserve">
     <value>FFmpeg error</value>
   </data>
-  <data name="HardDiskCache_GetImageEnumerator_Cache_file_size_cannot_exceed" xml:space="preserve">
-    <value>Cache file size cannot exceed {0} Bytes.
-Please use FFmpeg screen recording instead of GIF.</value>
-  </data>
   <data name="Surface_InitializeComponent_Region_capture" xml:space="preserve">
     <value>Region capture</value>
   </data>
@@ -166,5 +162,12 @@ Distance: {6:0.00} px / Angle: {7:0.00}°</value>
   </data>
   <data name="RectangleAnnotate_DrawTips_Drawing_mode_off" xml:space="preserve">
     <value>Ctrl: Drawing mode ░ Space: Fullscreen capture</value>
+  </data>
+  <data name="RectangleRegion_GetColorPickerText" xml:space="preserve">
+    <value>R: {0}, G: {1}, B: {2}, Hex: {3}
+X: {4}, Y: {5}</value>
+  <comment>@Invariant</comment></data>
+  <data name="RectangleTransparent_RectangleTransparent_Rectangle_capture_transparent" xml:space="preserve">
+    <value>Rectangle capture transparent</value>
   </data>
 </root>

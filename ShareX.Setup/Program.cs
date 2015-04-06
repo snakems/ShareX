@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -41,7 +41,7 @@ namespace ShareX.Setup
             Beta // Build setup + upload it using "Debug/ShareX.exe"
         }
 
-        private const SetupType Setup = SetupType.Beta;
+        private const SetupType Setup = SetupType.Stable;
 
         private static string parentDir = @"..\..\..\";
         private static string binDir = Path.Combine(parentDir, @"ShareX\bin");
@@ -122,7 +122,12 @@ namespace ShareX.Setup
 
             CopyFiles(files, portableDir);
 
-            CopyFiles(Path.Combine(releaseDir, @"tr\*.resources.dll"), Path.Combine(portableDir, @"Languages\tr"));
+            string[] languages = new string[] { "tr", "de", "fr", "zh-CN", "hu" };
+
+            foreach (string language in languages)
+            {
+                CopyFiles(Path.Combine(releaseDir, language + "\\*.resources.dll"), Path.Combine(portableDir, "Languages\\" + language));
+            }
 
             File.WriteAllText(Path.Combine(portableDir, "PersonalPath.cfg"), "ShareX", Encoding.UTF8);
 

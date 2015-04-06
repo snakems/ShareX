@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -33,10 +33,18 @@ namespace ShareX
         Automatic, // Localized
         [Description("English")]
         English,
-        [Description("Türkçe")]
-        Turkish,
-        [Description("Deutsch")]
-        German
+        [Description("Deutsch (German)")]
+        German,
+        [Description("Français (French)")]
+        French,
+        [Description("Magyar (Hungarian)")]
+        Hungarian,
+        [Description("한국어 (Korean)")]
+        Korean,
+        [Description("简体中文 (Simplified Chinese)")]
+        SimplifiedChinese,
+        [Description("Türkçe (Turkish)")]
+        Turkish
     }
 
     public enum EImageFormat
@@ -74,9 +82,9 @@ namespace ShareX
         SaveImageToFile = 1 << 4,
         SaveImageToFileWithDialog = 1 << 5,
         SaveThumbnailImageToFile = 1 << 6,
-        CopyFileToClipboard = 1 << 7,
-        CopyFilePathToClipboard = 1 << 8,
-        PerformActions = 1 << 9,
+        PerformActions = 1 << 7,
+        CopyFileToClipboard = 1 << 8,
+        CopyFilePathToClipboard = 1 << 9,
         UploadImageToHost = 1 << 10,
         DeleteFile = 1 << 11
     }
@@ -134,6 +142,7 @@ namespace ShareX
         WindowRectangle,
         RectangleAnnotate,
         RectangleLight,
+        RectangleTransparent,
         RoundedRectangleRegion,
         EllipseRegion,
         TriangleRegion,
@@ -143,9 +152,12 @@ namespace ShareX
         LastRegion,
         ScreenRecorder,
         StartScreenRecorder,
+        ScreenRecorderGIF,
+        StartScreenRecorderGIF,
         AutoCapture,
         StartAutoCapture,
         OpenScreenshotsFolder,
+        ColorPicker,
         ScreenColorPicker,
         Ruler,
         FTPClient,
@@ -153,7 +165,8 @@ namespace ShareX
         IndexFolder,
         ImageEffects,
         QRCode,
-        TweetMessage
+        TweetMessage,
+        Automate
     }
 
     public enum HotkeyStatus
@@ -198,5 +211,10 @@ namespace ShareX
     public enum ImagePreviewVisibility
     {
         Show, Hide, Automatic
+    }
+
+    public enum ColorPickerFormat
+    {
+        RGB, Hexadecimal
     }
 }

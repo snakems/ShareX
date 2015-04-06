@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -24,6 +24,7 @@
 #endregion License Information (GPL v3)
 
 using ShareX.HelpersLib;
+using ShareX.Properties;
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -44,6 +45,49 @@ namespace ShareX
             rtbCredits.AddContextMenu();
 
             uclUpdate.CheckUpdate(TaskHelpers.CheckUpdate);
+
+            rtbShareXInfo.Text = string.Format(@"{0}: {1}
+{2}: {3}
+{4}: {5}", Resources.AboutForm_AboutForm_Website, Links.URL_WEBSITE, Resources.AboutForm_AboutForm_Project_page, Links.URL_PROJECT, Resources.AboutForm_AboutForm_Issues, Links.URL_ISSUES);
+
+            rtbCredits.Text = string.Format(@"{0}:
+
+Mega, Gist and Jira support: https://github.com/gpailler
+Web site: https://github.com/dmxt
+MediaCrush (Imgrush) support: https://github.com/SirCmpwn
+Amazon S3 and DreamObjects support: https://github.com/alanedwardes
+Gfycat support: https://github.com/Dinnerbone
+Copy support: https://github.com/KamilKZ
+AdFly support: https://github.com/LRNAB
+MediaFire support: https://github.com/michalx2
+Pushbullet support: https://github.com/BallisticLingonberries
+Lambda support: https://github.com/marcusant
+
+{1}:
+
+Turkish: https://github.com/muratmoon
+German: https://github.com/Starbug2
+French: https://github.com/nwies
+Simplified Chinese: https://github.com/jiajiechan
+Hungarian: https://github.com/devBluestar
+
+{2}:
+
+Greenshot Image Editor: https://bitbucket.org/greenshot/greenshot
+Json.NET: https://json.codeplex.com
+SSH.NET: https://sshnet.codeplex.com
+Icons: http://p.yusukekamiyamane.com
+ImageListView: https://code.google.com/p/imagelistview
+FFmpeg: http://www.ffmpeg.org
+FFmpeg Windows builds: http://ffmpeg.zeranoe.com/builds
+7-Zip: http://www.7-zip.org
+SevenZipSharp: https://sevenzipsharp.codeplex.com
+DirectShow video and audio device: https://github.com/rdp/screen-capture-recorder-to-video-windows-free
+QrCode.Net: https://qrcodenet.codeplex.com
+System.Net.FtpClient: https://netftp.codeplex.com
+ResX Resource Manager: https://resxresourcemanager.codeplex.com
+
+Copyright © 2007-2015 ShareX Developers", Resources.AboutForm_AboutForm_Contributors, Resources.AboutForm_AboutForm_Translators, Resources.AboutForm_AboutForm_External_libraries);
         }
 
         private void AboutForm_Shown(object sender, EventArgs e)

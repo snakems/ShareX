@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -37,12 +37,34 @@ namespace ShareX.ScreenCaptureLib
     {
         public AreaManager AreaManager { get; private set; }
 
-        // For screen color picker
-        public bool OneClickMode { get; set; }
-        public Point OneClickPosition { get; set; }
+        #region Screen color picker
 
-        // For screen ruler
+        public bool OneClickMode { get; set; }
+
+        private Bitmap bmpSurfaceImage;
+
+        public Point CurrentPosition { get; set; }
+
+        public Color CurrentColor
+        {
+            get
+            {
+                if (bmpSurfaceImage != null && !CurrentPosition.IsEmpty)
+                {
+                    return bmpSurfaceImage.GetPixel(CurrentPosition.X, CurrentPosition.Y);
+                }
+
+                return Color.Empty;
+            }
+        }
+
+        #endregion Screen color picker
+
+        #region Screen ruler
+
         public bool RulerMode { get; set; }
+
+        #endregion Screen ruler
 
         public RectangleRegion()
         {
@@ -56,7 +78,7 @@ namespace ShareX.ScreenCaptureLib
         {
             if (OneClickMode && e.Button == MouseButtons.Left)
             {
-                OneClickPosition = e.Location;
+                CurrentPosition = e.Location;
                 Close(SurfaceResult.Region);
             }
         }
@@ -146,6 +168,11 @@ namespace ShareX.ScreenCaptureLib
                         AreaManager.Windows = wla.GetWindowsRectangleList();
                     });
                 }
+            }
+
+            if (OneClickMode)
+            {
+                bmpSurfaceImage = new Bitmap(SurfaceImage);
             }
         }
 
@@ -238,6 +265,11 @@ namespace ShareX.ScreenCaptureLib
                 }
             }
 
+            if (OneClickMode)
+            {
+                DrawScreenColorPickerInfo(g);
+            }
+
             if (Config.ShowMagnifier)
             {
                 DrawMagnifier(g);
@@ -259,6 +291,28 @@ namespace ShareX.ScreenCaptureLib
         private string GetAreaText(Rectangle area)
         {
             return string.Format(Resources.RectangleRegion_GetAreaText_Area, area.X, area.Y, area.Width, area.Height);
+        }
+
+        private void DrawScreenColorPickerInfo(Graphics g)
+        {
+            CurrentPosition = InputManager.MousePosition0Based;
+
+            if (Config.ShowInfo)
+            {
+                Color color = CurrentColor;
+
+                using (Brush brush = new SolidBrush(color))
+                {
+                    Rectangle colorBox = new Rectangle(CurrentPosition.X + 5, CurrentPosition.Y + 5, 20, 20);
+                    g.FillRectangle(brush, colorBox);
+                    g.DrawRectangleProper(Pens.Black, colorBox);
+                }
+
+                string infoText = string.Format(Resources.RectangleRegion_GetColorPickerText, color.R, color.G, color.B, ColorHelpers.ColorToHex(color),
+                    CurrentPosition.X, CurrentPosition.Y);
+
+                ImageHelpers.DrawTextWithOutline(g, infoText, new PointF(CurrentPosition.X + 25, CurrentPosition.Y + 5), textFont, Color.White, Color.Black);
+            }
         }
 
         private void DrawCrosshair(Graphics g)
@@ -301,7 +355,7 @@ namespace ShareX.ScreenCaptureLib
             Rectangle currentScreenRect0Based = CaptureHelpers.ScreenToClient(Screen.FromPoint(InputManager.MousePosition).Bounds);
             int offsetX = RulerMode ? 20 : 10, offsetY = RulerMode ? 20 : 10;
 
-            if (Config.ShowInfo && AreaManager.IsCurrentAreaValid && AreaManager.CurrentArea.Location == mousePos)
+            if (Config.ShowInfo && ((AreaManager.IsCurrentAreaValid && AreaManager.CurrentArea.Location == mousePos) || OneClickMode))
             {
                 offsetY = RulerMode ? 85 : 50;
             }
@@ -420,6 +474,16 @@ namespace ShareX.ScreenCaptureLib
         protected virtual void AddShapePath(GraphicsPath graphicsPath, Rectangle rect)
         {
             graphicsPath.AddRectangle(rect);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (bmpSurfaceImage != null)
+            {
+                bmpSurfaceImage.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -45,6 +45,8 @@ namespace ShareX.UploadersLib
         public static string DropboxConsumerSecret = "";
         public static string CopyConsumerKey = "";
         public static string CopyConsumerSecret = "";
+        public static string HubicClientID = "";
+        public static string HubicClientSecret = "";
         public static string MinusConsumerKey = "";
         public static string MinusConsumerSecret = "";
         public static string BoxClientID = "";

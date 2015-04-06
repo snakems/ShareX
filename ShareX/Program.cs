@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -39,7 +39,7 @@ namespace ShareX
 {
     internal static class Program
     {
-        public static bool IsBeta = true;
+        public static bool IsBeta = false;
 
         public static string Title
         {
@@ -205,7 +205,7 @@ namespace ShareX
             {
                 if (Settings != null && Settings.UseCustomScreenshotsPath && !string.IsNullOrEmpty(Settings.CustomScreenshotsPath))
                 {
-                    return Settings.CustomScreenshotsPath;
+                    return Environment.ExpandEnvironmentVariables(Settings.CustomScreenshotsPath);
                 }
 
                 return Path.Combine(PersonalPath, "Screenshots");
@@ -445,6 +445,7 @@ namespace ShareX
 
             if (!string.IsNullOrEmpty(customPersonalPath))
             {
+                customPersonalPath = Environment.ExpandEnvironmentVariables(customPersonalPath);
                 CustomPersonalPath = Helpers.GetAbsolutePath(customPersonalPath);
 
                 if (CustomPersonalPath.Equals(PortablePersonalPath, StringComparison.InvariantCultureIgnoreCase))

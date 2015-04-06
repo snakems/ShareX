@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -40,7 +40,7 @@ namespace ShareX.UploadersLib
 {
     public class Uploader
     {
-        private static readonly string UserAgent = "ShareX " + Application.ProductVersion;
+        private static readonly string UserAgent = "ShareX";
 
         public delegate void ProgressEventHandler(ProgressManager progress);
         public event ProgressEventHandler ProgressChanged;
@@ -302,7 +302,8 @@ namespace ShareX.UploadersLib
         }
 
         protected UploadResult UploadData(Stream dataStream, string url, string fileName, string fileFormName = "file", Dictionary<string, string> arguments = null,
-            NameValueCollection headers = null, CookieCollection cookies = null, ResponseType responseType = ResponseType.Text, HttpMethod method = HttpMethod.POST)
+            NameValueCollection headers = null, CookieCollection cookies = null, ResponseType responseType = ResponseType.Text, HttpMethod method = HttpMethod.POST,
+            string requestContentType = "multipart/form-data", string metadata = null)
         {
             UploadResult result = new UploadResult();
 
@@ -314,16 +315,29 @@ namespace ShareX.UploadersLib
                 string boundary = CreateBoundary();
 
                 byte[] bytesArguments = MakeInputContent(boundary, arguments, false);
-                byte[] bytesDataOpen = MakeFileInputContentOpen(boundary, fileFormName, fileName);
+                byte[] bytesDataOpen;
+                byte[] bytesDataDatafile = { };
+
+                if (metadata != null)
+                {
+                    bytesDataOpen = MakeFileInputContentOpen(boundary, fileFormName, fileName, metadata);
+                    bytesDataDatafile = MakeFileInputContentOpen(boundary, fileFormName, fileName, null);
+                }
+                else
+                {
+                    bytesDataOpen = MakeFileInputContentOpen(boundary, fileFormName, fileName);
+                }
+
                 byte[] bytesDataClose = MakeFileInputContentClose(boundary);
 
-                long contentLength = bytesArguments.Length + bytesDataOpen.Length + dataStream.Length + bytesDataClose.Length;
-                HttpWebRequest request = PrepareDataWebRequest(url, boundary, contentLength, "multipart/form-data", cookies, headers, method);
+                long contentLength = bytesArguments.Length + bytesDataOpen.Length + bytesDataDatafile.Length + dataStream.Length + bytesDataClose.Length;
+                HttpWebRequest request = PrepareDataWebRequest(url, boundary, contentLength, requestContentType, cookies, headers, method);
 
                 using (Stream requestStream = request.GetRequestStream())
                 {
                     requestStream.Write(bytesArguments, 0, bytesArguments.Length);
                     requestStream.Write(bytesDataOpen, 0, bytesDataOpen.Length);
+                    requestStream.Write(bytesDataDatafile, 0, bytesDataDatafile.Length);
                     if (!TransferData(dataStream, requestStream)) return null;
                     requestStream.Write(bytesDataClose, 0, bytesDataClose.Length);
                 }
@@ -361,7 +375,7 @@ namespace ShareX.UploadersLib
                 headers.Remove("Accept");
             }
 
-            request.AllowWriteStreamBuffering = ProxyInfo.Current.IsValidProxy();
+            request.AllowWriteStreamBuffering = HelpersOptions.CurrentProxy.IsValidProxy();
             request.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
             request.ContentLength = length;
             if (!string.IsNullOrEmpty(boundary)) contentType += "; boundary=" + boundary;
@@ -373,7 +387,7 @@ namespace ShareX.UploadersLib
             request.Method = method.ToString();
             request.Pipelined = false;
             request.ProtocolVersion = HttpVersion.Version11;
-            request.Proxy = ProxyInfo.Current.GetWebProxy();
+            request.Proxy = HelpersOptions.CurrentProxy.GetWebProxy();
             request.Timeout = -1;
             request.UserAgent = UserAgent;
 
@@ -390,7 +404,7 @@ namespace ShareX.UploadersLib
             request.CookieContainer = new CookieContainer();
             if (cookies != null) request.CookieContainer.Add(cookies);
             request.KeepAlive = false;
-            IWebProxy proxy = ProxyInfo.Current.GetWebProxy();
+            IWebProxy proxy = HelpersOptions.CurrentProxy.GetWebProxy();
             if (proxy != null) request.Proxy = proxy;
             request.UserAgent = UserAgent;
 
@@ -468,6 +482,23 @@ namespace ShareX.UploadersLib
         {
             string format = string.Format("--{0}\r\nContent-Disposition: form-data; name=\"{1}\"; filename=\"{2}\"\r\nContent-Type: {3}\r\n\r\n",
                 boundary, fileFormName, fileName, Helpers.GetMimeType(fileName));
+
+            return Encoding.UTF8.GetBytes(format);
+        }
+
+        private byte[] MakeFileInputContentOpen(string boundary, string fileFormName, string fileName, string metadata)
+        {
+            string format = "";
+
+            if (metadata != null)
+            {
+                format = string.Format("--{0}\r\nContent-Type: {1}; charset=UTF-8\r\n\r\n{2}\r\n\r\n", boundary, "application/json", metadata);
+            }
+            else
+            {
+                format = string.Format("--{0}\r\nContent-Type: {1}\r\n\r\n", boundary, Helpers.GetMimeType(fileName));
+            }
+
             return Encoding.UTF8.GetBytes(format);
         }
 

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -24,7 +24,6 @@
 #endregion License Information (GPL v3)
 
 using Newtonsoft.Json;
-using ShareX.HelpersLib;
 using ShareX.UploadersLib.HelperClasses;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -136,10 +135,8 @@ namespace ShareX.UploadersLib.FileUploaders
             return headers;
         }
 
-        private void SetMetadata(string fileID, string title, string parentID = null)
+        private string GetMetadata(string title, string parentID)
         {
-            string url = string.Format("https://www.googleapis.com/drive/v2/files/{0}", fileID);
-
             object metadata;
 
             if (!string.IsNullOrEmpty(parentID))
@@ -164,9 +161,7 @@ namespace ShareX.UploadersLib.FileUploaders
                 };
             }
 
-            string json = JsonConvert.SerializeObject(metadata);
-
-            string response = SendRequestJSON(url, json, GetAuthHeaders(), method: HttpMethod.PUT);
+            return JsonConvert.SerializeObject(metadata);
         }
 
         private void SetPermissions(string fileID, GoogleDrivePermissionRole role, GoogleDrivePermissionType type, string value, bool withLink)
@@ -222,7 +217,10 @@ namespace ShareX.UploadersLib.FileUploaders
         {
             if (!CheckAuthorization()) return null;
 
-            UploadResult result = UploadData(stream, "https://www.googleapis.com/upload/drive/v2/files", fileName, headers: GetAuthHeaders());
+            string metadata = GetMetadata(fileName, FolderID);
+
+            UploadResult result = UploadData(stream, "https://www.googleapis.com/upload/drive/v2/files?uploadType=multipart", fileName, headers: GetAuthHeaders(),
+                requestContentType: "multipart/related", metadata: metadata);
 
             if (!string.IsNullOrEmpty(result.Response))
             {
@@ -231,8 +229,6 @@ namespace ShareX.UploadersLib.FileUploaders
                 if (upload != null)
                 {
                     AllowReportProgress = false;
-
-                    SetMetadata(upload.id, fileName, FolderID);
 
                     if (IsPublic)
                     {

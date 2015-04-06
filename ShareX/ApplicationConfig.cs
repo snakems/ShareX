@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -125,7 +125,7 @@ namespace ShareX
         [Category("Application"), DefaultValue(false), Description("Show only customized tasks in main window workflows.")]
         public bool WorkflowsOnlyShowEdited { get; set; }
 
-        [Category("Application"), DefaultValue(true), Description("Automatically check updates at startup.")]
+        [Category("Application"), DefaultValue(true), Description("Automatically check updates.")]
         public bool AutoCheckUpdate { get; set; }
 
         [Category("Application"), DefaultValue(true), Description("Automatically expand capture menu when you open the tray menu.")]
@@ -137,7 +137,14 @@ namespace ShareX
         [Category("Application"), DefaultValue(true), Description("Show tips in main window list when list is empty.")]
         public bool ShowMainWindowTip { get; set; }
 
-        [Category("Application / Config"), DefaultValue(false), Description("Automatically detect external changes to UploaderConfig file and load settigns to memory.")]
+        [Category("Application"), DefaultValue(10), Description("In recent links tray menu max how many links to show.")]
+        public int RecentLinksMaxCount { get; set; }
+
+        [Category("Application"), DefaultValue(""), Description("URLs will open using this path instead of default browser. Example path: chrome.exe")]
+        [Editor(typeof(ExeFileNameEditor), typeof(UITypeEditor))]
+        public string BrowserPath { get; set; }
+
+        [Category("Application"), DefaultValue(false), Description("Automatically detect external changes to UploaderConfig file and load settigns to memory.")]
         public bool DetectUploaderConfigFileChanges { get; set; }
 
         [Category("Clipboard upload"), DefaultValue(true), Description("Show clipboard content viewer when using clipboard upload in main window.")]
@@ -194,5 +201,11 @@ namespace ShareX
         public Rectangle ScreenRecordRegion = Rectangle.Empty;
 
         #endregion ScreenRecord Form
+
+        #region Automate Form
+
+        public List<ScriptInfo> AutomateScripts = new List<ScriptInfo>();
+
+        #endregion Automate Form
     }
 }

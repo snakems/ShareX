@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -124,6 +124,7 @@ namespace ShareX.UploadersLib
         // OneDrive
 
         public OAuth2Info OneDriveOAuth2Info = null;
+        public OneDriveFileInfo OneDriveSelectedFolder = OneDrive.RootFolder;
         public bool OneDriveAutoCreateShareableLink = true;
 
         // Copy
@@ -133,18 +134,19 @@ namespace ShareX.UploadersLib
         public string CopyUploadPath = "ShareX/%y/%mo";
         public CopyURLType CopyURLType = CopyURLType.Shortened;
 
+        // Hubic
+
+        public OAuth2Info HubicOAuth2Info = null;
+        public HubicOpenstackAuthInfo HubicOpenstackAuthInfo = null;
+        public HubicFolderInfo HubicSelectedFolder = Hubic.RootFolder;
+        public bool HubicPublish = false;
+
         // Google Drive
 
         public OAuth2Info GoogleDriveOAuth2Info = null;
         public bool GoogleDriveIsPublic = true;
         public bool GoogleDriveUseFolder = false;
         public string GoogleDriveFolderID = string.Empty;
-
-        // RapidShare
-
-        public string RapidShareUsername = string.Empty;
-        public string RapidSharePassword = string.Empty;
-        public string RapidShareFolderID = string.Empty;
 
         // SendSpace
 
@@ -239,9 +241,9 @@ namespace ShareX.UploadersLib
 
         public PushbulletSettings PushbulletSettings = new PushbulletSettings();
 
-        // MediaCrush
+        // Lambda
 
-        public bool MediaCrushDirectLink = false;
+        public LambdaSettings LambdaSettings = new LambdaSettings();
 
         #endregion File uploaders
 
@@ -371,8 +373,6 @@ namespace ShareX.UploadersLib
                     return OAuthInfo.CheckOAuth(CopyOAuthInfo);
                 case FileDestination.GoogleDrive:
                     return OAuth2Info.CheckOAuth(GoogleDriveOAuth2Info);
-                case FileDestination.RapidShare:
-                    return !string.IsNullOrEmpty(RapidShareUsername) && !string.IsNullOrEmpty(RapidSharePassword);
                 case FileDestination.SendSpace:
                     return SendSpaceAccountType == AccountType.Anonymous || (!string.IsNullOrEmpty(SendSpaceUsername) && !string.IsNullOrEmpty(SendSpacePassword));
                 case FileDestination.Minus:
@@ -402,6 +402,8 @@ namespace ShareX.UploadersLib
                     return !string.IsNullOrEmpty(OwnCloudHost) && !string.IsNullOrEmpty(OwnCloudUsername) && !string.IsNullOrEmpty(OwnCloudPassword);
                 case FileDestination.MediaFire:
                     return !string.IsNullOrEmpty(MediaFireUsername) && !string.IsNullOrEmpty(MediaFirePassword);
+                case FileDestination.Lambda:
+                    return LambdaSettings != null && !string.IsNullOrEmpty(LambdaSettings.UserAPIKey);
             }
 
             return true;

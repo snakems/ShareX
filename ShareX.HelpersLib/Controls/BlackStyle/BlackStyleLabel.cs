@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -25,6 +25,7 @@
 
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Design;
 using System.Windows.Forms;
 
 namespace ShareX.HelpersLib
@@ -33,6 +34,8 @@ namespace ShareX.HelpersLib
     {
         private string text;
 
+        [Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
+        [SettingsBindable(true)]
         public override string Text
         {
             get
@@ -104,11 +107,8 @@ namespace ShareX.HelpersLib
 
         public BlackStyleLabel()
         {
-            InitializeComponent();
-
             DoubleBuffered = true;
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw | ControlStyles.OptimizedDoubleBuffer | ControlStyles.SupportsTransparentBackColor, true);
-
             TextAlign = ContentAlignment.TopLeft;
             BackColor = Color.Transparent;
             ForeColor = Color.White;
@@ -170,26 +170,5 @@ namespace ShareX.HelpersLib
             TextRenderer.DrawText(g, Text, Font, new Rectangle(ClientRectangle.X, ClientRectangle.Y + 1, ClientRectangle.Width, ClientRectangle.Height + 1), TextShadowColor, tff);
             TextRenderer.DrawText(g, Text, Font, ClientRectangle, ForeColor, tff);
         }
-
-        #region Component Designer generated code
-
-        private System.ComponentModel.IContainer components = null;
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
-
-        private void InitializeComponent()
-        {
-            components = new System.ComponentModel.Container();
-        }
-
-        #endregion Component Designer generated code
     }
 }

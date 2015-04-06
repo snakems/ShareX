@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -90,8 +90,6 @@ namespace ShareX.HelpersLib
 
         public BlackStyleCheckBox()
         {
-            InitializeComponent();
-
             SpaceAfterCheckBox = 3;
 
             SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw | ControlStyles.OptimizedDoubleBuffer | ControlStyles.SupportsTransparentBackColor, true);
@@ -176,17 +174,8 @@ namespace ShareX.HelpersLib
             }
         }
 
-        #region Component Designer generated code
-
-        private System.ComponentModel.IContainer components = null;
-
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-
             if (backgroundBrush != null) backgroundBrush.Dispose();
             if (backgroundCheckedBrush != null) backgroundCheckedBrush.Dispose();
             if (innerBorderBrush != null) innerBorderBrush.Dispose();
@@ -197,12 +186,5 @@ namespace ShareX.HelpersLib
 
             base.Dispose(disposing);
         }
-
-        private void InitializeComponent()
-        {
-            components = new System.ComponentModel.Container();
-        }
-
-        #endregion Component Designer generated code
     }
 }

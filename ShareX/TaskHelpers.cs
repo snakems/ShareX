@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -36,6 +36,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace ShareX
@@ -143,7 +144,8 @@ namespace ShareX
             {
                 AutoIncrementNumber = Program.Settings.NameParserAutoIncrementNumber,
                 MaxNameLength = taskSettings.AdvancedSettings.NamePatternMaxLength,
-                MaxTitleLength = taskSettings.AdvancedSettings.NamePatternMaxTitleLength
+                MaxTitleLength = taskSettings.AdvancedSettings.NamePatternMaxTitleLength,
+                CustomTimeZone = taskSettings.UploadSettings.UseCustomTimeZone ? taskSettings.UploadSettings.CustomTimeZone : null
             };
 
             string filename = nameParser.Parse(taskSettings.UploadSettings.NameFormatPattern);
@@ -167,7 +169,8 @@ namespace ShareX
                 Picture = image,
                 AutoIncrementNumber = Program.Settings.NameParserAutoIncrementNumber,
                 MaxNameLength = taskSettings.AdvancedSettings.NamePatternMaxLength,
-                MaxTitleLength = taskSettings.AdvancedSettings.NamePatternMaxTitleLength
+                MaxTitleLength = taskSettings.AdvancedSettings.NamePatternMaxTitleLength,
+                CustomTimeZone = taskSettings.UploadSettings.UseCustomTimeZone ? taskSettings.UploadSettings.CustomTimeZone : null
             };
 
             ImageTag imageTag = image.Tag as ImageTag;
@@ -346,16 +349,10 @@ namespace ShareX
             return false;
         }
 
-        public static PointInfo SelectPointColor(SurfaceOptions surfaceOptions = null)
+        public static PointInfo SelectPointColor()
         {
-            if (surfaceOptions == null)
-            {
-                surfaceOptions = new SurfaceOptions();
-            }
-
             using (RectangleRegion surface = new RectangleRegion())
             {
-                surface.Config = surfaceOptions;
                 surface.OneClickMode = true;
                 surface.Prepare();
                 surface.ShowDialog();
@@ -363,8 +360,8 @@ namespace ShareX
                 if (surface.Result == SurfaceResult.Region)
                 {
                     PointInfo pointInfo = new PointInfo();
-                    pointInfo.Position = CaptureHelpers.ClientToScreen(surface.OneClickPosition);
-                    pointInfo.Color = ((Bitmap)surface.SurfaceImage).GetPixel(surface.OneClickPosition.X, surface.OneClickPosition.Y);
+                    pointInfo.Position = CaptureHelpers.ClientToScreen(surface.CurrentPosition);
+                    pointInfo.Color = surface.CurrentColor;
                     return pointInfo;
                 }
             }
@@ -405,15 +402,15 @@ namespace ShareX
         {
             UpdateChecker updateChecker = new GitHubUpdateChecker("ShareX", "ShareX");
             updateChecker.IsBeta = Program.IsBeta;
-            updateChecker.Proxy = ProxyInfo.Current.GetWebProxy();
+            updateChecker.Proxy = HelpersOptions.CurrentProxy.GetWebProxy();
             updateChecker.CheckUpdate();
 
             // Fallback if GitHub API fails
             if (updateChecker.Status == UpdateStatus.None || updateChecker.Status == UpdateStatus.UpdateCheckFailed)
             {
-                updateChecker = new XMLUpdateChecker("http://getsharex.com/Update.xml", "ShareX");
+                updateChecker = new XMLUpdateChecker(Links.URL_UPDATE, "ShareX");
                 updateChecker.IsBeta = Program.IsBeta;
-                updateChecker.Proxy = ProxyInfo.Current.GetWebProxy();
+                updateChecker.Proxy = HelpersOptions.CurrentProxy.GetWebProxy();
                 updateChecker.CheckUpdate();
             }
 
@@ -455,18 +452,16 @@ namespace ShareX
         public static void DoScreenRecordingFFmpeg()
         {
             TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
-            taskSettings.CaptureSettings.ScreenRecordOutput = ScreenRecordOutput.FFmpeg;
-            StartScreenRecording(taskSettings);
+            StartScreenRecording(ScreenRecordOutput.FFmpeg, taskSettings);
         }
 
         public static void DoScreenRecordingGIF()
         {
             TaskSettings taskSettings = TaskSettings.GetDefaultTaskSettings();
-            taskSettings.CaptureSettings.ScreenRecordOutput = ScreenRecordOutput.GIF;
-            StartScreenRecording(taskSettings);
+            StartScreenRecording(ScreenRecordOutput.GIF, taskSettings);
         }
 
-        public static void StartScreenRecording(TaskSettings taskSettings = null, bool skipRegionSelection = false)
+        public static void StartScreenRecording(ScreenRecordOutput outputType, TaskSettings taskSettings = null, bool skipRegionSelection = false)
         {
             if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
 
@@ -478,7 +473,7 @@ namespace ShareX
             }
             else
             {
-                form.StartRecording(taskSettings, skipRegionSelection);
+                form.StartRecording(outputType, taskSettings, skipRegionSelection);
             }
         }
 
@@ -509,9 +504,36 @@ namespace ShareX
             }
         }
 
-        public static void OpenScreenColorPicker()
+        public static void OpenColorPicker()
         {
             new ScreenColorPicker().Show();
+        }
+
+        public static void OpenScreenColorPicker(TaskSettings taskSettings = null)
+        {
+            if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
+
+            PointInfo pointInfo = SelectPointColor();
+
+            if (pointInfo != null)
+            {
+                string text = taskSettings.AdvancedSettings.ScreenColorPickerFormat;
+
+                text = text.Replace("$r", pointInfo.Color.R.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$g", pointInfo.Color.G.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$b", pointInfo.Color.B.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$hex", ColorHelpers.ColorToHex(pointInfo.Color), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$x", pointInfo.Position.X.ToString(), StringComparison.InvariantCultureIgnoreCase).
+                    Replace("$y", pointInfo.Position.Y.ToString(), StringComparison.InvariantCultureIgnoreCase);
+
+                ClipboardHelpers.CopyText(text);
+
+                if (Program.MainForm.niTray.Visible)
+                {
+                    Program.MainForm.niTray.Tag = null;
+                    Program.MainForm.niTray.ShowBalloonTip(3000, "ShareX", string.Format(Resources.TaskHelpers_OpenQuickScreenColorPicker_Copied_to_clipboard___0_, text), ToolTipIcon.Info);
+                }
+            }
         }
 
         public static void OpenRuler()
@@ -524,6 +546,33 @@ namespace ShareX
                 surface.AreaManager.MinimumSize = 3;
                 surface.Prepare();
                 surface.ShowDialog();
+            }
+        }
+
+        public static void OpenAutomate()
+        {
+            AutomateForm form = AutomateForm.GetInstance(Program.Settings.AutomateScripts);
+            form.ShowActivate();
+        }
+
+        public static void StartAutomate()
+        {
+            AutomateForm form = AutomateForm.GetInstance(Program.Settings.AutomateScripts);
+
+            if (form.Visible)
+            {
+                if (AutomateForm.IsRunning)
+                {
+                    form.Stop();
+                }
+                else
+                {
+                    form.Start();
+                }
+            }
+            else
+            {
+                form.ShowActivate();
             }
         }
 
@@ -553,14 +602,14 @@ namespace ShareX
         public static void OpenImageEffects()
         {
             string filePath = ImageHelpers.OpenImageFileDialog();
-
+            Image img = null;
             if (!string.IsNullOrEmpty(filePath))
             {
-                Image img = ImageHelpers.LoadImage(filePath);
-                ImageEffectsForm form = new ImageEffectsForm(img);
-                form.EditorMode();
-                form.Show();
+                img = ImageHelpers.LoadImage(filePath);
             }
+            ImageEffectsForm form = new ImageEffectsForm(img);
+            form.EditorMode();
+            form.Show();
         }
 
         public static void OpenMonitorTest()
@@ -623,6 +672,26 @@ namespace ShareX
                 FTPAccount account = Program.UploadersConfig.FTPAccountList[Program.UploadersConfig.FTPSelectedImage];
                 new FTPClientForm(account).Show();
             }
+        }
+
+        public static EDataType FindDataType(string filePath, TaskSettings taskSettings)
+        {
+            string ext = Helpers.GetFilenameExtension(filePath);
+
+            if (!string.IsNullOrEmpty(ext))
+            {
+                if (taskSettings.AdvancedSettings.ImageExtensions.Any(x => ext.Equals(x, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    return EDataType.Image;
+                }
+
+                if (taskSettings.AdvancedSettings.TextExtensions.Any(x => ext.Equals(x, StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    return EDataType.Text;
+                }
+            }
+
+            return EDataType.File;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -78,6 +78,7 @@ namespace ShareX.UploadersLib
             AddIconToTab(tpBitly, Resources.Bitly);
             AddIconToTab(tpBox, Resources.Box);
             AddIconToTab(tpCopy, Resources.Copy);
+            AddIconToTab(tpHubic, Resources.Hubic);
             AddIconToTab(tpChevereto, Resources.Chevereto);
             AddIconToTab(tpCustomUploaders, Resources.globe_network);
             AddIconToTab(tpDropbox, Resources.Dropbox);
@@ -93,7 +94,6 @@ namespace ShareX.UploadersLib
             AddIconToTab(tpImageShack, Resources.ImageShack);
             AddIconToTab(tpImgur, Resources.Imgur);
             AddIconToTab(tpJira, Resources.jira);
-            AddIconToTab(tpMediaCrush, Resources.MediaCrush);
             AddIconToTab(tpMediaFire, Resources.MediaFire);
             AddIconToTab(tpMega, Resources.Mega);
             AddIconToTab(tpMinus, Resources.Minus);
@@ -104,13 +104,15 @@ namespace ShareX.UploadersLib
             AddIconToTab(tpPhotobucket, Resources.Photobucket);
             AddIconToTab(tpPicasa, Resources.Picasa);
             AddIconToTab(tpPushbullet, Resources.Pushbullet);
-            AddIconToTab(tpRapidShare, Resources.RapidShare);
             AddIconToTab(tpSendSpace, Resources.SendSpace);
             AddIconToTab(tpSharedFolder, Resources.server_network);
             AddIconToTab(tpTinyPic, Resources.TinyPic);
             AddIconToTab(tpTwitter, Resources.Twitter);
             AddIconToTab(tpUpaste, Resources.Upaste);
             AddIconToTab(tpYourls, Resources.Yourls);
+            AddIconToTab(tpLambda, Resources.Lambda);
+
+            tcFileUploaders.TabPages.Remove(tpHubic);
 
             ttlvMain.ImageList = uploadersImageList;
             ttlvMain.MainTabControl = tcUploaders;
@@ -323,6 +325,8 @@ namespace ShareX.UploadersLib
             {
                 oauth2GoogleDrive.Status = OAuthLoginStatus.LoginSuccessful;
                 btnGoogleDriveRefreshFolders.Enabled = true;
+
+                tvOneDrive.Enabled = true;
             }
 
             cbGoogleDriveIsPublic.Checked = Config.GoogleDriveIsPublic;
@@ -332,13 +336,17 @@ namespace ShareX.UploadersLib
 
             // OneDrive
 
+            tvOneDrive.Nodes.Clear();
+            OneDriveAddFolder(OneDrive.RootFolder, null);
+
             if (OAuth2Info.CheckOAuth(Config.OneDriveOAuth2Info))
             {
                 oAuth2OneDrive.Status = OAuthLoginStatus.LoginSuccessful;
-                btnOneDriveRefreshFolders.Enabled = true;
             }
 
             cbOneDriveCreateShareableLink.Checked = Config.OneDriveAutoCreateShareableLink;
+            lblOneDriveFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + Config.OneDriveSelectedFolder.name;
+            tvOneDrive.CollapseAll();
 
             // Minus
 
@@ -356,6 +364,16 @@ namespace ShareX.UploadersLib
 
             cbBoxShare.Checked = Config.BoxShare;
             lblBoxFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + Config.BoxSelectedFolder.name;
+
+            // Hubic
+
+            if (OAuth2Info.CheckOAuth(Config.HubicOAuth2Info))
+            {
+                oauth2Hubic.Status = OAuthLoginStatus.LoginSuccessful;
+                btnHubicRefreshFolders.Enabled = true;
+            }
+
+            cbHubicPublishLink.Checked = Config.HubicPublish;
 
             // Ge.tt
 
@@ -395,12 +413,6 @@ namespace ShareX.UploadersLib
             cbEmailRememberLastTo.Checked = Config.EmailRememberLastTo;
             txtEmailDefaultSubject.Text = Config.EmailDefaultSubject;
             txtEmailDefaultBody.Text = Config.EmailDefaultBody;
-
-            // RapidShare
-
-            txtRapidShareUsername.Text = Config.RapidShareUsername;
-            txtRapidSharePassword.Text = Config.RapidSharePassword;
-            txtRapidShareFolderID.Text = Config.RapidShareFolderID;
 
             // SendSpace
 
@@ -527,9 +539,9 @@ namespace ShareX.UploadersLib
             txtMediaFirePath.Text = Config.MediaFirePath;
             cbMediaFireUseLongLink.Checked = Config.MediaFireUseLongLink;
 
-            // MediaCrush
+            // Lambda
 
-            cbMediaCrushDirectLink.Checked = Config.MediaCrushDirectLink;
+            txtLambdaApiKey.Text = Config.LambdaSettings.UserAPIKey;
 
             #endregion File uploaders
 
@@ -1032,11 +1044,6 @@ namespace ShareX.UploadersLib
             URLHelpers.OpenURL("https://www.dropbox.com");
         }
 
-        private void btnDropboxRegister_Click(object sender, EventArgs e)
-        {
-            URLHelpers.OpenURL("http://db.tt/CtPYXvu");
-        }
-
         private void oauth2Dropbox_OpenButtonClicked()
         {
             DropboxAuthOpen();
@@ -1083,11 +1090,6 @@ namespace ShareX.UploadersLib
             URLHelpers.OpenURL("https://copy.com");
         }
 
-        private void btnCopyRegister_Click(object sender, EventArgs e)
-        {
-            URLHelpers.OpenURL("https://copy.com?r=BUN9jI");
-        }
-
         private void txtCopyPath_TextChanged(object sender, EventArgs e)
         {
             Config.CopyUploadPath = txtCopyPath.Text;
@@ -1116,6 +1118,69 @@ namespace ShareX.UploadersLib
 
         #endregion Copy
 
+        #region Hubic
+
+        private void oAuth2Hubic_OpenButtonClicked()
+        {
+            HubicAuthOpen();
+        }
+
+        private void oAuth2Hubic_CompleteButtonClicked(string code)
+        {
+            HubicAuthComplete(code);
+        }
+
+        private void oAuth2Hubic_RefreshButtonClicked()
+        {
+            HubicAuthRefresh();
+        }
+
+        private void oAuth2Hubic_ClearButtonClicked()
+        {
+            Config.HubicOAuth2Info = null;
+            Config.HubicOpenstackAuthInfo = null;
+        }
+
+        private void btnHubicRefreshFolders_Click(object sender, EventArgs e)
+        {
+            HubicListFolders(Hubic.RootFolder);
+        }
+
+        private void lvHubicFolders_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lvHubicFolders.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvHubicFolders.SelectedItems[0];
+                HubicFolderInfo folder = lvi.Tag as HubicFolderInfo;
+                if (folder != null)
+                {
+                    lblHubicSelectedFolder.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + folder.name;
+                    Config.HubicSelectedFolder = folder;
+                }
+            }
+        }
+
+        private void lvHubicFolders_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left && lvHubicFolders.SelectedItems.Count > 0)
+            {
+                ListViewItem lvi = lvHubicFolders.SelectedItems[0];
+                HubicFolderInfo folder = lvi.Tag as HubicFolderInfo;
+                if (folder != null)
+                {
+                    lvHubicFolders.Items.Clear();
+                    HubicListFolders(folder);
+                }
+            }
+        }
+
+        private void cbHubicPublishLink_CheckedChanged(object sender, EventArgs e)
+        {
+            Config.HubicPublish = cbHubicPublishLink.Checked;
+        }
+
+        #endregion Hubic
+
         #region OneDrive
 
         private void oAuth2OneDrive_OpenButtonClicked()
@@ -1143,22 +1208,22 @@ namespace ShareX.UploadersLib
             Config.OneDriveAutoCreateShareableLink = cbOneDriveCreateShareableLink.Checked;
         }
 
-        private void btnOneDriveRefreshFolders_Click(object sender, EventArgs e)
+        private void tvOneDrive_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            OneDriveListFolders();
+            OneDriveFileInfo file = e.Node.Tag as OneDriveFileInfo;
+            if (file != null)
+            {
+                lblOneDriveFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + file.name;
+                Config.OneDriveSelectedFolder = file;
+            }
         }
 
-        private void lvOneDriveFolders_MouseDoubleClick(object sender, MouseEventArgs e)
+        private void tvOneDrive_AfterExpand(object sender, TreeViewEventArgs e)
         {
-            if (e.Button == MouseButtons.Left && lvOneDriveFolders.SelectedItems.Count > 0)
+            OneDriveFileInfo file = e.Node.Tag as OneDriveFileInfo;
+            if (file != null)
             {
-                ListViewItem lvi = lvOneDriveFolders.SelectedItems[0];
-                OneDriveFileInfo file = lvi.Tag as OneDriveFileInfo;
-                if (file != null)
-                {
-                    lvOneDriveFolders.Items.Clear();
-                    OneDriveListFolders(file);
-                }
+                OneDriveListFolders(file, e.Node);
             }
         }
 
@@ -1263,6 +1328,7 @@ namespace ShareX.UploadersLib
                 if (file != null)
                 {
                     lblBoxFolderID.Text = Resources.UploadersConfigForm_LoadSettings_Selected_folder_ + " " + file.name;
+                    Config.BoxSelectedFolder = file;
                 }
             }
         }
@@ -1518,61 +1584,6 @@ namespace ShareX.UploadersLib
         }
 
         #endregion Email
-
-        #region RapidShare
-
-        private void txtRapidShareUsername_TextChanged(object sender, EventArgs e)
-        {
-            Config.RapidShareUsername = txtRapidShareUsername.Text;
-        }
-
-        private void txtRapidSharePassword_TextChanged(object sender, EventArgs e)
-        {
-            Config.RapidSharePassword = txtRapidSharePassword.Text;
-        }
-
-        private void txtRapidShareFolderID_TextChanged(object sender, EventArgs e)
-        {
-            Config.RapidShareFolderID = txtRapidShareFolderID.Text;
-        }
-
-        private void btnRapidShareRefreshFolders_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(Config.RapidShareUsername) || string.IsNullOrEmpty(Config.RapidSharePassword))
-            {
-                MessageBox.Show(Resources.UploadersConfigForm_btnRapidShareRefreshFolders_Click_RapidShare_account_username_or_password_is_empty_,
-                    Resources.UploadersConfigForm_btnRapidShareRefreshFolders_Click_RapidShare_refresh_folders_list_failed, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            }
-            else
-            {
-                tvRapidShareFolders.Nodes.Clear();
-                RapidShareFolderInfo root = new RapidShare(Config.RapidShareUsername, Config.RapidSharePassword).GetRootFolderWithChilds();
-                RapidShareRecursiveAddChilds(tvRapidShareFolders.Nodes, root);
-                tvRapidShareFolders.ExpandAll();
-            }
-        }
-
-        private void RapidShareRecursiveAddChilds(TreeNodeCollection treeNodes, RapidShareFolderInfo folderInfo)
-        {
-            TreeNode treeNode = treeNodes.Add(folderInfo.FolderName);
-            treeNode.Tag = folderInfo;
-
-            foreach (RapidShareFolderInfo folderInfo2 in folderInfo.ChildFolders)
-            {
-                RapidShareRecursiveAddChilds(treeNode.Nodes, folderInfo2);
-            }
-        }
-
-        private void tvRapidShareFolders_AfterSelect(object sender, TreeViewEventArgs e)
-        {
-            if (e.Node != null && e.Node.Tag is RapidShareFolderInfo)
-            {
-                RapidShareFolderInfo folderInfo = (RapidShareFolderInfo)e.Node.Tag;
-                txtRapidShareFolderID.Text = folderInfo.RealFolderID;
-            }
-        }
-
-        #endregion RapidShare
 
         #region SendSpace
 
@@ -1970,14 +1981,19 @@ namespace ShareX.UploadersLib
 
         #endregion MediaFire
 
-        #region MediaCrush
+        #region Lambda
 
-        private void cbMediaCrushDirectLink_CheckedChanged(object sender, EventArgs e)
+        private void lambdaInfoLabel_Click(object sender, EventArgs e)
         {
-            Config.MediaCrushDirectLink = cbMediaCrushDirectLink.Checked;
+            URLHelpers.OpenURL("https://lambda.sx/usercp");
         }
 
-        #endregion MediaCrush
+        private void txtLambdaApiKey_TextChanged(object sender, EventArgs e)
+        {
+            Config.LambdaSettings.UserAPIKey = txtLambdaApiKey.Text;
+        }
+
+        #endregion Lambda
 
         #endregion File Uploaders
 

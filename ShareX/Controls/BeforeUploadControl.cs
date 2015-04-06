@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -35,7 +35,6 @@ namespace ShareX
     {
         public delegate void EventHandler(string currentDestination);
         public event EventHandler InitCompleted;
-        private EDataType UploadDestination;
 
         public BeforeUploadControl()
         {
@@ -44,7 +43,6 @@ namespace ShareX
 
         public void Init(TaskInfo info)
         {
-            UploadDestination = info.UploadDestination;
             switch (info.DataType)
             {
                 case EDataType.Image:
@@ -66,8 +64,14 @@ namespace ShareX
 
                     flp.Controls.OfType<RadioButton>().ForEach(x =>
                     {
-                        x.Checked = (x.Tag is TextDestination && (TextDestination)x.Tag == info.TaskSettings.TextDestination) ||
-                            (x.Tag is FileDestination && (FileDestination)x.Tag == info.TaskSettings.TextFileDestination);
+                        if (info.TaskSettings.TextDestination != TextDestination.FileUploader)
+                        {
+                            x.Checked = x.Tag is TextDestination && (TextDestination)x.Tag == info.TaskSettings.TextDestination;
+                        }
+                        else
+                        {
+                            x.Checked = x.Tag is FileDestination && (FileDestination)x.Tag == info.TaskSettings.TextFileDestination;
+                        }
                     });
                     break;
                 case EDataType.File:
@@ -115,10 +119,14 @@ namespace ShareX
 
             flp.Controls.OfType<RadioButton>().ForEach(x =>
             {
-                if (UploadDestination == EDataType.Image)
-                    x.Checked = (x.Tag is ImageDestination && (ImageDestination)x.Tag == taskSettings.ImageDestination);
+                if (taskSettings.ImageDestination != ImageDestination.FileUploader)
+                {
+                    x.Checked = x.Tag is ImageDestination && (ImageDestination)x.Tag == taskSettings.ImageDestination;
+                }
                 else
-                    x.Checked = (x.Tag is FileDestination && (FileDestination)x.Tag == taskSettings.ImageFileDestination);
+                {
+                    x.Checked = x.Tag is FileDestination && (FileDestination)x.Tag == taskSettings.ImageFileDestination;
+                }
             });
         }
 
@@ -182,7 +190,9 @@ namespace ShareX
                 case EDataType.File:
                     if (destination is FileDestination)
                     {
-                        taskSettings.ImageFileDestination = taskSettings.FileDestination = (FileDestination)destination;
+                        taskSettings.ImageDestination = ImageDestination.FileUploader;
+                        taskSettings.TextDestination = TextDestination.FileUploader;
+                        taskSettings.ImageFileDestination = taskSettings.TextFileDestination = taskSettings.FileDestination = (FileDestination)destination;
                     }
                     break;
                 case EDataType.URL:

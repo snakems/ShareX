@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -26,8 +26,8 @@
 using Newtonsoft.Json;
 using ShareX.HelpersLib;
 using ShareX.UploadersLib.HelperClasses;
+using ShareX.UploadersLib.Properties;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 
@@ -42,7 +42,7 @@ namespace ShareX.UploadersLib.FileUploaders
         public static OneDriveFileInfo RootFolder = new OneDriveFileInfo
         {
             id = "me/skydrive",
-            name = "Root folder"
+            name = Resources.OneDrive_RootFolder_Root_folder
         };
 
         public OneDrive(OAuth2Info authInfo)
@@ -54,7 +54,7 @@ namespace ShareX.UploadersLib.FileUploaders
         {
             Dictionary<string, string> args = new Dictionary<string, string>();
             args.Add("client_id", AuthInfo.Client_ID);
-            args.Add("scope", "wl.offline_access wl.basic wl.skydrive_update");
+            args.Add("scope", "wl.offline_access wl.skydrive_update");
             args.Add("response_type", "code");
             args.Add("redirect_uri", Links.URL_CALLBACK);
 
@@ -219,6 +219,8 @@ namespace ShareX.UploadersLib.FileUploaders
 
             Dictionary<string, string> args = new Dictionary<string, string>();
             args.Add("access_token", AuthInfo.Token.access_token);
+
+            if (!path.EndsWith("files")) path += "/files";
 
             string url = CreateQuery(URLHelpers.CombineURL("https://apis.live.net/v5.0", path), args);
 

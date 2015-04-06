@@ -10,7 +10,7 @@
 
 [Setup]
 AllowNoIcons=true
-AppCopyright=Copyright (C) 2007-2014 {#MyAppPublisher}
+AppCopyright=Copyright © 2007-2015 {#MyAppPublisher}
 AppId={#MyAppId}
 AppMutex={#MyAppId}
 AppName={#MyAppName}
@@ -56,8 +56,8 @@ Name: "de"; MessagesFile: "compiler:Languages\German.isl"
 
 [Tasks]
 Name: "CreateDesktopIcon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional shortcuts:"
-Name: "CreateQuickLaunchIcon"; Description: "Create a quick launch shortcut"; GroupDescription: "Additional shortcuts:"
 Name: "CreateSendToIcon"; Description: "Create a send to shortcut"; GroupDescription: "Additional shortcuts:"
+Name: "CreateQuickLaunchIcon"; Description: "Create a quick launch shortcut"; GroupDescription: "Additional shortcuts:"; OnlyBelowVersion: 0,6.1
 Name: "CreateStartupIcon"; Description: "Launch {#MyAppName} automatically at Windows startup"; GroupDescription: "Other tasks:"
 
 [Files]
@@ -70,6 +70,9 @@ Source: "{#MyAppParentDir}\*.txt"; DestDir: {app}; Flags: ignoreversion
 ; Language resources
 Source: "{#MyAppParentDir}\tr\*.resources.dll"; DestDir: {app}\Languages\tr; Flags: ignoreversion
 Source: "{#MyAppParentDir}\de\*.resources.dll"; DestDir: {app}\Languages\de; Flags: ignoreversion
+Source: "{#MyAppParentDir}\fr\*.resources.dll"; DestDir: {app}\Languages\fr; Flags: ignoreversion
+Source: "{#MyAppParentDir}\zh-CN\*.resources.dll"; DestDir: {app}\Languages\zh-CN; Flags: ignoreversion
+Source: "{#MyAppParentDir}\hu\*.resources.dll"; DestDir: {app}\Languages\hu; Flags: ignoreversion
 
 ; Required for screen/audio recording
 Source: "..\Lib\screen-capture-recorder.dll"; DestDir: {app}; Flags: regserver 32bit; Check: IsAdminLoggedOn and not IsWin64

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -43,9 +43,11 @@ namespace ShareX
     {
         public bool IsReady { get; private set; }
 
-        private bool forceClose;
+        private bool forceClose, firstUpdateCheck = true;
         private UploadInfoManager uim;
         private ToolStripDropDownItem tsmiImageFileUploaders, tsmiTrayImageFileUploaders, tsmiTextFileUploaders, tsmiTrayTextFileUploaders;
+        private System.Threading.Timer updateTimer;
+        private static readonly object updateTimerLock = new object();
 
         public MainForm()
         {
@@ -57,10 +59,7 @@ namespace ShareX
         {
             LoadSettings();
             InitHotkeys();
-
-#if !DEBUG
-            AutoCheckUpdate();
-#endif
+            ConfigureAutoUpdate();
 
             IsReady = true;
 
@@ -84,7 +83,8 @@ namespace ShareX
             ((ToolStripDropDownMenu)tsddbWorkflows.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayWorkflows.DropDown).ShowImageMargin =
                 ((ToolStripDropDownMenu)tsmiMonitor.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiTrayMonitor.DropDown).ShowImageMargin =
                 ((ToolStripDropDownMenu)tsmiOpen.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiCopy.DropDown).ShowImageMargin =
-                ((ToolStripDropDownMenu)tsmiShortenSelectedURL.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiShareSelectedURL.DropDown).ShowImageMargin = false;
+                ((ToolStripDropDownMenu)tsmiShortenSelectedURL.DropDown).ShowImageMargin = ((ToolStripDropDownMenu)tsmiShareSelectedURL.DropDown).ShowImageMargin =
+                ((ToolStripDropDownMenu)tsmiTrayRecentItems.DropDown).ShowImageMargin = false;
 
             AddMultiEnumItems<AfterCaptureTasks>(x => Program.DefaultTaskSettings.AfterCaptureJob = Program.DefaultTaskSettings.AfterCaptureJob.Swap(x),
                 tsddbAfterCaptureTasks, tsmiTrayAfterCaptureTasks);
@@ -210,7 +210,7 @@ namespace ShareX
 
                 foreach (HotkeySettings hotkey in Program.HotkeysConfig.Hotkeys.Where(x => x.HotkeyInfo.IsValidHotkey))
                 {
-                    sb.AppendFormat("{0}  |  {1}\r\n", hotkey.HotkeyInfo, hotkey.TaskSettings.Description);
+                    sb.AppendFormat("{0}  |  {1}\r\n", hotkey.HotkeyInfo, hotkey.TaskSettings);
                 }
             }
 
@@ -219,7 +219,7 @@ namespace ShareX
 
         private ToolStripMenuItem WorkflowMenuItem(HotkeySettings hotkeySetting)
         {
-            ToolStripMenuItem tsmi = new ToolStripMenuItem(hotkeySetting.TaskSettings.Description.Replace("&", "&&"));
+            ToolStripMenuItem tsmi = new ToolStripMenuItem(hotkeySetting.TaskSettings.ToString().Replace("&", "&&"));
             if (hotkeySetting.HotkeyInfo.IsValidHotkey)
             {
                 tsmi.ShortcutKeyDisplayString = "  " + hotkeySetting.HotkeyInfo;
@@ -492,13 +492,6 @@ namespace ShareX
             }
         }
 
-        private void tsmiClipboardFormat_Click(object sender, EventArgs e)
-        {
-            ToolStripMenuItem tsmiClipboardFormat = sender as ToolStripMenuItem;
-            ClipboardFormat cf = tsmiClipboardFormat.Tag as ClipboardFormat;
-            uim.CopyCustomFormat(cf.Format);
-        }
-
         private void LoadSettings()
         {
             niTray.Icon = ShareXResources.Icon;
@@ -507,7 +500,7 @@ namespace ShareX
             bool isPositionChanged = false;
 
             if (Program.Settings.RememberMainFormPosition && !Program.Settings.MainFormPosition.IsEmpty &&
-                CaptureHelpers.GetScreenBounds().Contains(Program.Settings.MainFormPosition))
+                CaptureHelpers.GetScreenBounds().IntersectsWith(new Rectangle(Program.Settings.MainFormPosition, Program.Settings.MainFormSize)))
             {
                 StartPosition = FormStartPosition.Manual;
                 Location = Program.Settings.MainFormPosition;
@@ -571,8 +564,10 @@ namespace ShareX
 
         private void AfterSettingsJobs()
         {
-            ProxyInfo.Current = Program.Settings.ProxySettings;
-            ClipboardHelpers.UseAlternativeCopyImage = Program.Settings.UseAlternativeClipboardCopyImage;
+            HelpersOptions.CurrentProxy = Program.Settings.ProxySettings;
+            HelpersOptions.UseAlternativeCopyImage = Program.Settings.UseAlternativeClipboardCopyImage;
+            HelpersOptions.BrowserPath = Program.Settings.BrowserPath;
+            TaskManager.RecentManager.MaxCount = Program.Settings.RecentLinksMaxCount;
         }
 
         public void UpdateMainFormSettings()
@@ -648,34 +643,34 @@ namespace ShareX
                 Program.DefaultTaskSettings.URLSharingServiceDestination.GetLocalizedDescription());
         }
 
-        private void AutoCheckUpdate()
+        private void ConfigureAutoUpdate()
         {
-            if (Program.Settings.AutoCheckUpdate)
+#if !DEBUG
+            lock (updateTimerLock)
             {
-                Thread updateThread = new Thread(CheckUpdate);
-                updateThread.IsBackground = true;
-                updateThread.Start();
+                if (Program.Settings.AutoCheckUpdate)
+                {
+                    if (updateTimer == null)
+                    {
+                        updateTimer = new System.Threading.Timer(state => CheckUpdate(), null, 0, 1000 * 60 * 60);
+                    }
+                }
+                else if (updateTimer != null)
+                {
+                    updateTimer.Dispose();
+                    updateTimer = null;
+                }
             }
+#endif
         }
 
         private void CheckUpdate()
         {
-            UpdateChecker updateChecker = TaskHelpers.CheckUpdate();
-
-            if (updateChecker != null && updateChecker.Status == UpdateStatus.UpdateAvailable &&
-                MessageBox.Show(Resources.MainForm_CheckUpdate_Newer_version_available,
-                string.Format("ShareX {0} ", updateChecker.LatestVersion) + Resources.MainForm_CheckUpdate_is_available,
-                MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes)
+            if (!UpdateMessageBox.IsOpen)
             {
-                using (DownloaderForm updaterForm = new DownloaderForm(updateChecker))
-                {
-                    updaterForm.ShowDialog();
-
-                    if (updaterForm.Status == DownloaderFormStatus.InstallStarted)
-                    {
-                        Application.Exit();
-                    }
-                }
+                UpdateChecker updateChecker = TaskHelpers.CheckUpdate();
+                UpdateMessageBox.Start(updateChecker, firstUpdateCheck);
+                firstUpdateCheck = false;
             }
         }
 
@@ -722,7 +717,7 @@ namespace ShareX
                 {
                     if (hotkeySetting.TaskSettings.Job != HotkeyType.None)
                     {
-                        if (command.Parameter == hotkeySetting.TaskSettings.Description)
+                        if (command.Parameter == hotkeySetting.TaskSettings.ToString())
                         {
                             ExecuteJob(hotkeySetting.TaskSettings);
                             return true;
@@ -798,6 +793,18 @@ namespace ShareX
         private void MainForm_Shown(object sender, EventArgs e)
         {
             AfterShownJobs();
+        }
+
+        private void MainForm_VisibleChanged(object sender, EventArgs e)
+        {
+            if (Visible)
+            {
+                tsmiDonate.StartAnimation();
+            }
+            else
+            {
+                tsmiDonate.StopAnimation();
+            }
         }
 
         private void MainForm_Resize(object sender, EventArgs e)
@@ -880,14 +887,14 @@ namespace ShareX
             TaskHelpers.OpenDropWindow();
         }
 
-        private void tsmiCursorHelper_Click(object sender, EventArgs e)
+        private void tsmiColorPicker_Click(object sender, EventArgs e)
         {
-            TaskHelpers.OpenScreenColorPicker();
+            TaskHelpers.OpenColorPicker();
         }
 
-        private void tsmiRuler_Click(object sender, EventArgs e)
+        private void tsmiScreenColorPicker_Click(object sender, EventArgs e)
         {
-            TaskHelpers.OpenRuler();
+            TaskHelpers.OpenScreenColorPicker();
         }
 
         private void tsmiFTPClient_Click(object sender, EventArgs e)
@@ -898,6 +905,16 @@ namespace ShareX
         private void tsmiHashCheck_Click(object sender, EventArgs e)
         {
             TaskHelpers.OpenHashCheck();
+        }
+
+        private void tsmiRuler_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenRuler();
+        }
+
+        private void tsmiAutomate_Click(object sender, EventArgs e)
+        {
+            TaskHelpers.OpenAutomate();
         }
 
         private void tsmiIndexFolder_Click(object sender, EventArgs e)
@@ -995,8 +1012,8 @@ namespace ShareX
             AfterSettingsJobs();
             UpdateWorkflowsMenu();
             Program.Settings.SaveAsync(Program.ApplicationConfigFilePath);
-
             Program.ConfigureUploadersConfigWatcher();
+            ConfigureAutoUpdate();
         }
 
         private void tsbTaskSettings_Click(object sender, EventArgs e)
@@ -1338,6 +1355,13 @@ namespace ShareX
             uim.CopyFolder();
         }
 
+        private void tsmiClipboardFormat_Click(object sender, EventArgs e)
+        {
+            ToolStripMenuItem tsmiClipboardFormat = sender as ToolStripMenuItem;
+            ClipboardFormat cf = tsmiClipboardFormat.Tag as ClipboardFormat;
+            uim.CopyCustomFormat(cf.Format);
+        }
+
         private void tsmiUploadSelectedFile_Click(object sender, EventArgs e)
         {
             uim.Upload();
@@ -1408,7 +1432,7 @@ namespace ShareX
 
         private delegate Image ScreenCaptureDelegate();
 
-        private enum LastRegionCaptureType { Surface, Light, Annotate }
+        private enum LastRegionCaptureType { Surface, Light, Transparent, Annotate }
 
         private LastRegionCaptureType lastRegionCaptureType = LastRegionCaptureType.Surface;
 
@@ -1502,6 +1526,9 @@ namespace ShareX
                 case HotkeyType.RectangleLight:
                     CaptureRectangleLight(safeTaskSettings, false);
                     break;
+                case HotkeyType.RectangleTransparent:
+                    CaptureRectangleTransparent(safeTaskSettings, false);
+                    break;
                 case HotkeyType.RoundedRectangleRegion:
                     CaptureScreenshot(CaptureType.RoundedRectangle, safeTaskSettings, false);
                     break;
@@ -1524,10 +1551,16 @@ namespace ShareX
                     CaptureScreenshot(CaptureType.LastRegion, safeTaskSettings, false);
                     break;
                 case HotkeyType.ScreenRecorder:
-                    TaskHelpers.StartScreenRecording(safeTaskSettings, false);
+                    TaskHelpers.StartScreenRecording(ScreenRecordOutput.FFmpeg, safeTaskSettings, false);
                     break;
                 case HotkeyType.StartScreenRecorder:
-                    TaskHelpers.StartScreenRecording(safeTaskSettings, true);
+                    TaskHelpers.StartScreenRecording(ScreenRecordOutput.FFmpeg, safeTaskSettings, true);
+                    break;
+                case HotkeyType.ScreenRecorderGIF:
+                    TaskHelpers.StartScreenRecording(ScreenRecordOutput.GIF, safeTaskSettings, false);
+                    break;
+                case HotkeyType.StartScreenRecorderGIF:
+                    TaskHelpers.StartScreenRecording(ScreenRecordOutput.GIF, safeTaskSettings, true);
                     break;
                 case HotkeyType.AutoCapture:
                     TaskHelpers.OpenAutoCapture();
@@ -1538,8 +1571,11 @@ namespace ShareX
                 case HotkeyType.OpenScreenshotsFolder:
                     TaskHelpers.OpenScreenshotsFolder();
                     break;
+                case HotkeyType.ColorPicker:
+                    TaskHelpers.OpenColorPicker();
+                    break;
                 case HotkeyType.ScreenColorPicker:
-                    TaskHelpers.OpenScreenColorPicker();
+                    TaskHelpers.OpenScreenColorPicker(safeTaskSettings);
                     break;
                 case HotkeyType.Ruler:
                     TaskHelpers.OpenRuler();
@@ -1561,6 +1597,9 @@ namespace ShareX
                     break;
                 case HotkeyType.TweetMessage:
                     TaskHelpers.TweetMessage();
+                    break;
+                case HotkeyType.Automate:
+                    TaskHelpers.StartAutomate();
                     break;
             }
         }
@@ -1862,6 +1901,31 @@ namespace ShareX
             }, CaptureType.Rectangle, taskSettings, autoHideForm);
         }
 
+        private void CaptureRectangleTransparent(TaskSettings taskSettings = null, bool autoHideForm = true)
+        {
+            if (taskSettings == null) taskSettings = TaskSettings.GetDefaultTaskSettings();
+
+            DoCapture(() =>
+            {
+                Image img = null;
+
+                using (RectangleTransparent rectangleTransparent = new RectangleTransparent())
+                {
+                    if (rectangleTransparent.ShowDialog() == DialogResult.OK)
+                    {
+                        img = rectangleTransparent.GetAreaImage();
+
+                        if (img != null)
+                        {
+                            lastRegionCaptureType = LastRegionCaptureType.Transparent;
+                        }
+                    }
+                }
+
+                return img;
+            }, CaptureType.Rectangle, taskSettings, autoHideForm);
+        }
+
         private void CaptureLastRegion(TaskSettings taskSettings, bool autoHideForm = true)
         {
             switch (lastRegionCaptureType)
@@ -1896,6 +1960,22 @@ namespace ShareX
                     else
                     {
                         CaptureRectangleLight(taskSettings, autoHideForm);
+                    }
+                    break;
+                case LastRegionCaptureType.Transparent:
+                    if (!RectangleTransparent.LastSelectionRectangle0Based.IsEmpty)
+                    {
+                        DoCapture(() =>
+                        {
+                            using (Image screenshot = Screenshot.CaptureFullscreen())
+                            {
+                                return ImageHelpers.CropImage(screenshot, RectangleLight.LastSelectionRectangle0Based);
+                            }
+                        }, CaptureType.LastRegion, taskSettings, autoHideForm);
+                    }
+                    else
+                    {
+                        CaptureRectangleTransparent(taskSettings, autoHideForm);
                     }
                     break;
                 case LastRegionCaptureType.Annotate:
@@ -1936,7 +2016,7 @@ namespace ShareX
                     {
                         try
                         {
-                            string title = window.Text.Truncate(50);
+                            string title = window.Text.Truncate(50, "...");
                             ToolStripItem tsi = tsmiWindow.DropDownItems.Add(title);
                             tsi.Tag = window;
                             tsi.Click += handlerWindow;
@@ -2031,6 +2111,11 @@ namespace ShareX
             CaptureRectangleLight();
         }
 
+        private void tsmiRectangleTransparent_Click(object sender, EventArgs e)
+        {
+            CaptureRectangleTransparent();
+        }
+
         private void tsmiEllipse_Click(object sender, EventArgs e)
         {
             CaptureScreenshot(CaptureType.Ellipse);
@@ -2122,6 +2207,11 @@ namespace ShareX
         private void tsmiTrayRectangleLight_Click(object sender, EventArgs e)
         {
             CaptureRectangleLight(null, false);
+        }
+
+        private void tsmiTrayRectangleTransparent_Click(object sender, EventArgs e)
+        {
+            CaptureRectangleTransparent(null, false);
         }
 
         private void tsmiTrayRoundedRectangle_Click(object sender, EventArgs e)

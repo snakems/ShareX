@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -47,6 +47,8 @@ namespace ShareX
         }
 
         private static readonly List<UploadTask> Tasks = new List<UploadTask>();
+
+        public static readonly RecentManager RecentManager = new RecentManager();
 
         private static int lastIconStatus = -1;
 
@@ -305,6 +307,8 @@ namespace ShareX
                                 {
                                     HistoryManager.AddHistoryItemAsync(Program.HistoryFilePath, info.GetHistoryItem());
                                 }
+
+                                RecentManager.Add(result);
 
                                 if (!info.TaskSettings.AdvancedSettings.DisableNotifications && info.Job != TaskJob.ShareURL)
                                 {

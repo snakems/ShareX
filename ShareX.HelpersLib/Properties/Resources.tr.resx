@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="HashCheckForm_btnStartHashCheck_Click_Stop" xml:space="preserve">
+  <data name="Stop" xml:space="preserve">
     <value>Durdur</value>
   </data>
-  <data name="HashCheckForm_fileCheck_FileCheckCompleted_Start" xml:space="preserve">
+  <data name="Start" xml:space="preserve">
     <value>Başlat</value>
   </data>
   <data name="ActionsCodeMenuEntry_FilePath_File_path" xml:space="preserve">
@@ -156,7 +156,7 @@
   <data name="DownloaderForm_StartDownload_Getting_file_size_" xml:space="preserve">
     <value>Dosya boyutu alınıyor.</value>
   </data>
-  <data name="ExportImportControl_Serialize_Error" xml:space="preserve">
+  <data name="Error" xml:space="preserve">
     <value>Hata</value>
   </data>
   <data name="Extensions_AddContextMenu_Copy" xml:space="preserve">
@@ -453,7 +453,7 @@ Dosya boyutu: {2:n0} / {3:n0} KB</value>
     <value>Renk seçici ekranı</value>
   </data>
   <data name="HotkeyType_ScreenRecorder" xml:space="preserve">
-    <value>Ekran kaydetme</value>
+    <value>Ekran kaydetme (FFmpeg)</value>
   </data>
   <data name="HotkeyType_StopUploads" xml:space="preserve">
     <value>Tüm aktif yüklemeleri durdur</value>
@@ -585,6 +585,28 @@ Dosya boyutu: {2:n0} / {3:n0} KB</value>
     <value>Son bölgeyi kullanarak otomatik yakala</value>
   </data>
   <data name="HotkeyType_StartScreenRecorder" xml:space="preserve">
-    <value>Son bölgeyi kullanarak ekran kaydet</value>
+    <value>Son bölgeyi kullanarak ekran kaydet (FFmpeg)</value>
+  </data>
+  <data name="UpdateMessageBox_UpdateMessageBox_" xml:space="preserve">
+    <value>{0} yeni sürümü mevcut.
+İndirmek ve yüklemek ister misiniz?</value>
+  </data>
+  <data name="UpdateMessageBox_UpdateMessageBox_update_is_available" xml:space="preserve">
+    <value>Güncelleştirme mevcut</value>
+  </data>
+  <data name="Helpers_CreateDirectoryIfNotExist_Create_failed_" xml:space="preserve">
+    <value>Klasör yaratılamıyor, yol ayarlarını kontrol ediniz.</value>
+  </data>
+  <data name="HotkeyType_ColorPicker" xml:space="preserve">
+    <value>Renk seçici</value>
+  </data>
+  <data name="HotkeyType_ScreenRecorderGIF" xml:space="preserve">
+    <value>Ekran kaydetme (GIF)</value>
+  </data>
+  <data name="HotkeyType_StartScreenRecorderGIF" xml:space="preserve">
+    <value>Son bölgeyi kullanarak ekran kaydet (GIF)</value>
+  </data>
+  <data name="HotkeyType_Automate" xml:space="preserve">
+    <value>Aç/Durdur otomatikleştirme aracını</value>
   </data>
 </root>

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -24,12 +24,10 @@
 #endregion License Information (GPL v3)
 
 using ShareX.HelpersLib;
-using ShareX.ScreenCaptureLib.Properties;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Windows.Forms;
 
 namespace ShareX.ScreenCaptureLib
 {
@@ -88,16 +86,9 @@ namespace ShareX.ScreenCaptureLib
                 {
                     foreach (LocationInfo index in indexList)
                     {
-                        if (index.Location > int.MaxValue || index.Length > int.MaxValue)
-                        {
-                            MessageBox.Show(string.Format(Resources.HardDiskCache_GetImageEnumerator_Cache_file_size_cannot_exceed, int.MaxValue),
-                                "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                            yield break;
-                        }
-
                         using (MemoryStream ms = new MemoryStream())
                         {
-                            fsCache.CopyStreamTo(ms, (int)index.Location, (int)index.Length);
+                            fsCache.CopyStreamTo64(ms, index.Location, (int)index.Length);
                             yield return Image.FromStream(ms);
                         }
                     }

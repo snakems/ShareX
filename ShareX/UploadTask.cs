@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -95,7 +95,7 @@ namespace ShareX
 
         public static UploadTask CreateFileUploaderTask(string filePath, TaskSettings taskSettings)
         {
-            EDataType dataType = Helpers.FindDataType(filePath);
+            EDataType dataType = TaskHelpers.FindDataType(filePath, taskSettings);
             UploadTask task = new UploadTask(taskSettings);
 
             task.Info.DataType = dataType;
@@ -173,7 +173,7 @@ namespace ShareX
 
         public static UploadTask CreateFileJobTask(string filePath, TaskSettings taskSettings)
         {
-            EDataType dataType = Helpers.FindDataType(filePath);
+            EDataType dataType = TaskHelpers.FindDataType(filePath, taskSettings);
             UploadTask task = new UploadTask(taskSettings);
 
             task.Info.DataType = dataType;
@@ -557,15 +557,6 @@ namespace ShareX
         {
             if (!string.IsNullOrEmpty(Info.FilePath) && File.Exists(Info.FilePath))
             {
-                if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFileToClipboard))
-                {
-                    ClipboardHelpers.CopyFile(Info.FilePath);
-                }
-                else if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFilePathToClipboard))
-                {
-                    ClipboardHelpers.CopyText(Info.FilePath);
-                }
-
                 if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.PerformActions) && Info.TaskSettings.ExternalPrograms != null)
                 {
                     var actions = Info.TaskSettings.ExternalPrograms.Where(x => x.IsActive);
@@ -584,6 +575,15 @@ namespace ShareX
 
                         Data = new FileStream(Info.FilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     }
+                }
+
+                if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFileToClipboard))
+                {
+                    ClipboardHelpers.CopyFile(Info.FilePath);
+                }
+                else if (Info.TaskSettings.AfterCaptureJob.HasFlag(AfterCaptureTasks.CopyFilePathToClipboard))
+                {
+                    ClipboardHelpers.CopyText(Info.FilePath);
                 }
             }
         }
@@ -720,6 +720,9 @@ namespace ShareX
                         DirectURL = true
                     };
                     break;
+                case ImageDestination.Vgyme:
+                    imageUploader = new VgymeUploader();
+                    break;
                 case ImageDestination.CustomImageUploader:
                     CustomUploaderItem customUploader = GetCustomUploader(Program.UploadersConfig.CustomImageUploaderSelected);
                     if (customUploader != null)
@@ -832,6 +835,7 @@ namespace ShareX
                 case FileDestination.OneDrive:
                     fileUploader = new OneDrive(Program.UploadersConfig.OneDriveOAuth2Info)
                     {
+                        FolderID = Program.UploadersConfig.OneDriveSelectedFolder.id,
                         AutoCreateShareableLink = Program.UploadersConfig.OneDriveAutoCreateShareableLink
                     };
                     break;
@@ -849,9 +853,13 @@ namespace ShareX
                         URLType = Program.UploadersConfig.CopyURLType
                     };
                     break;
-                case FileDestination.RapidShare:
-                    fileUploader = new RapidShare(Program.UploadersConfig.RapidShareUsername, Program.UploadersConfig.RapidSharePassword, Program.UploadersConfig.RapidShareFolderID);
-                    break;
+                /*case FileDestination.Hubic:
+                    fileUploader = new Hubic(Program.UploadersConfig.HubicOAuth2Info, Program.UploadersConfig.HubicOpenstackAuthInfo)
+                    {
+                        SelectedFolder = Program.UploadersConfig.HubicSelectedFolder,
+                        Publish = Program.UploadersConfig.HubicPublish
+                    };
+                    break;*/
                 case FileDestination.SendSpace:
                     fileUploader = new SendSpace(APIKeys.SendSpaceKey);
                     switch (Program.UploadersConfig.SendSpaceAccountType)
@@ -968,12 +976,6 @@ namespace ShareX
                 case FileDestination.Pushbullet:
                     fileUploader = new Pushbullet(Program.UploadersConfig.PushbulletSettings);
                     break;
-                case FileDestination.MediaCrush:
-                    fileUploader = new MediaCrushUploader()
-                    {
-                        DirectLink = Program.UploadersConfig.MediaCrushDirectLink
-                    };
-                    break;
                 case FileDestination.MediaFire:
                     fileUploader = new MediaFire(APIKeys.MediaFireAppId, APIKeys.MediaFireApiKey, Program.UploadersConfig.MediaFireUsername, Program.UploadersConfig.MediaFirePassword)
                     {
@@ -983,6 +985,12 @@ namespace ShareX
                     break;
                 case FileDestination.Pomf:
                     fileUploader = new Pomf();
+                    break;
+                case FileDestination.Lambda:
+                    fileUploader = new Lambda(Program.UploadersConfig.LambdaSettings);
+                    break;
+                case FileDestination.Imgrush:
+                    fileUploader = new MediaCrushUploader("https://imgrush.com");
                     break;
             }
 
@@ -1018,6 +1026,9 @@ namespace ShareX
                     break;
                 case UrlShortenerType.ISGD:
                     urlShortener = new IsgdURLShortener();
+                    break;
+                case UrlShortenerType.VGD:
+                    urlShortener = new VgdURLShortener();
                     break;
                 case UrlShortenerType.TINYURL:
                     urlShortener = new TinyURLShortener();

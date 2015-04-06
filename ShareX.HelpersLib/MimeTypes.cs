@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -60,7 +60,7 @@ namespace ShareX.HelpersLib
 			{ "3ds", "image/x-3ds" },
 			{ "3g2", "video/3gpp2" },
 			{ "3gp", "video/3gpp" },
-			//{ "7z", "application/x-7z-compressed" },
+			{ "7z", "application/x-7z-compressed" },
 			{ "aab", "application/x-authorware-bin" },
 			{ "aac", "audio/x-aac" },
 			{ "aam", "application/x-authorware-map" },

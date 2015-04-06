@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -43,7 +43,7 @@ namespace ShareX.HelpersLib
 
             if (Menu != null && mevent.Button == MouseButtons.Left)
             {
-                Menu.Show(this, MenuX0 ? 0 : mevent.X, this.Height);
+                Menu.Show(this, MenuX0 ? 0 : mevent.X, Height);
             }
         }
 

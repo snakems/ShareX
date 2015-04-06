@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -94,14 +94,14 @@ namespace ShareX.ScreenCaptureLib
 
         public event ProgressEventHandler EncodingProgressChanged;
 
-        private int fps, delay, frameCount;
+        private int fps, delay, frameCount, previousProgress;
         private float durationSeconds;
         private Rectangle captureRectangle;
         private ImageCache imgCache;
-        private FFmpegHelper ffMpegCli;
+        private FFmpegHelper ffmpegCli;
         private bool stopRequest;
 
-        public ScreenRecorder(ScreencastOptions options, Rectangle captureRectangle, ScreenRecordOutput outputType)
+        public ScreenRecorder(ScreenRecordOutput outputType, ScreencastOptions options, Rectangle captureRectangle)
         {
             if (string.IsNullOrEmpty(options.OutputPath))
             {
@@ -118,11 +118,9 @@ namespace ShareX.ScreenCaptureLib
 
             switch (OutputType)
             {
-                case ScreenRecordOutput.AVI:
-                    imgCache = new AVICache(Options);
-                    break;
+                default:
                 case ScreenRecordOutput.FFmpeg:
-                    ffMpegCli = new FFmpegHelper(Options);
+                    ffmpegCli = new FFmpegHelper(Options);
                     break;
                 case ScreenRecordOutput.GIF:
                     imgCache = new HardDiskCache(Options);
@@ -145,7 +143,7 @@ namespace ShareX.ScreenCaptureLib
 
                 if (OutputType == ScreenRecordOutput.FFmpeg)
                 {
-                    ffMpegCli.Record();
+                    ffmpegCli.Record();
                 }
                 else
                 {
@@ -194,9 +192,9 @@ namespace ShareX.ScreenCaptureLib
         {
             stopRequest = true;
 
-            if (ffMpegCli != null)
+            if (ffmpegCli != null)
             {
-                ffMpegCli.Close();
+                ffmpegCli.Close();
             }
         }
 
@@ -229,17 +227,16 @@ namespace ShareX.ScreenCaptureLib
         {
             if (!string.IsNullOrEmpty(sourceFilePath) && File.Exists(sourceFilePath))
             {
-                OnEncodingProgressChanged(-1);
                 encoder.Encode(sourceFilePath, targetFilePath);
-                OnEncodingProgressChanged(100);
             }
         }
 
         protected void OnEncodingProgressChanged(int progress)
         {
-            if (EncodingProgressChanged != null)
+            if (EncodingProgressChanged != null && progress != previousProgress)
             {
                 EncodingProgressChanged(progress);
+                previousProgress = progress;
             }
         }
 

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -31,25 +31,6 @@ namespace ShareX.HelpersLib
 {
     public class ProxyInfo
     {
-        private static ProxyInfo current;
-
-        public static ProxyInfo Current
-        {
-            get
-            {
-                if (current == null)
-                {
-                    current = new ProxyInfo();
-                }
-
-                return current;
-            }
-            set
-            {
-                current = value;
-            }
-        }
-
         public ProxyMethod ProxyMethod { get; set; }
         public string Host { get; set; }
         public int Port { get; set; }

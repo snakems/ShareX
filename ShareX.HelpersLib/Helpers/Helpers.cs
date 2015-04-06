@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -42,6 +42,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Web;
 using System.Windows.Forms;
 
 namespace ShareX.HelpersLib
@@ -215,7 +216,7 @@ namespace ShareX.HelpersLib
         public static string GetValidURL(string url, bool replaceSpace = false)
         {
             if (replaceSpace) url = url.Replace(' ', '_');
-            return new string(url.Where(c => ValidURLCharacters.Contains(c)).ToArray());
+            return HttpUtility.UrlPathEncode(url);
         }
 
         public static string GetXMLValue(string input, string tag)
@@ -660,7 +661,15 @@ namespace ShareX.HelpersLib
 
                 if (!string.IsNullOrEmpty(path) && !Directory.Exists(path))
                 {
-                    Directory.CreateDirectory(path);
+                    try
+                    {
+                        Directory.CreateDirectory(path);
+                    }
+                    catch (Exception e)
+                    {
+                        DebugHelper.WriteException(e);
+                        MessageBox.Show(Resources.Helpers_CreateDirectoryIfNotExist_Create_failed_ + "\r\n\r\n" + e, "ShareX", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             }
         }
@@ -792,7 +801,7 @@ namespace ShareX.HelpersLib
                     using (WebClient wc = new WebClient())
                     {
                         wc.Encoding = Encoding.UTF8;
-                        wc.Proxy = ProxyInfo.Current.GetWebProxy();
+                        wc.Proxy = HelpersOptions.CurrentProxy.GetWebProxy();
                         return wc.DownloadString(url);
                     }
                 }

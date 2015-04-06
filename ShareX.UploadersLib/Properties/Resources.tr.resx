@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -229,12 +228,6 @@ Oluşturulmuş dizinler:</value>
   <data name="UploadersConfigForm_BoxListFolders_Box_refresh_folders_list_failed" xml:space="preserve">
     <value>Box dizin listesi yenileme başarısız</value>
   </data>
-  <data name="UploadersConfigForm_btnRapidShareRefreshFolders_Click_RapidShare_account_username_or_password_is_empty_" xml:space="preserve">
-    <value>RapidShare hesap kullanıcı adı veya şifresi boş.</value>
-  </data>
-  <data name="UploadersConfigForm_btnRapidShareRefreshFolders_Click_RapidShare_refresh_folders_list_failed" xml:space="preserve">
-    <value>RapidShare dizin listesi yenileme başarısız</value>
-  </data>
   <data name="UploadersConfigForm_DropboxAuthComplete_Login_successful_but_getting_account_info_failed_" xml:space="preserve">
     <value>Giriş başarılı fakat hesap bilgilerini alma başarısız.</value>
   </data>
@@ -249,5 +242,14 @@ Oluşturulmuş dizinler:</value>
   </data>
   <data name="UploadersConfigForm_LoadSettings_Parent_album_path_e_g_" xml:space="preserve">
     <value>Ana album yolu, örneğin:</value>
+  </data>
+  <data name="UploadersConfigForm_OneDriveAddFolder_Querying_folders___" xml:space="preserve">
+    <value>Klasörler isteniyor...</value>
+  </data>
+  <data name="OneDrive_RootFolder_Root_folder" xml:space="preserve">
+    <value>Ana klasör</value>
+  </data>
+  <data name="UploadersConfigForm_HubicListFolders_Hubic_refresh_folders_list_failed" xml:space="preserve">
+    <value>Hubic dizin listesi yenileme başarısız</value>
   </data>
 </root>

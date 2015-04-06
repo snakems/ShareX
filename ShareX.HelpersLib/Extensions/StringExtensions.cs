@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -179,14 +179,33 @@ namespace ShareX.HelpersLib
             return new String(chars);
         }
 
-        public static string Truncate(this string str, int length, string endings = "...")
+        public static string Truncate(this string str, int maxLength)
         {
-            if (length < 1) return string.Empty;
-
-            if (length < str.Length)
+            if (!string.IsNullOrEmpty(str) && str.Length > maxLength)
             {
-                str = str.Left(length - endings.Length);
-                str += endings;
+                return str.Substring(0, maxLength);
+            }
+
+            return str;
+        }
+
+        public static string Truncate(this string str, int maxLength, string endings, bool truncateFromRight = true)
+        {
+            if (!string.IsNullOrEmpty(str) && str.Length > maxLength)
+            {
+                int length = maxLength - endings.Length;
+
+                if (length > 0)
+                {
+                    if (truncateFromRight)
+                    {
+                        str = str.Left(length) + endings;
+                    }
+                    else
+                    {
+                        str = endings + str.Right(length);
+                    }
+                }
             }
 
             return str;

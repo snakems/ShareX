@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -29,7 +29,6 @@ using ShareX.ScreenCaptureLib;
 using ShareX.UploadersLib;
 using System;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -52,8 +51,19 @@ namespace ShareX
             Icon = ShareXResources.Icon;
 
             // General
-            cbLanguage.Items.AddRange(Helpers.GetLocalizedEnumDescriptions<SupportedLanguage>());
-            cbLanguage.SelectedIndex = (int)Program.Settings.Language;
+
+            foreach (SupportedLanguage language in Helpers.GetEnums<SupportedLanguage>())
+            {
+                ToolStripMenuItem tsmi = new ToolStripMenuItem(language.GetLocalizedDescription());
+                tsmi.Image = GetLanguageIcon(language);
+                tsmi.ImageScaling = ToolStripItemImageScaling.None;
+                SupportedLanguage lang = language;
+                tsmi.Click += (sender, e) => ChangeLanguage(lang);
+                cmsLanguages.Items.Add(tsmi);
+            }
+
+            ChangeLanguage(Program.Settings.Language);
+
             cbShowTray.Checked = Program.Settings.ShowTray;
             cbSilentRun.Enabled = Program.Settings.ShowTray;
             cbSilentRun.Checked = Program.Settings.SilentRun;
@@ -126,6 +136,60 @@ namespace ShareX
             tttvMain.MainTabControl = tcSettings;
         }
 
+        private Image GetLanguageIcon(SupportedLanguage language)
+        {
+            Image icon;
+
+            switch (language)
+            {
+                default:
+                case SupportedLanguage.Automatic:
+                    icon = Resources.globe;
+                    break;
+                case SupportedLanguage.English:
+                    icon = Resources.us;
+                    break;
+                case SupportedLanguage.German:
+                    icon = Resources.de;
+                    break;
+                case SupportedLanguage.French:
+                    icon = Resources.fr;
+                    break;
+                case SupportedLanguage.Hungarian:
+                    icon = Resources.hu;
+                    break;
+                case SupportedLanguage.Korean:
+                    icon = Resources.kr;
+                    break;
+                case SupportedLanguage.SimplifiedChinese:
+                    icon = Resources.cn;
+                    break;
+                case SupportedLanguage.Turkish:
+                    icon = Resources.tr;
+                    break;
+            }
+
+            return icon;
+        }
+
+        private void ChangeLanguage(SupportedLanguage language)
+        {
+            btnLanguages.Text = language.GetLocalizedDescription();
+            btnLanguages.Image = GetLanguageIcon(language);
+
+            if (loaded)
+            {
+                Program.Settings.Language = language;
+
+                if (LanguageHelper.ChangeLanguage(Program.Settings.Language) &&
+                    MessageBox.Show(Resources.ApplicationSettingsForm_cbLanguage_SelectedIndexChanged_Language_Restart,
+                    "ShareX", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+                {
+                    Program.Restart();
+                }
+            }
+        }
+
         private void SettingsForm_Shown(object sender, EventArgs e)
         {
             this.ShowActivate();
@@ -168,28 +232,14 @@ namespace ShareX
             }
             else
             {
-                personalPath = Path.GetFullPath(personalPath);
+                personalPath = Environment.ExpandEnvironmentVariables(personalPath);
+                personalPath = Helpers.GetAbsolutePath(personalPath);
             }
 
             lblPreviewPersonalFolderPath.Text = personalPath;
         }
 
         #region General
-
-        private void cbLanguage_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (loaded)
-            {
-                Program.Settings.Language = (SupportedLanguage)cbLanguage.SelectedIndex;
-
-                if (LanguageHelper.ChangeLanguage(Program.Settings.Language) &&
-                    MessageBox.Show(Resources.ApplicationSettingsForm_cbLanguage_SelectedIndexChanged_Language_Restart,
-                    "ShareX", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
-                {
-                    Program.Restart();
-                }
-            }
-        }
 
         private void llTranslators_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {

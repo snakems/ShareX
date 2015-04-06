@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -51,11 +51,23 @@ namespace ShareX
                     case SupportedLanguage.English:
                         cultureName = "en-US";
                         break;
-                    case SupportedLanguage.Turkish:
-                        cultureName = "tr-TR";
-                        break;
                     case SupportedLanguage.German:
                         cultureName = "de-DE";
+                        break;
+                    case SupportedLanguage.French:
+                        cultureName = "fr-FR";
+                        break;
+                    case SupportedLanguage.Hungarian:
+                        cultureName = "hu-HU";
+                        break;
+                    case SupportedLanguage.Korean:
+                        cultureName = "ko-KR";
+                        break;
+                    case SupportedLanguage.SimplifiedChinese:
+                        cultureName = "zh-CN";
+                        break;
+                    case SupportedLanguage.Turkish:
+                        cultureName = "tr-TR";
                         break;
                 }
 

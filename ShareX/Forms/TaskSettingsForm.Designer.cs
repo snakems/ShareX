@@ -116,20 +116,17 @@
             this.tpRegionCapture = new System.Windows.Forms.TabPage();
             this.pgRegionCapture = new System.Windows.Forms.PropertyGrid();
             this.tpScreenRecorder = new System.Windows.Forms.TabPage();
+            this.btnScreenRecorderFFmpegOptions = new System.Windows.Forms.Button();
             this.lblScreenRecorderStartDelay = new System.Windows.Forms.Label();
             this.chkScreenRecordAutoStart = new System.Windows.Forms.CheckBox();
-            this.cbScreenRecordAutoDisableAero = new System.Windows.Forms.CheckBox();
             this.lblScreenRecorderFixedDuration = new System.Windows.Forms.Label();
             this.nudScreenRecordFPS = new System.Windows.Forms.NumericUpDown();
             this.lblScreenRecordFPS = new System.Windows.Forms.Label();
             this.chkRunScreencastCLI = new System.Windows.Forms.CheckBox();
-            this.btnScreenRecorderOptions = new System.Windows.Forms.Button();
             this.btnEncoderConfig = new System.Windows.Forms.Button();
             this.cboEncoder = new System.Windows.Forms.ComboBox();
             this.nudScreenRecorderDuration = new System.Windows.Forms.NumericUpDown();
             this.nudScreenRecorderStartDelay = new System.Windows.Forms.NumericUpDown();
-            this.cbScreenRecorderOutput = new System.Windows.Forms.ComboBox();
-            this.lblScreenRecorderOutput = new System.Windows.Forms.Label();
             this.cbScreenRecorderFixedDuration = new System.Windows.Forms.CheckBox();
             this.nudGIFFPS = new System.Windows.Forms.NumericUpDown();
             this.lblGIFFPS = new System.Windows.Forms.Label();
@@ -180,6 +177,8 @@
             this.pgTaskSettings = new System.Windows.Forms.PropertyGrid();
             this.chkUseDefaultAdvancedSettings = new System.Windows.Forms.CheckBox();
             this.tttvMain = new ShareX.HelpersLib.TabToTreeView();
+            this.cbNameFormatTimeZone = new System.Windows.Forms.ComboBox();
+            this.cbNameFormatCustomTimeZone = new System.Windows.Forms.CheckBox();
             this.tcTaskSettings.SuspendLayout();
             this.tpTask.SuspendLayout();
             this.cmsDestinations.SuspendLayout();
@@ -895,26 +894,30 @@
             // 
             // tpScreenRecorder
             // 
+            this.tpScreenRecorder.Controls.Add(this.btnScreenRecorderFFmpegOptions);
             this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderStartDelay);
             this.tpScreenRecorder.Controls.Add(this.chkScreenRecordAutoStart);
-            this.tpScreenRecorder.Controls.Add(this.cbScreenRecordAutoDisableAero);
             this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderFixedDuration);
             this.tpScreenRecorder.Controls.Add(this.nudScreenRecordFPS);
             this.tpScreenRecorder.Controls.Add(this.lblScreenRecordFPS);
             this.tpScreenRecorder.Controls.Add(this.chkRunScreencastCLI);
-            this.tpScreenRecorder.Controls.Add(this.btnScreenRecorderOptions);
             this.tpScreenRecorder.Controls.Add(this.btnEncoderConfig);
             this.tpScreenRecorder.Controls.Add(this.cboEncoder);
             this.tpScreenRecorder.Controls.Add(this.nudScreenRecorderDuration);
             this.tpScreenRecorder.Controls.Add(this.nudScreenRecorderStartDelay);
-            this.tpScreenRecorder.Controls.Add(this.cbScreenRecorderOutput);
-            this.tpScreenRecorder.Controls.Add(this.lblScreenRecorderOutput);
             this.tpScreenRecorder.Controls.Add(this.cbScreenRecorderFixedDuration);
             this.tpScreenRecorder.Controls.Add(this.nudGIFFPS);
             this.tpScreenRecorder.Controls.Add(this.lblGIFFPS);
             resources.ApplyResources(this.tpScreenRecorder, "tpScreenRecorder");
             this.tpScreenRecorder.Name = "tpScreenRecorder";
             this.tpScreenRecorder.UseVisualStyleBackColor = true;
+            // 
+            // btnScreenRecorderFFmpegOptions
+            // 
+            resources.ApplyResources(this.btnScreenRecorderFFmpegOptions, "btnScreenRecorderFFmpegOptions");
+            this.btnScreenRecorderFFmpegOptions.Name = "btnScreenRecorderFFmpegOptions";
+            this.btnScreenRecorderFFmpegOptions.UseVisualStyleBackColor = true;
+            this.btnScreenRecorderFFmpegOptions.Click += new System.EventHandler(this.btnScreenRecorderFFmpegOptions_Click);
             // 
             // lblScreenRecorderStartDelay
             // 
@@ -928,13 +931,6 @@
             this.chkScreenRecordAutoStart.UseVisualStyleBackColor = true;
             this.chkScreenRecordAutoStart.CheckedChanged += new System.EventHandler(this.chkScreenRecordAutoStart_CheckedChanged);
             // 
-            // cbScreenRecordAutoDisableAero
-            // 
-            resources.ApplyResources(this.cbScreenRecordAutoDisableAero, "cbScreenRecordAutoDisableAero");
-            this.cbScreenRecordAutoDisableAero.Name = "cbScreenRecordAutoDisableAero";
-            this.cbScreenRecordAutoDisableAero.UseVisualStyleBackColor = true;
-            this.cbScreenRecordAutoDisableAero.CheckedChanged += new System.EventHandler(this.cbScreenRecordAutoDisableAero_CheckedChanged);
-            // 
             // lblScreenRecorderFixedDuration
             // 
             resources.ApplyResources(this.lblScreenRecorderFixedDuration, "lblScreenRecorderFixedDuration");
@@ -944,12 +940,12 @@
             // 
             resources.ApplyResources(this.nudScreenRecordFPS, "nudScreenRecordFPS");
             this.nudScreenRecordFPS.Maximum = new decimal(new int[] {
-            30,
+            60,
             0,
             0,
             0});
             this.nudScreenRecordFPS.Minimum = new decimal(new int[] {
-            5,
+            1,
             0,
             0,
             0});
@@ -972,13 +968,6 @@
             this.chkRunScreencastCLI.Name = "chkRunScreencastCLI";
             this.chkRunScreencastCLI.UseVisualStyleBackColor = true;
             this.chkRunScreencastCLI.CheckedChanged += new System.EventHandler(this.chkRunScreencastCLI_CheckedChanged);
-            // 
-            // btnScreenRecorderOptions
-            // 
-            resources.ApplyResources(this.btnScreenRecorderOptions, "btnScreenRecorderOptions");
-            this.btnScreenRecorderOptions.Name = "btnScreenRecorderOptions";
-            this.btnScreenRecorderOptions.UseVisualStyleBackColor = true;
-            this.btnScreenRecorderOptions.Click += new System.EventHandler(this.btnScreenRecorderOptions_Click);
             // 
             // btnEncoderConfig
             // 
@@ -1044,19 +1033,6 @@
             0});
             this.nudScreenRecorderStartDelay.ValueChanged += new System.EventHandler(this.nudScreenRecorderStartDelay_ValueChanged);
             // 
-            // cbScreenRecorderOutput
-            // 
-            this.cbScreenRecorderOutput.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cbScreenRecorderOutput.FormattingEnabled = true;
-            resources.ApplyResources(this.cbScreenRecorderOutput, "cbScreenRecorderOutput");
-            this.cbScreenRecorderOutput.Name = "cbScreenRecorderOutput";
-            this.cbScreenRecorderOutput.SelectedIndexChanged += new System.EventHandler(this.cbScreenRecorderOutput_SelectedIndexChanged);
-            // 
-            // lblScreenRecorderOutput
-            // 
-            resources.ApplyResources(this.lblScreenRecorderOutput, "lblScreenRecorderOutput");
-            this.lblScreenRecorderOutput.Name = "lblScreenRecorderOutput";
-            // 
             // cbScreenRecorderFixedDuration
             // 
             resources.ApplyResources(this.cbScreenRecorderFixedDuration, "cbScreenRecorderFixedDuration");
@@ -1068,7 +1044,7 @@
             // 
             resources.ApplyResources(this.nudGIFFPS, "nudGIFFPS");
             this.nudGIFFPS.Maximum = new decimal(new int[] {
-            15,
+            30,
             0,
             0,
             0});
@@ -1276,6 +1252,8 @@
             // 
             // pUpload
             // 
+            this.pUpload.Controls.Add(this.cbNameFormatCustomTimeZone);
+            this.pUpload.Controls.Add(this.cbNameFormatTimeZone);
             this.pUpload.Controls.Add(this.lblNameFormatPattern);
             this.pUpload.Controls.Add(this.cbFileUploadUseNamePattern);
             this.pUpload.Controls.Add(this.lblNameFormatPatternPreviewActiveWindow);
@@ -1435,7 +1413,22 @@
             this.tttvMain.MainTabControl = null;
             this.tttvMain.Name = "tttvMain";
             this.tttvMain.TreeViewFont = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.tttvMain.TreeViewSize = 150;
+            this.tttvMain.TreeViewSize = 190;
+            // 
+            // cbNameFormatTimeZone
+            // 
+            this.cbNameFormatTimeZone.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbNameFormatTimeZone.FormattingEnabled = true;
+            resources.ApplyResources(this.cbNameFormatTimeZone, "cbNameFormatTimeZone");
+            this.cbNameFormatTimeZone.Name = "cbNameFormatTimeZone";
+            this.cbNameFormatTimeZone.SelectedIndexChanged += new System.EventHandler(this.cbNameFormatTimeZone_SelectedIndexChanged);
+            // 
+            // cbNameFormatCustomTimeZone
+            // 
+            resources.ApplyResources(this.cbNameFormatCustomTimeZone, "cbNameFormatCustomTimeZone");
+            this.cbNameFormatCustomTimeZone.Name = "cbNameFormatCustomTimeZone";
+            this.cbNameFormatCustomTimeZone.UseVisualStyleBackColor = true;
+            this.cbNameFormatCustomTimeZone.CheckedChanged += new System.EventHandler(this.cbNameFormatCustomTimeZone_CheckedChanged);
             // 
             // TaskSettingsForm
             // 
@@ -1586,8 +1579,6 @@
         private System.Windows.Forms.NumericUpDown nudGIFFPS;
         private System.Windows.Forms.NumericUpDown nudScreenRecorderDuration;
         private System.Windows.Forms.Label lblGIFFPS;
-        private System.Windows.Forms.ComboBox cbScreenRecorderOutput;
-        private System.Windows.Forms.Label lblScreenRecorderOutput;
         private System.Windows.Forms.TabPage tpWatchFolders;
         private System.Windows.Forms.CheckBox cbWatchFolderEnabled;
         private System.Windows.Forms.ListView lvWatchFolderList;
@@ -1636,14 +1627,12 @@
         private System.Windows.Forms.Label lblThumbnailNamePreview;
         private System.Windows.Forms.CheckBox cbThumbnailIfSmaller;
         private System.Windows.Forms.CheckBox cbClipboardUploadAutoIndexFolder;
-        private System.Windows.Forms.Button btnScreenRecorderOptions;
         private System.Windows.Forms.CheckBox chkRunScreencastCLI;
         private System.Windows.Forms.CheckBox chkClipboardUploadURLContents;
         private System.Windows.Forms.NumericUpDown nudScreenRecordFPS;
         private System.Windows.Forms.Label lblScreenRecordFPS;
         private System.Windows.Forms.CheckBox chkShowBeforeUploadForm;
         private System.Windows.Forms.Label lblScreenRecorderFixedDuration;
-        private System.Windows.Forms.CheckBox cbScreenRecordAutoDisableAero;
         private System.Windows.Forms.CheckBox cbClipboardUploadShareURL;
         private System.Windows.Forms.TabPage tpRectangleAnnotate;
         private System.Windows.Forms.PropertyGrid pgRectangleAnnotate;
@@ -1659,6 +1648,9 @@
         private System.Windows.Forms.Panel pUpload;
         private System.Windows.Forms.ComboBox cbOverrideCustomUploader;
         private System.Windows.Forms.CheckBox chkOverrideCustomUploader;
+        private System.Windows.Forms.Button btnScreenRecorderFFmpegOptions;
+        private System.Windows.Forms.ComboBox cbNameFormatTimeZone;
+        private System.Windows.Forms.CheckBox cbNameFormatCustomTimeZone;
 
 
 

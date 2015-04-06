@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -43,7 +43,9 @@ namespace ShareX
                 string title = string.IsNullOrEmpty(currentDestination) ? Resources.BeforeUploadForm_BeforeUploadForm_Please_choose_a_destination_ :
                     Resources.BeforeUploadForm_BeforeUploadForm__0__is_about_to_be_uploaded_to__1___You_may_choose_a_different_destination_;
                 lblTitle.Text = string.Format(title, info.FileName, currentDestination);
+                pbPreview.LoadImageFromFileAsync(info.FilePath);
             };
+
             ucBeforeUpload.Init(info);
         }
 

@@ -61,6 +61,60 @@ namespace ShareX.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Contributors.
+        /// </summary>
+        public static string AboutForm_AboutForm_Contributors {
+            get {
+                return ResourceManager.GetString("AboutForm_AboutForm_Contributors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to External libraries.
+        /// </summary>
+        public static string AboutForm_AboutForm_External_libraries {
+            get {
+                return ResourceManager.GetString("AboutForm_AboutForm_External_libraries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Issues.
+        /// </summary>
+        public static string AboutForm_AboutForm_Issues {
+            get {
+                return ResourceManager.GetString("AboutForm_AboutForm_Issues", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Project page.
+        /// </summary>
+        public static string AboutForm_AboutForm_Project_page {
+            get {
+                return ResourceManager.GetString("AboutForm_AboutForm_Project_page", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Translators.
+        /// </summary>
+        public static string AboutForm_AboutForm_Translators {
+            get {
+                return ResourceManager.GetString("AboutForm_AboutForm_Translators", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Website.
+        /// </summary>
+        public static string AboutForm_AboutForm_Website {
+            get {
+                return ResourceManager.GetString("AboutForm_AboutForm_Website", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to File path can&apos;t be empty..
         /// </summary>
         public static string ActionsForm_btnOK_Click_File_path_can_t_be_empty_ {
@@ -372,6 +426,16 @@ namespace ShareX.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap clipboard_list {
+            get {
+                object obj = ResourceManager.GetObject("clipboard_list", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Supported variables: {0} and other variables such as {1} etc..
         /// </summary>
         public static string ClipboardFormatForm_ClipboardFormatForm_Supported_variables___0__and_other_variables_such_as__1__etc_ {
@@ -387,6 +451,16 @@ namespace ShareX.Properties {
         public static System.Drawing.Bitmap clock {
             get {
                 object obj = ResourceManager.GetObject("clock", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap cn {
+            get {
+                object obj = ResourceManager.GetObject("cn", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -437,6 +511,16 @@ namespace ShareX.Properties {
         public static System.Drawing.Bitmap crown {
             get {
                 object obj = ResourceManager.GetObject("crown", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap de {
+            get {
+                object obj = ResourceManager.GetObject("de", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -629,6 +713,16 @@ namespace ShareX.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap fr {
+            get {
+                object obj = ResourceManager.GetObject("fr", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap FreeHand {
             get {
                 object obj = ResourceManager.GetObject("FreeHand", resourceCulture);
@@ -662,6 +756,16 @@ namespace ShareX.Properties {
         public static System.Drawing.Bitmap GitHub {
             get {
                 object obj = ResourceManager.GetObject("GitHub", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap globe {
+            get {
+                object obj = ResourceManager.GetObject("globe", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -758,6 +862,16 @@ namespace ShareX.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap hu {
+            get {
+                object obj = ResourceManager.GetObject("hu", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap image {
             get {
                 object obj = ResourceManager.GetObject("image", resourceCulture);
@@ -811,6 +925,16 @@ namespace ShareX.Properties {
         public static System.Drawing.Bitmap keyboard {
             get {
                 object obj = ResourceManager.GetObject("keyboard", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap kr {
+            get {
+                object obj = ResourceManager.GetObject("kr", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -888,6 +1012,16 @@ namespace ShareX.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap layer_transparent {
+            get {
+                object obj = ResourceManager.GetObject("layer_transparent", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap layers_arrange {
             get {
                 object obj = ResourceManager.GetObject("layers_arrange", resourceCulture);
@@ -922,25 +1056,6 @@ namespace ShareX.Properties {
             get {
                 object obj = ResourceManager.GetObject("layout_select_sidebar", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to is available.
-        /// </summary>
-        public static string MainForm_CheckUpdate_is_available {
-            get {
-                return ResourceManager.GetString("MainForm_CheckUpdate_is_available", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to A newer version of ShareX is available.
-        ///Would you like to download and install it?.
-        /// </summary>
-        public static string MainForm_CheckUpdate_Newer_version_available {
-            get {
-                return ResourceManager.GetString("MainForm_CheckUpdate_Newer_version_available", resourceCulture);
             }
         }
         
@@ -1137,6 +1252,16 @@ namespace ShareX.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap robot {
+            get {
+                object obj = ResourceManager.GetObject("robot", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap RoundedRectangle {
             get {
                 object obj = ResourceManager.GetObject("RoundedRectangle", resourceCulture);
@@ -1218,7 +1343,7 @@ namespace ShareX.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Click tray icon to start recording..
+        ///   Looks up a localized string similar to Click to start recording..
         /// </summary>
         public static string ScreenRecordForm_StartRecording_Click_tray_icon_to_start_recording_ {
             get {
@@ -1227,7 +1352,7 @@ namespace ShareX.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Click tray icon to stop recording..
+        ///   Looks up a localized string similar to Click to stop recording..
         /// </summary>
         public static string ScreenRecordForm_StartRecording_Click_tray_icon_to_stop_recording_ {
             get {
@@ -1317,6 +1442,15 @@ namespace ShareX.Properties {
         public static System.IO.UnmanagedMemoryStream TaskCompletedSound {
             get {
                 return ResourceManager.GetStream("TaskCompletedSound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Copied to clipboard: {0}.
+        /// </summary>
+        public static string TaskHelpers_OpenQuickScreenColorPicker_Copied_to_clipboard___0_ {
+            get {
+                return ResourceManager.GetString("TaskHelpers_OpenQuickScreenColorPicker_Copied_to_clipboard___0_", resourceCulture);
             }
         }
         
@@ -1713,6 +1847,16 @@ namespace ShareX.Properties {
         public static string UploadTask_ThreadDoWork_URL_is_empty_ {
             get {
                 return ResourceManager.GetString("UploadTask_ThreadDoWork_URL_is_empty_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap us {
+            get {
+                object obj = ResourceManager.GetObject("us", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         

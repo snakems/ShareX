@@ -457,6 +457,15 @@ namespace ShareX.HelpersLib.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Error.
+        /// </summary>
+        internal static string Error {
+            get {
+                return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Browse for executable....
         /// </summary>
         internal static string ExeFileNameEditor_EditValue_Browse_for_executable___ {
@@ -471,15 +480,6 @@ namespace ShareX.HelpersLib.Properties {
         internal static string ExportImportControl_Deserialize_Import_failed_ {
             get {
                 return ResourceManager.GetString("ExportImportControl_Deserialize_Import_failed_", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Error.
-        /// </summary>
-        internal static string ExportImportControl_Serialize_Error {
-            get {
-                return ResourceManager.GetString("ExportImportControl_Serialize_Error", resourceCulture);
             }
         }
         
@@ -655,20 +655,11 @@ namespace ShareX.HelpersLib.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Stop.
+        ///   Looks up a localized string similar to Could not create directory, check your path settings..
         /// </summary>
-        internal static string HashCheckForm_btnStartHashCheck_Click_Stop {
+        internal static string Helpers_CreateDirectoryIfNotExist_Create_failed_ {
             get {
-                return ResourceManager.GetString("HashCheckForm_btnStartHashCheck_Click_Stop", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Start.
-        /// </summary>
-        internal static string HashCheckForm_fileCheck_FileCheckCompleted_Start {
-            get {
-                return ResourceManager.GetString("HashCheckForm_fileCheck_FileCheckCompleted_Start", resourceCulture);
+                return ResourceManager.GetString("Helpers_CreateDirectoryIfNotExist_Create_failed_", resourceCulture);
             }
         }
         
@@ -718,6 +709,15 @@ namespace ShareX.HelpersLib.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open/Stop Automate tool.
+        /// </summary>
+        internal static string HotkeyType_Automate {
+            get {
+                return ResourceManager.GetString("HotkeyType_Automate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Upload from clipboard.
         /// </summary>
         internal static string HotkeyType_ClipboardUpload {
@@ -732,6 +732,15 @@ namespace ShareX.HelpersLib.Properties {
         internal static string HotkeyType_ClipboardUploadWithContentViewer {
             get {
                 return ResourceManager.GetString("HotkeyType_ClipboardUploadWithContentViewer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Color picker.
+        /// </summary>
+        internal static string HotkeyType_ColorPicker {
+            get {
+                return ResourceManager.GetString("HotkeyType_ColorPicker", resourceCulture);
             }
         }
         
@@ -907,6 +916,15 @@ namespace ShareX.HelpersLib.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Capture rectangle region (Transparent).
+        /// </summary>
+        internal static string HotkeyType_RectangleTransparent {
+            get {
+                return ResourceManager.GetString("HotkeyType_RectangleTransparent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Capture rounded rectangle region.
         /// </summary>
         internal static string HotkeyType_RoundedRectangleRegion {
@@ -934,11 +952,20 @@ namespace ShareX.HelpersLib.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Screen recording.
+        ///   Looks up a localized string similar to Screen recording (FFmpeg).
         /// </summary>
         internal static string HotkeyType_ScreenRecorder {
             get {
                 return ResourceManager.GetString("HotkeyType_ScreenRecorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Screen recording (GIF).
+        /// </summary>
+        internal static string HotkeyType_ScreenRecorderGIF {
+            get {
+                return ResourceManager.GetString("HotkeyType_ScreenRecorderGIF", resourceCulture);
             }
         }
         
@@ -952,11 +979,20 @@ namespace ShareX.HelpersLib.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Start screen recording using last region.
+        ///   Looks up a localized string similar to Start screen recording (FFmpeg) using last region.
         /// </summary>
         internal static string HotkeyType_StartScreenRecorder {
             get {
                 return ResourceManager.GetString("HotkeyType_StartScreenRecorder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Start screen recording (GIF) using last region.
+        /// </summary>
+        internal static string HotkeyType_StartScreenRecorderGIF {
+            get {
+                return ResourceManager.GetString("HotkeyType_StartScreenRecorderGIF", resourceCulture);
             }
         }
         
@@ -1460,6 +1496,24 @@ namespace ShareX.HelpersLib.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Start.
+        /// </summary>
+        internal static string Start {
+            get {
+                return ResourceManager.GetString("Start", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stop.
+        /// </summary>
+        internal static string Stop {
+            get {
+                return ResourceManager.GetString("Stop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Automatic.
         /// </summary>
         internal static string SupportedLanguage_Automatic {
@@ -1520,6 +1574,25 @@ namespace ShareX.HelpersLib.Properties {
         internal static string UpdateCheckerLabel_UpdateControls_Update_check_failed {
             get {
                 return ResourceManager.GetString("UpdateCheckerLabel_UpdateControls_Update_check_failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A newer version of {0} is available.
+        ///Would you like to download and install it?.
+        /// </summary>
+        internal static string UpdateMessageBox_UpdateMessageBox_ {
+            get {
+                return ResourceManager.GetString("UpdateMessageBox_UpdateMessageBox_", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update is available.
+        /// </summary>
+        internal static string UpdateMessageBox_UpdateMessageBox_update_is_available {
+            get {
+                return ResourceManager.GetString("UpdateMessageBox_UpdateMessageBox_update_is_available", resourceCulture);
             }
         }
         

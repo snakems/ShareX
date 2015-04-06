@@ -251,13 +251,6 @@ sürükle</value>
   <data name="MainForm_tsmiTestTextUpload_Click_Text_upload_test" xml:space="preserve">
     <value>Yazı yükleme testi</value>
   </data>
-  <data name="MainForm_CheckUpdate_is_available" xml:space="preserve">
-    <value>mevcut</value>
-  </data>
-  <data name="MainForm_CheckUpdate_Newer_version_available" xml:space="preserve">
-    <value>ShareX yeni sürümü mevcut.
-İndirmek ve yüklemek ister misiniz?</value>
-  </data>
   <data name="ScreenColorPicker_btnCopyAll_Click_Cursor_position" xml:space="preserve">
     <value>İmleç pozisyonu (X, Y) = {0}, {1}</value>
   </data>
@@ -395,5 +388,26 @@ Lütfen başka bir kısayol seçin veya çakışan uygulamayı kapatın ve Share
   </data>
   <data name="MainForm_UpdateMainFormTip_Currently_configured_hotkeys_" xml:space="preserve">
     <value>Şu anda ayarlı olan kısayollar:</value>
+  </data>
+  <data name="AboutForm_AboutForm_Contributors" xml:space="preserve">
+    <value>Katkıda bulunanlar</value>
+  </data>
+  <data name="AboutForm_AboutForm_External_libraries" xml:space="preserve">
+    <value>Harici kütüphaneler</value>
+  </data>
+  <data name="AboutForm_AboutForm_Issues" xml:space="preserve">
+    <value>Sorunlar</value>
+  </data>
+  <data name="AboutForm_AboutForm_Project_page" xml:space="preserve">
+    <value>Proje sayfası</value>
+  </data>
+  <data name="AboutForm_AboutForm_Translators" xml:space="preserve">
+    <value>Çevirmenler</value>
+  </data>
+  <data name="AboutForm_AboutForm_Website" xml:space="preserve">
+    <value>Web sitesi</value>
+  </data>
+  <data name="TaskHelpers_OpenQuickScreenColorPicker_Copied_to_clipboard___0_" xml:space="preserve">
+    <value>Panoya kopyalandı: {0}</value>
   </data>
 </root>

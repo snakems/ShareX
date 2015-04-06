@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -37,8 +37,6 @@ namespace ShareX.HelpersLib
         private const int RetryTimes = 20, RetryDelay = 100;
 
         private static readonly object ClipboardLock = new object();
-
-        public static bool UseAlternativeCopyImage = false;
 
         private static bool CopyData(IDataObject data, bool copy = true)
         {
@@ -102,7 +100,7 @@ namespace ShareX.HelpersLib
 
         public static bool CopyImage(Image img)
         {
-            if (UseAlternativeCopyImage)
+            if (HelpersOptions.UseAlternativeCopyImage)
             {
                 return CopyImageAlternative(img);
             }

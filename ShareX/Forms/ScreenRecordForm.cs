@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@
 using ShareX.HelpersLib;
 using ShareX.Properties;
 using ShareX.ScreenCaptureLib;
+using System;
 using System.Drawing;
 using System.IO;
 using System.Threading;
@@ -55,7 +56,6 @@ namespace ShareX
 
         private ScreenRecorder screenRecorder;
         private ScreenRegionForm regionForm;
-        private DWMManager dwmManager;
         private bool abortRequested;
 
         private ScreenRecordForm()
@@ -88,7 +88,7 @@ namespace ShareX
             }
         }
 
-        public void StartRecording(TaskSettings taskSettings, bool skipRegionSelection = false)
+        public void StartRecording(ScreenRecordOutput outputType, TaskSettings taskSettings, bool skipRegionSelection = false)
         {
             if (taskSettings.CaptureSettings.RunScreencastCLI)
             {
@@ -108,7 +108,7 @@ namespace ShareX
                 }
             }
 
-            if (taskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.FFmpeg)
+            if (outputType == ScreenRecordOutput.FFmpeg)
             {
                 if (!File.Exists(taskSettings.CaptureSettings.FFmpegOptions.CLIPath))
                 {
@@ -159,7 +159,8 @@ namespace ShareX
             IsRecording = true;
             Screenshot.CaptureCursor = taskSettings.CaptureSettings.ShowCursor;
 
-            TrayIcon.Text = "ShareX - " + Resources.ScreenRecordForm_StartRecording_Waiting___;
+            string trayText = "ShareX - " + Resources.ScreenRecordForm_StartRecording_Waiting___;
+            TrayIcon.Text = trayText.Truncate(63);
             TrayIcon.Icon = Resources.control_record_yellow.ToIcon();
             TrayIcon.Visible = true;
 
@@ -174,17 +175,7 @@ namespace ShareX
             {
                 try
                 {
-                    if (taskSettings.CaptureSettings.ScreenRecordAutoDisableAero)
-                    {
-                        dwmManager = new DWMManager();
-                        dwmManager.AutoDisable();
-                    }
-
-                    if (taskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.AVI)
-                    {
-                        path = Path.Combine(taskSettings.CaptureFolder, TaskHelpers.GetFilename(taskSettings, "avi"));
-                    }
-                    else if (taskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.FFmpeg)
+                    if (outputType == ScreenRecordOutput.FFmpeg)
                     {
                         path = Path.Combine(taskSettings.CaptureFolder, TaskHelpers.GetFilename(taskSettings, taskSettings.CaptureSettings.FFmpegOptions.Extension));
                     }
@@ -196,7 +187,6 @@ namespace ShareX
                     ScreencastOptions options = new ScreencastOptions()
                     {
                         FFmpeg = taskSettings.CaptureSettings.FFmpegOptions,
-                        AVI = taskSettings.CaptureSettings.AVIOptions,
                         ScreenRecordFPS = taskSettings.CaptureSettings.ScreenRecordFPS,
                         GIFFPS = taskSettings.CaptureSettings.GIFFPS,
                         Duration = duration,
@@ -205,11 +195,12 @@ namespace ShareX
                         DrawCursor = taskSettings.CaptureSettings.ShowCursor
                     };
 
-                    screenRecorder = new ScreenRecorder(options, captureRectangle, taskSettings.CaptureSettings.ScreenRecordOutput);
+                    screenRecorder = new ScreenRecorder(outputType, options, captureRectangle);
 
                     if (regionForm != null && regionForm.RecordResetEvent != null)
                     {
-                        TrayIcon.Text = "ShareX - " + Resources.ScreenRecordForm_StartRecording_Click_tray_icon_to_start_recording_;
+                        trayText = "ShareX - " + Resources.ScreenRecordForm_StartRecording_Click_tray_icon_to_start_recording_;
+                        TrayIcon.Text = trayText.Truncate(63);
 
                         if (taskSettings.CaptureSettings.ScreenRecordAutoStart)
                         {
@@ -233,12 +224,13 @@ namespace ShareX
 
                     if (!abortRequested)
                     {
-                        TrayIcon.Text = "ShareX - " + Resources.ScreenRecordForm_StartRecording_Click_tray_icon_to_stop_recording_;
+                        trayText = "ShareX - " + Resources.ScreenRecordForm_StartRecording_Click_tray_icon_to_stop_recording_;
+                        TrayIcon.Text = trayText.Truncate(63);
                         TrayIcon.Icon = Resources.control_record.ToIcon();
 
                         if (regionForm != null)
                         {
-                            this.InvokeSafe(() => regionForm.StartTimer());
+                            regionForm.InvokeSafe(() => regionForm.StartTimer());
                         }
 
                         screenRecorder.StartRecording();
@@ -249,14 +241,12 @@ namespace ShareX
                         }
                     }
                 }
+                catch (Exception e)
+                {
+                    DebugHelper.WriteException(e);
+                }
                 finally
                 {
-                    if (dwmManager != null)
-                    {
-                        dwmManager.Dispose();
-                        dwmManager = null;
-                    }
-
                     if (regionForm != null)
                     {
                         if (regionForm.RecordResetEvent != null)
@@ -264,7 +254,7 @@ namespace ShareX
                             regionForm.RecordResetEvent.Dispose();
                         }
 
-                        this.InvokeSafe(() => regionForm.Close());
+                        regionForm.InvokeSafe(() => regionForm.Close());
                         regionForm = null;
                     }
                 }
@@ -278,7 +268,7 @@ namespace ShareX
 
                         string sourceFilePath = path;
 
-                        if (taskSettings.CaptureSettings.ScreenRecordOutput == ScreenRecordOutput.GIF)
+                        if (outputType == ScreenRecordOutput.GIF)
                         {
                             if (taskSettings.CaptureSettings.RunScreencastCLI)
                             {
@@ -290,6 +280,10 @@ namespace ShareX
                             }
 
                             Helpers.CreateDirectoryIfNotExist(sourceFilePath);
+                            screenRecorder.EncodingProgressChanged += progress =>
+                            {
+                                TrayIcon.Text = string.Format("ShareX - {0} ({1}%)", Resources.ScreenRecordForm_StartRecording_Encoding___, progress);
+                            };
                             screenRecorder.SaveAsGIF(sourceFilePath, taskSettings.ImageSettings.ImageGIFQuality);
                         }
 
@@ -305,7 +299,8 @@ namespace ShareX
                 {
                     if (screenRecorder != null)
                     {
-                        if (taskSettings.CaptureSettings.RunScreencastCLI && !string.IsNullOrEmpty(screenRecorder.CachePath) && File.Exists(screenRecorder.CachePath))
+                        if ((outputType == ScreenRecordOutput.GIF || taskSettings.CaptureSettings.RunScreencastCLI) &&
+                            !string.IsNullOrEmpty(screenRecorder.CachePath) && File.Exists(screenRecorder.CachePath))
                         {
                             File.Delete(screenRecorder.CachePath);
                         }

@@ -2,7 +2,7 @@
 
 /*
     ShareX - A program that allows you to take screenshots and share any file type
-    Copyright (C) 2007-2014 ShareX Developers
+    Copyright © 2007-2015 ShareX Developers
 
     This program is free software; you can redistribute it and/or
     modify it under the terms of the GNU General Public License
@@ -48,6 +48,8 @@ namespace ShareX.UploadersLib
         Chevereto,
         [Description("Hızlı Resim")]
         HizliResim,
+        [Description("vgy.me")]
+        Vgyme,
         CustomImageUploader, // Localized
         FileUploader // Localized
     }
@@ -88,6 +90,8 @@ namespace ShareX.UploadersLib
         GoogleDrive,
         [Description("Copy")]
         Copy,
+        //[Description("hubiC")]
+        //Hubic,
         [Description("Box")]
         Box,
         [Description("MEGA")]
@@ -104,10 +108,6 @@ namespace ShareX.UploadersLib
         Gfycat,
         [Description("Pushbullet")]
         Pushbullet,
-        [Description("MediaCrush")]
-        MediaCrush,
-        [Description("RapidShare")]
-        RapidShare,
         [Description("SendSpace")]
         SendSpace,
         [Description("Minus")]
@@ -118,6 +118,10 @@ namespace ShareX.UploadersLib
         Localhostr,
         [Description("JIRA")]
         Jira,
+        [Description("Lambda")]
+        Lambda,
+        [Description("Imgrush")]
+        Imgrush,
         SharedFolder, // Localized
         Email, // Localized
         CustomFileUploader // Localized
@@ -132,6 +136,8 @@ namespace ShareX.UploadersLib
         Google,
         [Description("is.gd")]
         ISGD,
+        [Description("v.gd")]
+        VGD,
         [Description("tinyurl.com")]
         TINYURL,
         [Description("turl.ca")]

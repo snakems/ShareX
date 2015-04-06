@@ -126,16 +126,6 @@ namespace ShareX.ScreenCaptureLib.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Cache file size cannot exceed {0} Bytes.
-        ///Please use FFmpeg screen recording instead of GIF..
-        /// </summary>
-        internal static string HardDiskCache_GetImageEnumerator_Cache_file_size_cannot_exceed {
-            get {
-                return ResourceManager.GetString("HardDiskCache_GetImageEnumerator_Cache_file_size_cannot_exceed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Ctrl: Drawing mode ░ Space: Fullscreen capture.
         /// </summary>
         internal static string RectangleAnnotate_DrawTips_Drawing_mode_off {
@@ -182,6 +172,16 @@ namespace ShareX.ScreenCaptureLib.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to R: {0}, G: {1}, B: {2}, Hex: {3}
+        ///X: {4}, Y: {5}.
+        /// </summary>
+        internal static string RectangleRegion_GetColorPickerText {
+            get {
+                return ResourceManager.GetString("RectangleRegion_GetColorPickerText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to X: {0} / Y: {1} / X2: {2} / Y2: {3}
         ///Width: {4} px / Height: {5} px
         ///Distance: {6:0.00} px / Angle: {7:0.00}°.
@@ -189,6 +189,15 @@ namespace ShareX.ScreenCaptureLib.Properties {
         internal static string RectangleRegion_GetRulerText_Ruler_info {
             get {
                 return ResourceManager.GetString("RectangleRegion_GetRulerText_Ruler_info", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Rectangle capture transparent.
+        /// </summary>
+        internal static string RectangleTransparent_RectangleTransparent_Rectangle_capture_transparent {
+            get {
+                return ResourceManager.GetString("RectangleTransparent_RectangleTransparent_Rectangle_capture_transparent", resourceCulture);
             }
         }
         
